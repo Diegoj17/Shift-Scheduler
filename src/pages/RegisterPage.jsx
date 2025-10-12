@@ -3,7 +3,7 @@ import RegisterForm from '../modules/admin/auth/components/register/RegisterForm
 import Modal from '../components/common/Modal';
 import AuthLayout from '../modules/admin/auth/layout/AuthLayout';
 import RegisterWelcomePanel from '../modules/admin/auth/components/register/RegisterWelcomePanel';
-import '/src/styles/pages/RegisterPage.css';
+import '../styles/pages/RegisterPage.css';
 
 const RegisterPage = () => {
   const [modal, setModal] = useState({ 
