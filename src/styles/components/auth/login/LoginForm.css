@@ -1,0 +1,227 @@
+/* Panel de formulario derecho */
+.login-form-panel {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.login-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.login-card-header {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.login-card-header h2 {
+  color: var(--login-text-dark);
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+  font-size: 1.8rem;
+}
+
+.login-card-header p {
+  color: var(--login-text-light);
+  font-size: 1rem;
+}
+
+.login-form-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.login-form-label {
+  font-size: 0.95rem;
+  color: var(--login-text-dark);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.login-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.login-input-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--login-primary-color);
+  font-size: 1.1rem;
+  z-index: 1;
+}
+
+.login-form-input {
+  padding: 0.9rem 3.5rem 0.9rem 3rem;
+  border: 1.5px solid var(--login-border-color);
+  border-radius: 12px;
+  font-size: 1rem;
+  background: var(--login-background-light);
+  transition: var(--login-transition);
+  width: 100%;
+  color: var(--login-text-dark);
+  position: relative;
+  font-weight: 500;
+}
+
+.login-form-input:focus {
+  border-color: var(--login-primary-color);
+  outline: none;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.15);
+}
+
+.login-form-input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.login-btn {
+  background: linear-gradient(135deg, var(--login-primary-color) 0%, var(--login-primary-dark) 100%);
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  width: 100%;
+  transition: var(--login-transition);
+  box-shadow: var(--login-shadow-md);
+  position: relative;
+  overflow: hidden;
+}
+
+.login-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(51, 88, 230, 0.3);
+}
+
+.login-btn:active {
+  transform: translateY(0);
+}
+
+.login-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.8;
+}
+
+.login-btn.loading {
+  color: transparent;
+}
+
+.login-spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: login-spin 0.8s ease infinite;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes login-spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.login-error-message {
+  background: #fed7d7;
+  color: var(--login-error-color);
+  padding: 0.9rem 1rem;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
+  border: 1px solid #feb2b2;
+  font-weight: 500;
+}
+
+.login-footer {
+  text-align: center;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--login-border-color);
+}
+
+.login-footer p {
+  color: var(--login-text-light);
+  font-size: 0.95rem;
+}
+
+.login-footer a {
+  color: var(--login-primary-color);
+  text-decoration: none;
+  font-weight: 600;
+  transition: var(--login-transition);
+}
+
+.login-footer a:hover {
+  color: var(--login-primary-dark);
+  text-decoration: underline;
+}
+
+/* Responsive Design para LoginAuthForm */
+@media (max-width: 768px) {
+  .login-card {
+    padding: 2rem 1.5rem;
+    border-radius: 16px;
+  }
+  
+  .login-card-header h2 {
+    font-size: 1.6rem;
+  }
+  
+  .login-form-input {
+    padding: 0.9rem 3rem 0.9rem 3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .login-form-panel {
+    padding: 1.5rem;
+  }
+  
+  .login-card {
+    padding: 1.8rem 1.2rem;
+    border-radius: 14px;
+  }
+  
+  .login-card-header h2 {
+    font-size: 1.4rem;
+  }
+  
+  .login-form-input {
+    padding: 0.8rem 2.8rem 0.8rem 2.8rem;
+  }
+  
+  .login-input-icon {
+    left: 0.8rem;
+    font-size: 1rem;
+  }
+  
+  .login-btn {
+    padding: 0.9rem;
+    font-size: 1rem;
+  }
+}

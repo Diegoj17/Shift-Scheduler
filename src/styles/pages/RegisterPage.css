@@ -1,0 +1,140 @@
+/* ====== REGISTER PAGE LAYOUT ====== */
+.login-body {
+  background: linear-gradient(120deg, #4f8cff 0%, #3358e6 100%);
+  min-height: 100vh;
+  margin: 0;
+  font-family: 'Segoe UI', 'Roboto', -apple-system, BlinkMacSystemFont, Arial, sans-serif;
+  line-height: 1.6;
+  color: var(--login-text-dark);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.register-page {
+  width: 100vw;
+  min-height: 100vh;
+  background: #3358e6;
+}
+
+.register-page-container {
+  display: flex;
+  min-height: 100vh;
+}
+
+.register-card-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.register-card {
+  width: 100%;
+  max-width: 1100px;
+  border-radius: 20px;
+  display: flex;
+  overflow: hidden;
+  box-shadow: 0 30px 90px rgba(2,6,23,0.12);
+  background: white;
+  position: relative;
+}
+
+/* Línea separadora entre los dos azules */
+.register-card::before {
+  content: '';
+  position: absolute;
+  top: 1.5rem;
+  bottom: 1.5rem;
+  left: calc(50% - 0.5px);
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+  rgba(255, 255, 255, 0.22) 20%,
+  rgba(255, 255, 255, 0.22) 80%,
+    transparent 100%
+  );
+  z-index: 1;
+}
+
+.register-card-left {
+  flex: 1;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0; /* Eliminar padding para que ocupe todo el espacio */
+  background: transparent; /* Fondo ya está en el panel interno */
+  position: relative;
+}
+
+.register-card-right {
+  width: 520px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem;
+  position: relative;
+}
+
+/* ====== RESPONSIVE DESIGN ====== */
+@media (max-width: 1024px) {
+  .register-page-container {
+    flex-direction: column;
+  }
+  
+  .register-card {
+    flex-direction: column;
+    max-width: 760px;
+    border-radius: 14px;
+  }
+  
+  .register-card::before {
+    display: none; /* Ocultar línea en móvil */
+  }
+  
+  .register-card-left,
+  .register-card-right {
+    width: 100%;
+    padding: 1.75rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .register-card-container {
+    padding: 1.5rem;
+  }
+  
+  .register-card-left,
+  .register-card-right {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-page {
+    background: white;
+  }
+  
+  .register-card-container {
+    padding: 1rem;
+  }
+  
+  .register-card {
+    box-shadow: none;
+    border-radius: 8px;
+  }
+  
+  .register-card-left {
+    display: none; /* hide left panel on very small screens to prioritize form */
+  }
+  
+  .register-card-right {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 8px;
+  }
+}

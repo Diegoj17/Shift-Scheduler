@@ -1,4 +1,5 @@
 :root {
+  --sidebar-width: 260px; /* Ajusta según el ancho real de tu sidebar */
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
