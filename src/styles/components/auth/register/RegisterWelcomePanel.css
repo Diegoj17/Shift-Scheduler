@@ -1,0 +1,180 @@
+/* ====== REGISTER WELCOME PANEL ====== */
+.register-welcome-panel {
+  flex: 1;
+  background: linear-gradient(135deg, var(--login-primary-color) 0%, var(--login-primary-dark) 100%);
+  color: white;
+  padding: 2.5rem 2.5rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  position: relative;
+  overflow: hidden;
+}
+
+.register-welcome-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M0,0 L100,0 L100,100 Z" fill="rgba(255,255,255,0.05)"/></svg>');
+  background-size: cover;
+}
+
+.register-welcome-content {
+  position: relative;
+  z-index: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.register-logo-container {
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.register-logo {
+  width: 6rem;
+  height: 6rem;
+  border-radius: 16px;
+  object-fit: contain;
+  margin-bottom: 0.75rem;
+}
+
+.register-welcome-app-name {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0.15rem 0 0.35rem 0;
+  letter-spacing: -0.5px;
+  text-align: center;
+}
+
+.register-welcome-tagline {
+  font-size: 1rem;
+  font-weight: 500;
+  opacity: 0.95;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.register-welcome-section {
+  margin: 0.5rem 0 1rem 0;
+  max-width: 420px;
+  text-align: center;
+}
+
+.register-welcome-section h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  margin-top: 0;
+}
+
+.register-welcome-section p {
+  font-size: 0.98rem;
+  opacity: 0.95;
+  line-height: 1.6;
+  margin-bottom: 0.5rem;
+}
+
+.register-welcome-footer {
+  margin-top: 0.75rem;
+  text-align: center;
+}
+
+.register-welcome-account {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.register-welcome-account-text {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+}
+
+.register-welcome-login-btn {
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  text-decoration: none;
+  padding: 0.75rem 2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  min-width: 160px;
+  text-align: center;
+}
+
+.register-welcome-login-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  color: white;
+  text-decoration: none;
+}
+
+/* Responsive Design para RegisterWelcomePanel */
+@media (max-width: 968px) {
+  .register-welcome-panel {
+    padding: 2rem 1.5rem;
+  }
+  
+  .register-features {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .register-feature {
+    flex: 1;
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .register-features {
+    flex-direction: column;
+  }
+  
+  .register-feature {
+    min-width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .register-welcome-panel {
+    padding: 1.25rem 1rem;
+  }
+  
+  .register-logo-container {
+    margin-bottom: 1.5rem;
+  }
+  
+  .register-logo {
+    width: 60px;
+    height: 60px;
+  }
+
+  .register-welcome-app-name {
+    font-size: 1.6rem;
+  }
+
+  .register-welcome-tagline {
+    font-size: 0.95rem;
+  }
+  
+  .register-welcome-section h2 {
+    font-size: 1.4rem;
+  }
+}

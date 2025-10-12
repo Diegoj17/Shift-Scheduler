@@ -2,12 +2,81 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/public/img/calendario.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite + React</title>
+    <title>Shift Scheduler</title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html><!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/public/img/calendario.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- El título se actualizará dinámicamente desde React -->
+    <title>Shift Scheduler</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+    <script>
+      function computeTitle(path) {
+        // Rutas de autenticación
+        if (path === "/login" || path === "/") return "Iniciar Sesión | Shift Scheduler";
+        if (path === "/register") return "Registrarse | Shift Scheduler";
+        if (path === "/forgot-password") return "Restablecer Contraseña | Shift Scheduler";
+        if (path === "/reset-password") return "Nueva Contraseña | Shift Scheduler";
+        
+        // Rutas del dashboard y gestión
+        if (path === "/dashboard") return "Dashboard | Shift Scheduler";
+        if (path === "/schedule") return "Programación | Shift Scheduler";
+        if (path === "/employees") return "Gestión de Empleados | Shift Scheduler";
+        if (path === "/teams") return "Gestión de Equipos | Shift Scheduler";
+        if (path === "/reports") return "Reportes | Shift Scheduler";
+        if (path === "/settings") return "Configuración | Shift Scheduler";
+        if (path === "/profile") return "Mi Perfil | Shift Scheduler";
+        
+        // Rutas de administración
+        if (path === "/admin") return "Administración | Shift Scheduler";
+        if (path === "/admin/users") return "Gestión de Usuarios | Shift Scheduler";
+        if (path === "/admin/settings") return "Configuración del Sistema | Shift Scheduler";
+        
+        // Fallback
+        return "Shift Scheduler";
+      }
+
+      function actualizarTitulo() {
+        const path = window.location.pathname;
+        document.title = computeTitle(path);
+      }
+
+      // Inicial
+      actualizarTitulo();
+
+      // Navegación con botones del navegador
+      window.addEventListener("popstate", actualizarTitulo);
+      window.addEventListener("hashchange", actualizarTitulo);
+
+      // Intercepta pushState y replaceState para SPA
+      (function (history) {
+        const pushState = history.pushState;
+        const replaceState = history.replaceState;
+
+        history.pushState = function () {
+          const ret = pushState.apply(history, arguments);
+          actualizarTitulo();
+          return ret;
+        };
+
+        history.replaceState = function () {
+          const ret = replaceState.apply(history, arguments);
+          actualizarTitulo();
+          return ret;
+        };
+      })(window.history);
+    </script>
   </body>
 </html>

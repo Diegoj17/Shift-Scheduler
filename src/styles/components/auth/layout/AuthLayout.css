@@ -1,0 +1,33 @@
+.auth-layout {
+
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(120deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  position: relative;
+  overflow-x: hidden;
+}
+
+.auth-layout-content {
+  flex: 1;
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  padding: 0rem;
+  position: relative;
+  z-index: 1;
+  overflow-x: hidden;
+}
+
+/* Media queries para responsividad */
+@media (max-width: 768px) {
+  .auth-layout-content {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .auth-layout-content {
+    padding: 0.5rem;
+  }
+}
