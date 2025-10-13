@@ -1,5 +1,4 @@
 .auth-layout {
-
   display: flex;
   flex-direction: column;
   background: linear-gradient(120deg, var(--primary-color) 0%, var(--primary-dark) 100%);
@@ -14,13 +13,18 @@
   align-items: center;
   justify-content: center;
   padding: 0rem;
+.auth-layout {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100vh;
+  min-width: 100vw;
+  background: linear-gradient(120deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+  background-size: cover;
+  background-attachment: fixed;
   position: relative;
-  z-index: 1;
   overflow-x: hidden;
 }
-
-/* Media queries para responsividad */
-@media (max-width: 768px) {
   .auth-layout-content {
     padding: 1rem;
   }

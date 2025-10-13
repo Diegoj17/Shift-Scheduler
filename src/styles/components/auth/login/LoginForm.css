@@ -122,8 +122,13 @@
   opacity: 0.8;
 }
 
-.login-btn.loading {
-  color: transparent;
+.login-btn-text {
+  display: inline-block;
+}
+
+/* Cuando el botón está en estado loading, ocultamos visualmente el texto pero mantenemos su espacio con visibility */
+.login-btn.loading .login-btn-text {
+  visibility: hidden;
 }
 
 .login-spinner {
@@ -137,6 +142,7 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 
 @keyframes login-spin {

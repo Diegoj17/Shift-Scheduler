@@ -12,7 +12,6 @@ const LoginWelcomePanel = () => {
             className="login-logo"
           />
           <h1 className="login-app-name">Shift Scheduler</h1>
-          <p className="login-app-tagline">Gestión de turnos y horarios</p>
         </div>
 
         <div className="login-welcome-section">

@@ -12,13 +12,12 @@ const RegisterWelcomePanel = () => {
             className="register-logo" 
           />
 
-          <h1 className="register-welcome-app-name">Programador de turnos</h1>
-          <p className="register-welcome-tagline">Gestión de turnos y horarios</p>
+          <h1 className="register-welcome-app-name">Shift Scheduler</h1>
         </div>
 
         <div className="register-welcome-section">
           <h2>¡Hola!</h2>
-          <p>Accede a tu cuenta para gestionar los horarios de tu equipo de manera eficiente.</p>
+          <p>Registrate para hacer parte de nuestro equipo.</p>
         </div>
 
         <div className="register-welcome-footer">
