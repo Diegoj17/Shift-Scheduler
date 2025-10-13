@@ -1,6 +1,6 @@
 import api from '../api/Axios';
 
-const AuthService = {
+const authService = {
   login: async (email, password) => {
     const response = await api.post('/auth/login', { email, password });
     // El backend devuelve { access, refresh, user }
@@ -56,4 +56,5 @@ const AuthService = {
   }
 };
 
-export default AuthService;
+export default authService;
+export { authService };

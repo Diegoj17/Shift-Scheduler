@@ -1,6 +1,6 @@
 import { useState, useContext } from 'react';
 import { AuthContext } from '../contexts/AuthContext';
-import AuthService from '../services/AuthService';
+import authService from '../services/authService';
 
 export const useAuth = () => {
   const { currentUser, setCurrentUser, updateUser, logout: contextLogout, loading: contextLoading } = useContext(AuthContext);
@@ -12,7 +12,7 @@ export const useAuth = () => {
     setError(null);
     
     try {
-      const response = await AuthService.login(email, password);
+      const response = await authService.login(email, password);
       setCurrentUser(response.user);
       setLoading(false);
       return { success: true, data: response };
@@ -40,7 +40,7 @@ export const useAuth = () => {
     setError(null);
     
     try {
-      const response = await AuthService.register(userData);
+      const response = await authService.register(userData);
       setLoading(false);
       return { success: true, data: response };
     } catch (err) {
@@ -69,7 +69,7 @@ export const useAuth = () => {
     setError(null);
     
     try {
-      const response = await AuthService.resetPassword(email);
+      const response = await authService.resetPassword(email);
       setLoading(false);
       return { success: true, data: response };
     } catch (err) {
@@ -94,7 +94,7 @@ export const useAuth = () => {
     setError(null);
     
     try {
-      const response = await AuthService.changePassword(currentPassword, newPassword);
+      const response = await authService.changePassword(currentPassword, newPassword);
       setLoading(false);
       return { success: true, data: response };
     } catch (err) {
@@ -110,7 +110,7 @@ export const useAuth = () => {
     setError(null);
     
     try {
-      const response = await AuthService.updateProfile(userData);
+      const response = await authService.updateProfile(userData);
       updateUser(response.user);
       setLoading(false);
       return { success: true, data: response };
