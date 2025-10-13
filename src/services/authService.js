@@ -1,5 +1,4 @@
 import api from '../api/Axios';
-
 const authService = {
   login: async (email, password) => {
     const response = await api.post('/auth/login', { email, password });
@@ -57,3 +56,4 @@ const authService = {
 };
 
 export default authService;
+export { authService };

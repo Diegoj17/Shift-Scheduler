@@ -70,7 +70,7 @@ const ResetForm = () => {
     <div className="reset-form-card-inner">
       <form onSubmit={handleSubmit} className="reset-form">
         <div className="reset-form-header">
-          <h2 className="reset-form-title">Reestablecer Contraseña</h2>
+          <h2 className="reset-form-title">Restablecer Contraseña</h2>
           <p className="reset-form-subtitle">Ingresa tu correo electrónico para recibir instrucciones</p>
         </div>
 
