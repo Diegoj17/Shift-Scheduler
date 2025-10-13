@@ -8,7 +8,7 @@ const ResetWelcomePanel = () => {
       <div className="register-welcome-content reset-welcome-content">
         <div className="register-logo-container reset-logo-container">
           <img
-            src="/public/img/calendario.png"
+            src="/img/calendario.png"
             alt="Programador de turnos"
             className="register-logo reset-logo"
           />

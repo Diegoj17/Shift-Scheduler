@@ -7,7 +7,7 @@ const RegisterWelcomePanel = () => {
       <div className="register-welcome-content">
         <div className="register-logo-container">
           <img 
-            src="/public/img/calendario.png" 
+            src="/img/calendario.png" 
             alt="Programador de turnos" 
             className="register-logo" 
           />
