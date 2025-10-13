@@ -1,14 +1,20 @@
-import api from './api';
-
-export const authService = {
+import api from '../api/Axios';
+const authService = {
   login: async (email, password) => {
-    // Endpoint: /api/auth/login
     const response = await api.post('/auth/login', { email, password });
-    return response.data;
+    // El backend devuelve { access, refresh, user }
+    const { access, user } = response.data;
+    
+    // Guardar token en localStorage
+    localStorage.setItem('token', access);
+    
+    return {
+      token: access,
+      user: user
+    };
   },
 
   register: async (userData) => {
-    // Endpoint expects: first_name, last_name, email, telefono, password, password_confirm, role
     const payload = {
       first_name: userData.first_name || userData.firstName || userData.first || '',
       last_name: userData.last_name || userData.lastName || userData.last || '',
@@ -16,7 +22,7 @@ export const authService = {
       telefono: userData.telefono || userData.phone || '',
       password: userData.password || '',
       password_confirm: userData.password_confirm || userData.passwordConfirm || userData.confirmPassword || '',
-      role: userData.role || ''
+      role: userData.role || 'EMPLEADO'
     };
 
     const response = await api.post('/auth/register', payload);
@@ -24,14 +30,14 @@ export const authService = {
   },
 
   verifyToken: async (token) => {
-    const response = await api.get('/auth/verify', {
+    const response = await api.get('/auth/me', {
       headers: { Authorization: `Bearer ${token}` }
     });
-    return response.data;
+    return response.data.user; // El backend devuelve { user }
   },
 
   resetPassword: async (email) => {
-    const response = await api.post('/auth/reset-password', { email });
+    const response = await api.post('/auth/password/reset', { email });
     return response.data;
   },
 
@@ -48,3 +54,6 @@ export const authService = {
     return response.data;
   }
 };
+
+export default authService;
+export { authService };

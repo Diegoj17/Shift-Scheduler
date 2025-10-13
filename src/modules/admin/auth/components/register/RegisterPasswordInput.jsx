@@ -8,7 +8,6 @@ const RegisterPasswordInput = ({
   touched,
   showPass,
   showConfirm,
-  showPasswordPanel,
   passwordChecks,
   passwordValid,
   confirmMatches,
@@ -19,10 +18,9 @@ const RegisterPasswordInput = ({
   onToggleShowConfirm
 }) => {
   const [showRules, setShowRules] = useState(false);
+  // removed showValid badge display per design
   const rulesRef = useRef(null);
   const passwordInputRef = useRef(null);
-
-  const showValid = (valueLen, isValid) => valueLen > 0 && isValid;
 
   // Cerrar el popover al hacer click fuera
   useEffect(() => {
@@ -52,12 +50,10 @@ const RegisterPasswordInput = ({
   };
 
   return (
-    <>
+    <div className="register-password-component">
       {/* CONTRASEÑA */}
       <div className="register-form-group register-password-group">
-        <label htmlFor="password" className="register-form-label">
-          Contraseña *
-        </label>
+        <label htmlFor="password" className="register-form-label">Contraseña *</label>
         <div className="register-input-container" ref={passwordInputRef}>
           <RiLockPasswordFill className="register-input-icon" />
           <input
@@ -74,6 +70,7 @@ const RegisterPasswordInput = ({
             disabled={isLoading}
             autoComplete="new-password"
           />
+
           {formData.password.length > 0 && (
             <button
               type="button"
@@ -85,15 +82,14 @@ const RegisterPasswordInput = ({
               {showPass ? <AiOutlineEyeInvisible size={18} /> : <AiOutlineEye size={18} />}
             </button>
           )}
+
           {touched.password && formData.password.length > 0 && !passwordValid && (
             <span className="register-status-icon">!</span>
           )}
         </div>
+
         {touched.password && formData.password.length > 0 && !passwordValid && (
           <span className="register-field-hint register-error">La contraseña no cumple con los requisitos.</span>
-        )}
-        {showValid(formData.password.length, passwordValid) && (
-          <span className="register-valid-badge">✓ Válido</span>
         )}
 
         {/* Panel de reglas */}
@@ -102,28 +98,17 @@ const RegisterPasswordInput = ({
             <div className="register-arrow" />
             <p className="register-rules-title">La contraseña debe tener:</p>
             <ul className="register-rules-list">
-              <li className={passwordChecks.len ? 'register-ok' : ''}>
-                {passwordChecks.len ? '✓ ' : '• '}Mínimo 6 caracteres
-              </li>
-              <li className={passwordChecks.upper ? 'register-ok' : ''}>
-                {passwordChecks.upper ? '✓ ' : '• '}Al menos una mayúscula
-              </li>
-              <li className={passwordChecks.digit ? 'register-ok' : ''}>
-                {passwordChecks.digit ? '✓ ' : '• '}Al menos un número
-              </li>
-              <li className={passwordChecks.special ? 'register-ok' : ''}>
-                {passwordChecks.special ? '✓ ' : '• '}Un carácter especial (@#$%^&*)
-              </li>
+              <li className={passwordChecks.len ? 'register-ok' : ''}>{passwordChecks.len ? '✓ ' : '• '}Mínimo 8 caracteres</li>
+              <li className={passwordChecks.letter ? 'register-ok' : ''}>{passwordChecks.letter ? '✓ ' : '• '}Al menos una letra</li>
+              <li className={passwordChecks.digit ? 'register-ok' : ''}>{passwordChecks.digit ? '✓ ' : '• '}Al menos un número</li>
             </ul>
           </div>
         )}
-      </div>
 
+      
       {/* CONFIRMAR CONTRASEÑA */}
       <div className="register-form-group">
-        <label htmlFor="confirmPassword" className="register-form-label">
-          Confirmar Contraseña *
-        </label>
+        <label htmlFor="confirmPassword" className="register-form-label">Confirmar Contraseña *</label>
         <div className="register-input-container">
           <RiLockPasswordFill className="register-input-icon" />
           <input
@@ -154,12 +139,11 @@ const RegisterPasswordInput = ({
         {touched.confirmPassword && formData.confirmPassword.length > 0 && !confirmMatches && (
           <span className="register-field-hint register-error">Las contraseñas no coinciden.</span>
         )}
-        {showValid(formData.confirmPassword.length, confirmMatches) && (
-          <span className="register-valid-badge">✓ Válido</span>
-        )}
+        </div>
       </div>
-    </>
+    </div>
   );
+
 };
 
 export default RegisterPasswordInput;
