@@ -1,7 +1,7 @@
 import AuthLayout from '../modules/admin/auth/layout/AuthLayout';
 import LoginWelcomePanel from '../modules/admin/auth/components/login/LoginWelcomePanel';
 import LoginForm from '../modules/admin/auth/components/login/LoginForm';
-import '/src/styles/pages/LoginPage.css';
+import '../styles/pages/LoginPage.css';
 
 const Login = () => {
   return (
