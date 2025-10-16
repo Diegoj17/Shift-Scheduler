@@ -1,42 +1,34 @@
-import axios from 'axios'
+import axios from 'axios';
 
 const API_BASE_URL =
-  (import.meta.env?.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL.trim())
+  (import.meta.env?.VITE_API_BASE_URL?.trim())
     ? import.meta.env.VITE_API_BASE_URL.trim()
     : 'http://127.0.0.1:8000/api/auth';
-console.log('[API] baseURL =', import.meta.env.VITE_API_BASE_URL);
+
+console.log('[API] baseURL =', API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,
-  headers: {
-    'Content-Type': 'application/json'
-  }
-})
+  headers: { 'Content-Type': 'application/json' },
+});
 
-// Interceptor para agregar el token a las solicitudes
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token')
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
-    return config
-  },
-  (error) => {
-    return Promise.reject(error)
-  }
-)
+api.interceptors.request.use((cfg) => {
+  const t = localStorage.getItem('token');
+  if (t) cfg.headers.Authorization = `Bearer ${t}`;
+  // Diagnóstico (quitar luego):
+  // console.log('[API] =>', cfg.method?.toUpperCase(), (cfg.baseURL||'')+(cfg.url||''));
+  return cfg;
+});
 
-// Interceptor para manejar respuestas de error
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token')
-      window.location.href = '/login'
+  (r) => r,
+  (e) => {
+    if (e.response?.status === 401) {
+      localStorage.removeItem('token'); localStorage.removeItem('refresh');
+      if (!location.pathname.startsWith('/login')) location.href = '/login';
     }
-    return Promise.reject(error)
+    return Promise.reject(e);
   }
-)
+);
 
-export default api
+export default api;
