@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaRegCalendarAlt, FaClock } from 'react-icons/fa';
-import '/src/styles/components/dashboard/user/WelcomeCard.css';
+import '../../../../styles/components/dashboard/user/WelcomeCard.css';
 
 const WelcomeCard = ({ employeeName, currentTime }) => {
   const firstName = employeeName.split(' ')[0];

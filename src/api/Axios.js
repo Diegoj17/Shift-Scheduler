@@ -1,6 +1,10 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://10.212.40.38:8000/api'
+const API_BASE_URL =
+  (import.meta.env?.VITE_API_BASE_URL && import.meta.env.VITE_API_BASE_URL.trim())
+    ? import.meta.env.VITE_API_BASE_URL.trim()
+    : 'http://127.0.0.1:8000/api/auth';
+console.log('[API] baseURL =', import.meta.env.VITE_API_BASE_URL);
 
 const api = axios.create({
   baseURL: API_BASE_URL,

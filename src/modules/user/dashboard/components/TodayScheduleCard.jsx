@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaRegClock, FaCalendarAlt } from 'react-icons/fa';
-import '/src/styles/components/dashboard/user/TodayScheduleCard.css';
+import '../../../../styles/components/dashboard/user/TodayScheduleCard.css';
 
 const TodayScheduleCard = ({ schedule, onClockAction }) => {
   return (

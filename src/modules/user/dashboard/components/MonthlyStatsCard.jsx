@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaClock, FaCheckCircle, FaChartLine } from 'react-icons/fa';
-import '/src/styles/components/dashboard/user/MonthlyStatsCard.css';
+import '../../../../styles/components/dashboard/user/MonthlyStatsCard.css';
 
 const MonthlyStatsCard = ({ stats = {} }) => {
   const statItems = [
