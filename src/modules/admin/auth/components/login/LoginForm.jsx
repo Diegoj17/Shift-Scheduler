@@ -27,8 +27,19 @@ const LoginForm = () => {
     try {
       const result = await login(email, password);
       if (result.success) {
-        // Redirigir al dashboard después del login exitoso
-        navigate('/dashboard');
+        // result.data comes from authService.login -> { token, user }
+        const user = result.data?.user;
+        const role = (user?.role || '').toString().toLowerCase();
+
+        // Roles that should go to admin dashboard
+        const adminRoles = ['admin', 'administrador', 'gerente', 'manager', 'superadmin'];
+
+        if (adminRoles.includes(role)) {
+          navigate('/admin/dashboard');
+        } else {
+          // Usuarios normales van a la página principal de usuario
+          navigate('/main');
+        }
       }
     } catch (err) {
       console.error('Login failed:', err);

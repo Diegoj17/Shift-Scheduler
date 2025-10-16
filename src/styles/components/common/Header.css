@@ -1,0 +1,172 @@
+.main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background: #ffffff;
+  border-bottom: none;
+  box-shadow: none;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  height: 72px;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+/* Mobile/sidebar toggle (override to remove dark filled background) */
+.mobile-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: transparent; /* remove filled background */
+  border: none;
+  border-radius: 12px;
+  color: #4f8cff;
+  cursor: pointer;
+  padding: 0.25rem;
+  box-shadow: none;
+}
+
+.mobile-toggle:hover {
+  background: rgba(79,140,255,0.06); /* subtle hover */
+  transform: translateY(-1px);
+  box-shadow: none;
+  color: #2563eb;
+}
+
+/* Force remove any border/outline/shadow applied elsewhere */
+.mobile-toggle,
+.mobile-toggle svg {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.mobile-toggle:focus {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+
+.react-icon {
+  color: #4f8cff;
+  align-items: center;
+}
+
+.sidebar-toggle:hover {
+  background: transparent; /* no filled hover */
+  border-color: transparent;
+  color: #0f172a;
+  transform: translateY(-1px);
+  box-shadow: none;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #0f172a; /* keep text dark for readability */
+  margin: 0;
+  letter-spacing: -0.02em;
+  /* Remove text clipping and transparent fill so the title is visible */
+  -webkit-background-clip: initial;
+  -webkit-text-fill-color: initial;
+  background-clip: initial;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Contenedor de Notificaciones */
+.notification-container {
+  position: relative;
+}
+
+.notification-trigger {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: none;
+  border-radius: 12px;
+  color: #64748b;
+  font-size: 1.125rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: none;
+}
+
+.notification-trigger:hover {
+  background: #ffffff;
+  border-color: #4f8cff;
+  color: #0f172a;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.15);
+}
+
+.notification-trigger.active {
+  background: #4f8cff;
+  border-color: #4f8cff;
+  color: white;
+}
+
+.notification-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  font-size: 0.6875rem;
+  font-weight: 800;
+  padding: 0.25rem 0.5rem;
+  border-radius: 20px;
+  min-width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
+  border: 2px solid #ffffff;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .main-header {
+    padding: 1rem;
+  }
+
+  .page-title {
+    font-size: 1.25rem;
+  }
+
+  .header-right {
+    gap: 0.75rem;
+  }
+
+  .sidebar-toggle,
+  .notification-trigger {
+    width: 40px;
+    height: 40px;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-title {
+    display: none;
+  }
+}
+
+/* Dark mode styles removed — app will use only light theme styles */

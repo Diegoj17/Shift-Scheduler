@@ -1,0 +1,364 @@
+/* ShiftDistribution.css - Versión Mejorada y Profesional */
+
+.distribucion-turnos {
+  padding: 1.75rem;
+  background: var(--bg-card, #ffffff);
+  height: 100%;
+}
+
+.distribucion-content {
+  margin-top: 1.5rem;
+}
+
+.chart-container {
+  display: flex;
+  width: 100%;
+  height: 50px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 1.75rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+
+.chart-container::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 14px;
+  padding: 2px;
+  background: linear-gradient(90deg, #4f8cff, #8b5cf6, #f59e0b);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: all 0.3s ease;
+  pointer-events: none;
+}
+
+.chart-container:hover::before {
+  opacity: 0.6;
+}
+
+.chart-segment {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.chart-segment::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), transparent);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.chart-segment:hover {
+  filter: brightness(1.15);
+  transform: scaleY(1.15);
+  z-index: 1;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.chart-segment:hover::before {
+  opacity: 1;
+}
+
+.segment-label {
+  color: white;
+  font-weight: 800;
+  font-size: 1rem;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+  position: relative;
+  z-index: 1;
+  transition: all 0.3s ease;
+}
+
+.chart-segment:hover .segment-label {
+  transform: scale(1.1);
+  text-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+}
+
+.distribucion-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 0.5rem 0;
+}
+
+.legend-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.legend-row::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: var(--legend-color);
+  transform: scaleY(0);
+  transform-origin: bottom;
+  transition: all 0.3s ease;
+}
+
+.legend-row:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  transform: translateX(6px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.legend-row:hover::before {
+  transform: scaleY(1);
+}
+
+.legend-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.legend-color::after {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 10px;
+  background: inherit;
+  opacity: 0.3;
+  filter: blur(6px);
+  z-index: -1;
+  transition: all 0.3s ease;
+}
+
+.legend-row:hover .legend-color {
+  transform: scale(1.15) rotate(8deg);
+}
+
+.legend-row:hover .legend-color::after {
+  opacity: 0.5;
+  filter: blur(8px);
+}
+
+.legend-name {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 0.9375rem;
+  letter-spacing: -0.01em;
+  transition: all 0.3s ease;
+}
+
+.legend-row:hover .legend-name {
+  color: #4f8cff;
+  transform: translateX(4px);
+}
+
+.legend-value {
+  font-weight: 800;
+  /* use the per-row legend color so each percentage matches its legend */
+  color: var(--legend-color, var(--primary-dark));
+  font-size: 1.25rem;
+  letter-spacing: -0.02em;
+  transition: all 0.3s ease;
+  position: relative;
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.legend-value::after {
+  content: '%';
+  position: static; /* keep inline so it aligns with the number */
+  margin-left: 0.35rem;
+  font-size: 0.8rem;
+  color: rgba(17,24,39,0.55); /* subtle neutral for the percent sign */
+  opacity: 0.95;
+}
+
+.legend-row:hover .legend-value {
+  transform: scale(1.08);
+}
+
+/* Animación de entrada */
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.legend-row {
+  animation: slideInRight 0.4s ease-out backwards;
+}
+
+.legend-row:nth-child(1) {
+  animation-delay: 0.1s;
+  --legend-color: #3b82f6;
+}
+
+.legend-row:nth-child(2) {
+  animation-delay: 0.2s;
+  --legend-color: #8b5cf6;
+}
+
+.legend-row:nth-child(3) {
+  animation-delay: 0.3s;
+  --legend-color: #f59e0b;
+}
+
+/* Estado de carga */
+.distribucion-turnos.loading .chart-container,
+.distribucion-turnos.loading .legend-row {
+  background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Tooltip */
+.chart-segment {
+  position: relative;
+}
+
+.chart-segment::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 12px);
+  left: 50%;
+  transform: translateX(-50%) scale(0);
+  background: rgba(30, 41, 59, 0.95);
+  color: white;
+  padding: 0.5rem 0.875rem;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+}
+
+.chart-segment:hover::after {
+  transform: translateX(-50%) scale(1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .distribucion-turnos {
+    padding: 1.25rem;
+  }
+  
+  .chart-container {
+    height: 45px;
+    margin-bottom: 1.5rem;
+  }
+  
+  .segment-label {
+    font-size: 0.9375rem;
+  }
+  
+  .legend-row {
+    padding: 0.875rem;
+  }
+  
+  .legend-value {
+    font-size: 1.375rem;
+  }
+  
+  .legend-name {
+    font-size: 0.875rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .distribucion-content {
+    margin-top: 1rem;
+  }
+  
+  .chart-container {
+    height: 40px;
+  }
+  
+  .segment-label {
+    font-size: 0.875rem;
+  }
+  
+  .legend-row {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+  
+  .legend-color {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .legend-value {
+    font-size: 1.25rem;
+  }
+  
+  .distribucion-legend {
+    gap: 1rem;
+  }
+}
+
+/* Accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .chart-segment,
+  .legend-row,
+  .legend-color,
+  .legend-name,
+  .legend-value {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* Modo de alto contraste */
+@media (prefers-contrast: high) {
+  .chart-container {
+    border: 2px solid currentColor;
+  }
+  
+  .legend-row {
+    border-width: 2px;
+  }
+}
