@@ -1,0 +1,366 @@
+/* ProfileView.css - Vista de Perfil Compacta y Profesional */
+
+/* --------- CONTENEDOR --------- */
+.profile-view-container {
+  padding: 0.875rem 1rem;
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  animation: fadeIn 0.28s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --------- HEADER --------- */
+.profile-view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0 0 0.875rem 0;
+  padding: 0.625rem 0.875rem;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(248, 250, 252, 0.96));
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(16, 24, 40, 0.03);
+}
+
+.header-content h1 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  margin: 0 0 0.15rem 0;
+  background: linear-gradient(135deg, #eef2f7 0%, #4f8cff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -.02em;
+}
+
+.header-content p {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #64748b;
+  margin: 0;
+}
+
+.edit-profile-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.75rem;
+  background: linear-gradient(135deg, #4f8cff 0%, #3b82f6 100%);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all .25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 6px rgba(79, 140, 255, 0.24);
+}
+.edit-profile-btn:hover {
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.3);
+}
+
+/* --------- LAYOUT --------- */
+.profile-view-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+/* --------- CARD PRINCIPAL --------- */
+.profile-main-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  transition: box-shadow .25s ease;
+}
+.profile-main-card:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+.profile-banner {
+  height: 80px;
+  background: linear-gradient(90deg, #4f8cff 0%, #6ea8ff 50%, #3b82f6 100%);
+  position: relative;
+  overflow: hidden;
+}
+.profile-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: url('data:image/svg+xml,<svg width="100" height="100" xmlns="http://www.w3.org/2000/svg"><defs><pattern id="g" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0L0 0 0 40" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23g)"/></svg>');
+  opacity: 0.5;
+}
+
+.profile-avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0 0.875rem 0.875rem 0.875rem;
+  margin-top: -2.25rem;
+}
+
+.profile-avatar-large {
+  width: 70px;
+  height: 70px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #4f8cff 0%, #3b82f6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.25rem;
+  font-weight: 700;
+  box-shadow: 0 6px 18px rgba(59, 130, 246, 0.16);
+  border: 3px solid #fff;
+  flex-shrink: 0;
+}
+
+.profile-name-section {
+  flex: 1;
+  padding-bottom: 0.15rem;
+}
+.profile-name-section h2 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #0f1724;
+  margin: 0 0 0.2rem 0;
+  letter-spacing: -.01em;
+}
+.profile-position {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #64748b;
+  margin: 0 0 0.35rem 0;
+}
+.profile-badge {
+  display: inline-flex;
+  padding: 0.2rem 0.5rem;
+  background: linear-gradient(135deg, rgba(79, 140, 255, 0.1), rgba(59, 130, 246, 0.1));
+  border: 1px solid rgba(79, 140, 255, 0.18);
+  border-radius: 999px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: #4f8cff;
+  letter-spacing: .3px;
+}
+
+/* --------- GRID INFORMACIÓN --------- */
+.profile-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.875rem;
+}
+.info-card {
+  background: #fff;
+  border: 1px solid rgba(226, 232, 240, 0.85);
+  border-radius: 10px;
+  padding: 0.75rem;
+  box-shadow: 0 4px 12px rgba(16, 24, 40, 0.03);
+  transition: transform .24s ease, box-shadow .24s ease;
+}
+.info-card:hover {
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+.info-card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.625rem;
+  border-bottom: 2px solid #f1f5f9;
+}
+.card-icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(79, 140, 255, 0.08), rgba(59, 130, 246, 0.08));
+  color: #4f8cff;
+  border-radius: 8px;
+  font-size: 0.875rem;
+}
+.info-card-header h3 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: -.01em;
+}
+
+.info-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.625rem;
+}
+.info-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #64748b;
+}
+.info-icon {
+  color: #4f8cff;
+  font-size: 0.8125rem;
+}
+.info-value {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #1e293b;
+  text-align: right;
+}
+
+/* --------- ESTADÍSTICAS --------- */
+.profile-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.875rem;
+}
+.stat-card {
+  background: linear-gradient(135deg, #fff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  transition: all .24s ease;
+  position: relative;
+  overflow: hidden;
+}
+.stat-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  transition: all .24s ease;
+}
+.stat-card:hover {
+  background: #fff;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+.stat-card:hover::before {
+  opacity: 1;
+}
+
+.stat-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9375rem;
+  color: #fff;
+  flex-shrink: 0;
+  transition: transform .24s ease;
+}
+.stat-icon.blue {
+  background: linear-gradient(135deg, #4f8cff, #3b82f6);
+  box-shadow: 0 2px 6px rgba(79, 140, 255, 0.26);
+}
+.stat-icon.green {
+  background: linear-gradient(135deg, #10b981, #059669);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.26);
+}
+.stat-icon.orange {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  box-shadow: 0 2px 6px rgba(245, 158, 11, 0.26);
+}
+
+.stat-card:nth-child(1)::before {
+  background: linear-gradient(180deg, #4f8cff, #3b82f6);
+}
+.stat-card:nth-child(2)::before {
+  background: linear-gradient(180deg, #10b981, #059669);
+}
+.stat-card:nth-child(3)::before {
+  background: linear-gradient(180deg, #f59e0b, #d97706);
+}
+
+.stat-card:hover .stat-icon {
+  transform: scale(1.05) rotate(3deg);
+}
+
+.stat-content h4 {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 0.1rem 0;
+  letter-spacing: -.02em;
+}
+.stat-content p {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #64748b;
+  margin: 0;
+}
+
+/* --------- RESPONSIVE --------- */
+@media (max-width: 1024px) {
+  .profile-info-grid {
+    grid-template-columns: 1fr;
+  }
+  .profile-avatar-large {
+    width: 64px;
+    height: 64px;
+    font-size: 1.125rem;
+    border: 3px solid #fff;
+  }
+}
+@media (max-width: 768px) {
+  .profile-view-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.625rem;
+  }
+  .edit-profile-btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .profile-avatar-section {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 0 0.75rem 0.75rem 0.75rem;
+  }
+  .profile-stats {
+    grid-template-columns: 1fr;
+  }
+  .info-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .info-value {
+    text-align: left;
+  }
+}

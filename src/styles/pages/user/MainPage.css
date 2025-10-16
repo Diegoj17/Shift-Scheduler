@@ -1,0 +1,222 @@
+:root {
+  --primary-blue: #2563eb;
+  --primary-blue-dark: #1d4ed8;
+  --secondary-slate: #64748b;
+  --accent-cyan: #06b6d4;
+  --success-green: #10b981;
+  --warning-amber: #f59e0b;
+  --danger-red: #ef4444;
+  --bg-light: #f8fafc;
+  --card-white: #ffffff;
+  --text-dark: #1e293b;
+  --text-muted: #64748b;
+  --border-gray: #e2e8f0;
+  --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.app-layout-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-light);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+}
+
+/* Asegurarnos de tomar las variables de Sidebar.css si están definidas */
+:root {
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 80px;
+}
+
+/* Layout principal: dejar espacio a la izquierda para el sidebar fijo */
+
+/* Compatibilidad con el layout usado en DashboardPage */
+.dashboard-container {
+  display: flex;
+  width: 100vw;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--bg-light) 0%, #f1f5f9 100%);
+  position: relative;
+  overflow-x: hidden;
+}
+
+.main-content {
+  margin-left: var(--sidebar-width);
+  transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  min-height: 100vh;
+  width: calc(100% - var(--sidebar-width));
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.main-content.sidebar-collapsed {
+  margin-left: var(--sidebar-collapsed-width);
+  width: calc(100% - var(--sidebar-collapsed-width));
+}
+
+.content-area {
+  flex: 1;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Main Content Area */
+.dashboard-content-grid {
+  /* Mantener el grid dentro de content-area */
+  margin: 0;
+}
+
+/* Ajustes del contenedor principal interior (si alguien usa la clase antigua) */
+.dashboard-main-content {
+  flex: 1;
+  padding: 2.5rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.dashboard-content-grid {
+  display: grid;
+  margin: 0;
+}
+
+/* Nueva rejilla principal: columna principal y columna secundaria (derecha) */
+.dashboard-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.dashboard-primary-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.dashboard-secondary-column {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.primary-item, .secondary-item {
+  background: var(--card-white);
+  border-radius: 12px;
+  padding: 0; /* Los componentes internos controlan su propio padding */
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-gray);
+  overflow: hidden;
+}
+
+.lower-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  width: 100%;
+  margin-top: 1.5rem;
+  /* ocupar todo el ancho de la grid principal */
+  grid-column: 1 / -1;
+}
+
+.lower-grid-item {
+  background: var(--card-white);
+  border-radius: 16px;
+  padding: 0;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-gray);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  height: fit-content;
+}
+
+.lower-grid-item:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .dashboard-main-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .lower-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-main-content {
+    padding: 1.5rem;
+  }
+  
+  .dashboard-content-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  
+  .footer-content-wrapper {
+    flex-direction: column;
+    gap: 1.5rem;
+    text-align: center;
+    padding: 0 1.5rem;
+  }
+  
+  .footer-navigation-links {
+    flex-direction: column;
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-main-content {
+    padding: 1rem;
+  }
+  
+  .dashboard-content-grid {
+    gap: 1rem;
+  }
+  
+  .footer-content-wrapper {
+    padding: 0 1rem;
+  }
+}
+
+/* Smooth Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dashboard-content-grid > * {
+  animation: fadeInUp 0.6s ease-out backwards;
+}
+
+.dashboard-content-grid > *:nth-child(1) { animation-delay: 0.1s; }
+.dashboard-content-grid > *:nth-child(2) { animation-delay: 0.2s; }
+.dashboard-content-grid > *:nth-child(3) { animation-delay: 0.3s; }
+.dashboard-content-grid > *:nth-child(4) { animation-delay: 0.4s; }
+.dashboard-content-grid > *:nth-child(5) { animation-delay: 0.5s; }
+.dashboard-content-grid > *:nth-child(6) { animation-delay: 0.6s; }

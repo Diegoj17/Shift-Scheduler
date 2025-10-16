@@ -1,0 +1,406 @@
+/* styles/pages/admin/DashboardPage.css - Versión Mejorada y Profesional */
+
+:root {
+  /* Dimensiones */
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 80px;
+  --header-height: 72px;
+  
+  /* Colores principales */
+  --primary-color: #4f8cff;
+  --primary-dark: #3a7cff;
+  --primary-light: #e6f0ff;
+  --secondary-color: #ff6b6b;
+  --secondary-light: #ffe6e6;
+  --accent-color: #8b5cf6;
+  --accent-light: #f3f0ff;
+  --success-color: #10b981;
+  --success-light: #ecfdf5;
+  --warning-color: #f59e0b;
+  --warning-light: #fffbeb;
+  
+  /* Colores de texto */
+  --text-dark: #1e293b;
+  --text-medium: #475569;
+  --text-light: #64748b;
+  --text-lighter: #94a3b8;
+  
+  /* Colores de fondo */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-card: #ffffff;
+  --border-color: #e2e8f0;
+  --border-light: #f1f5f9;
+  
+  /* Sombras */
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.15);
+  
+  /* Transiciones */
+  --transition-fast: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  
+  /* Espaciado */
+  --spacing-xs: 1rem;
+  --spacing-sm: 1rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1rem;
+  --spacing-xl: 1rem;
+  --spacing-2xl: 1rem;
+}
+
+/* ===== Layout Principal ===== */
+.dashboard-container {
+  display: flex;
+  width: 100vw;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  position: relative;
+  overflow-x: hidden;
+}
+
+.main-content {
+  margin-left: var(--sidebar-width);
+  transition: var(--transition-base);
+  min-height: 100vh;
+  width: calc(100% - var(--sidebar-width));
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.main-content.sidebar-collapsed {
+  margin-left: var(--sidebar-collapsed-width);
+  width: calc(100% - var(--sidebar-collapsed-width));
+}
+
+/* ===== Área de Contenido ===== */
+.content-area {
+  flex: 1;
+  width: 100%;
+  padding: 1rem 1.5rem;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== Header Section ===== */
+.dashboard-header-section {
+  margin-bottom: var(--spacing-lg);
+  animation: slideDown 0.5s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== Stats Section ===== */
+.stats-section {
+  margin-bottom: var(--spacing-xl);
+  animation: slideUp 0.6s ease-out 0.1s both;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ===== Main Dashboard Grid ===== */
+.dashboard-main-grid {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: var(--spacing-xl);
+  animation: fadeInGrid 0.7s ease-out 0.2s both;
+}
+
+@keyframes fadeInGrid {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ===== Columnas ===== */
+.dashboard-primary-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.dashboard-secondary-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+/* ===== Cards ===== */
+.primary-content-card,
+.secondary-content-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  transition: var(--transition-base);
+  position: relative;
+  overflow: hidden;
+}
+
+.primary-content-card::before,
+.secondary-content-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #4f8cff, #3b82f6);
+  opacity: 0;
+  transition: var(--transition-base);
+}
+
+.primary-content-card:hover,
+.secondary-content-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: var(--primary-light);
+}
+
+.primary-content-card:hover::before,
+.secondary-content-card:hover::before {
+  opacity: 1;
+}
+
+/* ===== Section Titles ===== */
+.section-title {
+  color: var(--text-dark);
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  letter-spacing: -0.02em;
+}
+
+.section-title::before {
+  content: '';
+  width: 4px;
+  height: 24px;
+  background: linear-gradient(180deg, #4f8cff, #3b82f6);
+  border-radius: var(--radius-sm);
+}
+
+/* ===== Widget Styles ===== */
+.widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-md);
+  padding-bottom: var(--spacing-sm);
+  border-bottom: 2px solid var(--border-light);
+}
+
+.widget-title {
+  color: var(--text-dark);
+  font-size: 1.125rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  letter-spacing: -0.01em;
+}
+
+.title-icon {
+  color: var(--primary-color);
+  font-size: 1.25rem;
+}
+
+/* ===== Scrollbar personalizado ===== */
+.turnos-list::-webkit-scrollbar,
+.shifts-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.turnos-list::-webkit-scrollbar-track,
+.shifts-list::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+  border-radius: var(--radius-sm);
+}
+
+.turnos-list::-webkit-scrollbar-thumb,
+.shifts-list::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: var(--radius-sm);
+  transition: var(--transition-base);
+}
+
+.turnos-list::-webkit-scrollbar-thumb:hover,
+.shifts-list::-webkit-scrollbar-thumb:hover {
+  background: var(--text-lighter);
+}
+
+/* ===== Responsive Design ===== */
+
+/* Tablets (hasta 1200px) */
+@media (max-width: 1200px) {
+  .dashboard-main-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-lg);
+  }
+  
+  .dashboard-secondary-column {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: var(--spacing-lg);
+  }
+  
+  .content-area {
+    padding: var(--spacing-lg);
+  }
+}
+
+/* Tablets pequeños (hasta 992px) */
+@media (max-width: 992px) {
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+  
+  .content-area {
+    padding: var(--spacing-md);
+  }
+  
+  .dashboard-header-section {
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .stats-section {
+    margin-bottom: var(--spacing-lg);
+  }
+}
+
+/* Móviles (hasta 768px) */
+@media (max-width: 768px) {
+  .content-area {
+    padding: var(--spacing-sm);
+  }
+  
+  .dashboard-main-grid {
+    gap: var(--spacing-md);
+  }
+  
+  .dashboard-primary-column,
+  .dashboard-secondary-column {
+    gap: var(--spacing-md);
+  }
+  
+  .dashboard-secondary-column {
+    grid-template-columns: 1fr;
+  }
+  
+  .primary-content-card,
+  .secondary-content-card {
+    border-radius: var(--radius-md);
+  }
+  
+  .section-title {
+    font-size: 1.125rem;
+  }
+}
+
+/* Móviles pequeños (hasta 480px) */
+@media (max-width: 480px) {
+  :root {
+    --spacing-xs: 0.375rem;
+    --spacing-sm: 0.75rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.25rem;
+    --spacing-xl: 1.5rem;
+  }
+  
+  .content-area {
+    padding: 0.75rem;
+  }
+}
+
+/* ===== Utilidades ===== */
+.card-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-color), transparent);
+  margin: var(--spacing-md) 0;
+}
+
+.fade-in {
+  animation: fadeIn 0.4s ease-out;
+}
+
+.slide-up {
+  animation: slideUp 0.4s ease-out;
+}
+
+/* ===== Estados de carga ===== */
+.loading-skeleton {
+  background: linear-gradient(90deg, var(--border-light) 25%, var(--bg-primary) 50%, var(--border-light) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: var(--radius-md);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Dark mode styles removed — app will use only light theme styles */
+
+/* ===== Impresión ===== */
+@media print {
+  .dashboard-container {
+    background: white;
+  }
+  
+  .primary-content-card,
+  .secondary-content-card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+    page-break-inside: avoid;
+  }
+}

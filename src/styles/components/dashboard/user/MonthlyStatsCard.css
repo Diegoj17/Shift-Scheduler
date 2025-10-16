@@ -1,0 +1,148 @@
+.monthly-stats-widget {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1rem ;
+  height: 100%;
+  width: 100%;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+
+
+.monthly-stats-widget:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.monthly-stats-heading {
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.monthly-stats-heading::before {
+  content: '';
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 0.35rem;
+  background: var(--icon-blue, #2563eb);
+  border-radius: 0.25rem;
+}
+
+.monthly-stats-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.stats-metric-box {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 14px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.stats-metric-box::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: var(--stat-color);
+}
+
+.stats-metric-box:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  border-color: var(--stat-color);
+  background: #ffffff;
+}
+
+.metric-icon-circle {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  background: var(--stat-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  box-shadow: 0 6px 16px rgba(37,99,235,0.12);
+  transition: all 0.3s ease;
+}
+
+.stats-metric-box:hover .metric-icon-circle {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.metric-icon {
+  font-size: 1.25rem;
+  color: white;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.metric-value-display {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--stat-color);
+  margin-bottom: 0.5rem;
+  line-height: 1;
+  transition: all 0.3s ease;
+}
+
+.stats-metric-box:hover .metric-value-display {
+  transform: scale(1.1);
+}
+
+.metric-label-text {
+  font-size: 0.85rem;
+  color: #64748b;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+}
+
+.metric-progress-bar {
+  width: 100%;
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-top: 0.75rem;
+}
+
+.metric-progress-fill {
+  height: 100%;
+  width: 75%;
+  background: var(--stat-color);
+  border-radius: 4px;
+  animation: progressGrow 1.5s ease-out;
+}
+
+@keyframes progressGrow {
+  from { width: 0%; }
+  to { width: 75%; }
+}
+
+@media (max-width: 768px) {
+  .monthly-stats-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+}

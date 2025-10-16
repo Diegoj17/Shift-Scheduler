@@ -1,0 +1,449 @@
+/* Sidebar.css actualizado */
+:root {
+  --sidebar-width: 280px;
+  --sidebar-collapsed-width: 80px;
+  --primary-color: #4f8cff;
+  --primary-dark: #3a7cff;
+  --secondary-color: #ff6b6b;
+  --text-dark: #213547;
+  --text-light: #6b7280;
+  --text-lighter: #9ca3af;
+  --border-color: #e5e7eb;
+  --background-light: #f8fafc;
+  --white: #ffffff;
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.12);
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --border-radius: 12px;
+  --border-radius-sm: 8px;
+  
+}
+
+.sidebar {
+  width: var(--sidebar-width);
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 1000;
+  transition: var(--transition);
+  border-right: 1px solid;
+}
+
+.sidebar.collapsed {
+  width: var(--sidebar-collapsed-width);
+  align-items: center;
+}
+
+.sidebar {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: var(--border-color);
+}
+
+.sidebar-header {
+  padding: 1.5rem 1.5rem 1rem;
+  border-bottom: 1px solid;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: var(--transition);
+}
+
+.sidebar .sidebar-header {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: var(--border-color);
+}
+
+.sidebar.collapsed .sidebar-header {
+  padding: 1.5rem 0.5rem 1rem;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  transition: var(--transition);
+}
+
+.sidebar.collapsed .logo-container {
+  justify-content: center;
+}
+
+.sidebar-logo {
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: var(--white);
+  font-size: 0.9rem;
+}
+
+.sidebar-logo-img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  transition: var(--transition);
+}
+
+.logo-text h2 {
+  font-size: 1.25rem;
+  color: var(--text-dark);
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+
+
+.logo-text span {
+  font-size: 0.75rem;
+  color: var(--text-light);
+  font-weight: 500;
+}
+
+
+
+.sidebar.collapsed .logo-text {
+  opacity: 0;
+  visibility: hidden;
+  width: 0;
+  height: 0;
+  margin: 0;
+}
+
+
+.sidebar .sidebar-toggle {
+  border-color: var(--border-color);
+  color: var(--text-light);
+}
+
+.sidebar-toggle:hover {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--white);
+  transform: scale(1.05);
+}
+
+.sidebar.collapsed .sidebar-toggle {
+  transform: rotate(180deg);
+}
+
+.sidebar.collapsed .sidebar-toggle:hover {
+  transform: rotate(180deg) scale(1.05);
+}
+
+.sidebar-nav {
+  flex: 1;
+  padding: 1.5rem 0;
+  width: 100%;
+}
+
+.sidebar-nav ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.sidebar-nav li {
+  margin-bottom: 0.25rem;
+  width: 100%;
+  position: relative;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  width: calc(100% - 1rem);
+  padding: 0.875rem 1rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: var(--transition);
+  border-radius: 0 var(--border-radius-sm) var(--border-radius-sm) 0;
+  margin: 0 0.5rem;
+  position: relative;
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  overflow: hidden;
+}
+
+.nav-item {
+  color: var(--text-dark);
+}
+
+.sidebar.collapsed .nav-item {
+  width: 50px;
+  padding: 0.875rem;
+  margin: 0 auto;
+  justify-content: center;
+  border-radius: var(--border-radius-sm);
+}
+
+.nav-item:hover {
+  transform: translateX(4px);
+}
+
+.nav-item:hover {
+  background: var(--background-light);
+  color: var(--primary-color);
+}
+
+.sidebar.collapsed .nav-item:hover {
+  transform: scale(1.05);
+}
+
+.nav-item.active {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: var(--white);
+  font-weight: 600;
+  transform: translateX(8px);
+  box-shadow: var(--shadow-sm);
+}
+
+.sidebar.collapsed .nav-item.active {
+  transform: scale(1.05);
+}
+
+.active-indicator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 60%;
+  background: var(--white);
+  border-radius: 0 2px 2px 0;
+  opacity: 0;
+  transition: var(--transition);
+}
+
+.nav-item.active .active-indicator {
+  opacity: 1;
+}
+
+.nav-icon {
+  font-size: 1.25rem;
+  margin-right: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
+  min-width: 24px;
+}
+
+.sidebar.collapsed .nav-icon {
+  margin-right: 0;
+  font-size: 1.3rem;
+}
+
+.nav-label {
+  transition: var(--transition);
+  white-space: nowrap;
+  overflow: hidden;
+  font-weight: 500;
+}
+
+.sidebar.collapsed .nav-label {
+  opacity: 0;
+  visibility: hidden;
+  width: 0;
+  height: 0;
+  margin: 0;
+}
+
+.nav-item::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: calc(100% + 15px);
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 0.6rem 1rem;
+  border-radius: var(--border-radius-sm);
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: var(--transition);
+  z-index: 1002;
+  pointer-events: none;
+  box-shadow: var(--shadow-md);
+}
+
+.sidebar.light .nav-item::before {
+  background: var(--text-dark);
+  color: var(--white);
+}
+
+.nav-item::before {
+  background: var(--text-dark);
+  color: var(--white);
+}
+
+.nav-item::after {
+  content: "";
+  position: absolute;
+  left: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 6px solid transparent;
+  opacity: 0;
+  visibility: hidden;
+  transition: var(--transition);
+  z-index: 1003;
+  pointer-events: none;
+}
+
+.nav-item::after {
+  border-right-color: var(--text-dark);
+}
+
+.sidebar.collapsed .nav-item:hover::before,
+.sidebar.collapsed .nav-item:hover::after {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(-50%) scale(1);
+}
+
+.sidebar-footer {
+  padding: 1.5rem;
+  border-top: 1px solid;
+  transition: padding var(--transition);
+  width: 100%;
+}
+
+.sidebar-footer {
+  border-color: var(--border-color);
+}
+
+.sidebar.collapsed .sidebar-footer {
+  padding: 1rem 0.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background: rgba(255, 107, 107, 0.08);
+  border: 1.5px solid rgba(255, 107, 107, 0.15);
+  color: var(--secondary-color);
+  border-radius: var(--border-radius-sm);
+  cursor: pointer;
+  transition: var(--transition);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.logout-btn {
+  background: rgba(255, 107, 107, 0.08);
+  border-color: rgba(255, 107, 107, 0.15);
+}
+
+.sidebar.collapsed .logout-btn {
+  width: 50px;
+  padding: 0.875rem;
+  justify-content: center;
+  border-radius: var(--border-radius-sm);
+}
+
+.logout-btn:hover {
+  background: var(--secondary-color);
+  color: var(--white);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.3);
+  border-color: var(--secondary-color);
+}
+
+.sidebar.collapsed .logout-btn:hover {
+  transform: scale(1.05);
+}
+
+.logout-btn span {
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.sidebar.collapsed .logout-btn span:not(.nav-icon) {
+  /* Ocultar solo los spans que NO son íconos (ej. el texto "Cerrar sesión")
+     para que el icono dentro de .nav-icon siga siendo visible al colapsar */
+  opacity: 0;
+  visibility: hidden;
+  width: 0;
+  height: 0;
+  margin: 0;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--text-light);
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    transform: translateX(-100%);
+    width: var(--sidebar-width);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar.collapsed {
+    width: var(--sidebar-width);
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open.collapsed {
+    transform: translateX(0);
+    width: var(--sidebar-collapsed-width);
+  }
+}
+
+@media (max-width: 480px) {
+  .sidebar.open {
+    width: 100%;
+  }
+  
+  .sidebar.open.collapsed {
+    width: 80px;
+  }
+}

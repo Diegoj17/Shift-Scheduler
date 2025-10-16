@@ -1,4 +1,3 @@
-/* ====== RESET WELCOME PANEL (copied de RegisterWelcomePanel.css) ====== */
 .reset-welcome-panel {
    flex: 1;
    background: linear-gradient(135deg, var(--login-primary-color) 0%, var(--login-primary-dark) 100%);

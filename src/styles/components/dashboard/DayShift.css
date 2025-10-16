@@ -1,0 +1,448 @@
+/* DayShift.css - Versión Mejorada y Profesional */
+
+.turnos-del-dia {
+  padding: 1.75rem;
+  background: var(--bg-card, #ffffff);
+  height: 100%;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f1f5f9;
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #1e293b;
+  letter-spacing: -0.02em;
+}
+
+.title-icon {
+  color: #4f8cff;
+  font-size: 1.5rem;
+  animation: pulse-icon 2s ease-in-out infinite;
+}
+
+@keyframes pulse-icon {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+.status-legend {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.legend-item {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: default;
+}
+
+.legend-item.activo {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.15));
+  color: #059669;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.legend-item.pendiente {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.15));
+  color: #d97706;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.legend-item.ausente {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(239, 68, 68, 0.15));
+  color: #dc2626;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.legend-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.turnos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 550px;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* Scrollbar personalizado */
+.turnos-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.turnos-list::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 10px;
+}
+
+.turnos-list::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #cbd5e1, #94a3b8);
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.turnos-list::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #94a3b8, #64748b);
+}
+
+.turno-card {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.25rem;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.turno-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #4f8cff, #3b82f6);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.turno-card:hover {
+  background: #ffffff;
+  border-color: #cbd5e1;
+  transform: translateX(8px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+}
+
+.turno-card:hover::before {
+  opacity: 1;
+}
+
+.turno-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.empleado-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.avatar-large {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #4f8cff 0%, #8b5cf6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: white;
+  font-size: 1.125rem;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.25);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.avatar-large::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 16px;
+  padding: 2px;
+  background: linear-gradient(135deg, #4f8cff, #8b5cf6);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.turno-card:hover .avatar-large {
+  transform: scale(1.05) rotate(5deg);
+}
+
+.turno-card:hover .avatar-large::after {
+  opacity: 1;
+}
+
+.empleado-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.empleado-nombre {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.375rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.empleado-meta {
+  display: flex;
+  gap: 1.25rem;
+  flex-wrap: wrap;
+}
+
+.meta-item {
+  font-size: 0.8125rem;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.meta-item:hover {
+  color: #4f8cff;
+}
+
+.meta-item svg {
+  font-size: 0.875rem;
+}
+
+.turno-info {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.horario-info {
+  text-align: right;
+}
+
+.turno-tipo {
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.25rem;
+  font-size: 0.9375rem;
+  letter-spacing: -0.01em;
+}
+
+.turno-horario {
+  font-size: 0.8125rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.status-indicator {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.status-indicator::before {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  opacity: 0.3;
+  animation: pulse-status 2s ease-in-out infinite;
+}
+
+@keyframes pulse-status {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0;
+  }
+}
+
+.status-indicator.activo {
+  background: #10b981;
+  box-shadow: 0 0 16px rgba(16, 185, 129, 0.6);
+}
+
+.status-indicator.activo::before {
+  background: #10b981;
+}
+
+.status-indicator.pendiente {
+  background: #f59e0b;
+  box-shadow: 0 0 16px rgba(245, 158, 11, 0.6);
+}
+
+.status-indicator.pendiente::before {
+  background: #f59e0b;
+}
+
+.status-indicator.ausente {
+  background: #ef4444;
+  box-shadow: 0 0 16px rgba(239, 68, 68, 0.6);
+}
+
+.status-indicator.ausente::before {
+  background: #ef4444;
+}
+
+.turno-actions {
+  display: flex;
+  gap: 0.5rem;
+  opacity: 0;
+  transform: translateX(-10px);
+  transition: all 0.3s ease;
+}
+
+.turno-card:hover .turno-actions {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.action-btn {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border: 1px solid #e2e8f0;
+  padding: 0.625rem;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.action-btn::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(79, 140, 255, 0.1), rgba(139, 92, 246, 0.1));
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.action-btn:hover {
+  transform: translateY(-3px) scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+  border-color: transparent;
+}
+
+.action-btn:hover::before {
+  opacity: 1;
+}
+
+.action-btn:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+.edit-btn:hover {
+  background: linear-gradient(135deg, #4f8cff, #3a7cff);
+  color: white;
+}
+
+.delete-btn:hover {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+}
+
+/* Estados vacíos */
+.turnos-list:empty::after {
+  content: 'No hay turnos programados para hoy';
+  display: block;
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #94a3b8;
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .status-legend {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 768px) {
+  .turnos-del-dia {
+    padding: 1.25rem;
+  }
+  
+  .turno-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .turno-info {
+    width: 100%;
+    justify-content: space-between;
+  }
+  
+  .turno-actions {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  
+  .empleado-meta {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .card-title {
+    font-size: 1.25rem;
+  }
+  
+  .legend-item {
+    font-size: 0.6875rem;
+    padding: 0.375rem 0.75rem;
+  }
+  
+  .avatar-large {
+    width: 48px;
+    height: 48px;
+    font-size: 1rem;
+  }
+  
+  .turno-card {
+    padding: 1rem;
+  }
+}

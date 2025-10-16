@@ -1,0 +1,171 @@
+.welcome-dashboard-container {
+  grid-column: span 2;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.welcome-dashboard-container::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+  animation: welcomePulse 8s ease-in-out infinite;
+}
+
+@keyframes welcomePulse {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-10%, -10%); }
+}
+
+.welcome-dashboard-container:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px rgba(102, 126, 234, 0.4);
+}
+
+.welcome-greeting-section {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 1.5rem;
+}
+
+.welcome-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.welcome-title {
+  font-size: 2.2rem;
+  font-weight: 800;
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.5px;
+  color: #4f8cff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-subtitle {
+  font-size: 1.1rem;
+  opacity: 0.95;
+  font-weight: 300;
+  color: #000000;
+}
+
+.welcome-datetime-display {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  border-radius: 12px;
+  padding: 0.75rem 1rem;
+  flex-shrink: 0;
+}
+
+.date-block, .time-block {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.date-icon, .time-icon {
+  color: #000000;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 1.1rem;
+}
+
+.date-text {
+  font-size: 0.95rem;
+  text-transform: capitalize;
+  color: rgba(0, 0, 0, 0.95);
+}
+
+.time-text {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #000000;
+  font-family: 'Monaco', 'Consolas', monospace;
+  letter-spacing: 1.5px;
+}
+
+/* Reutilizar estilos de info-card del DashboardHeader para fecha y hora */
+.welcome-datetime-display .info-card {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff 0%, rgba(248,250,252,0.6) 100%);
+  border: 1px solid #e6eef9;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+  min-width: 220px;
+}
+
+.welcome-datetime-display .info-icon {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 1.1rem;
+}
+
+.welcome-datetime-display .date-card .info-icon {
+  background: linear-gradient(135deg, rgba(79, 140, 255, 0.12), rgba(79, 140, 255, 0.18));
+  color: #4f8cff;
+}
+
+.welcome-datetime-display .time-card .info-icon {
+  background: linear-gradient(135deg, rgba(245,158,11,0.12), rgba(245,158,11,0.18));
+  color: #f59e0b;
+}
+
+.welcome-datetime-display .info-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.welcome-datetime-display .info-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+@media (max-width: 768px) {
+  .welcome-dashboard-container {
+    grid-column: span 1;
+    padding: 1.5rem;
+  }
+  
+  .welcome-top-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .welcome-title {
+    font-size: 1.5rem;
+  }
+
+  .welcome-time-text {
+    font-size: 1.5rem;
+  }
+}

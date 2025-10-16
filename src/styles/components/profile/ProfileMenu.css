@@ -1,0 +1,235 @@
+/* ProfileMenu.css - Menú de Usuario Profesional */
+
+.profile-menu-container {
+  position: relative;
+  z-index: 1200;
+  background: transparent;
+}
+
+.profile-trigger {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  transition: all 0.15s ease;
+}
+
+.profile-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #4f8cff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 0.9375rem;
+  transition: none;
+}
+
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.125rem;
+}
+
+.profile-name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #ffe0e0;
+  letter-spacing: -0.01em;
+}
+
+.profile-name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.01em;
+}
+.profile-role {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+}
+
+
+.profile-chevron.open {
+  transform: rotate(180deg);
+  color: #4f8cff;
+}
+
+/* Dropdown Menu */
+.profile-dropdown {
+  position: absolute;
+  top: 4.1rem;
+  right: 0;
+  width: 280px;
+  background: #ffffff;
+  border: none;
+  border-radius: 10px;
+  box-shadow: none;
+  overflow: visible; /* allow inner elements to overflow if needed */
+  pointer-events: auto;
+}
+
+@keyframes dropdownSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 1.25rem;
+  background: transparent;
+}
+
+.dropdown-avatar {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #4f8cff 0%, #3b82f6 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 700;
+  font-size: 1.125rem;
+  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.3);
+  flex-shrink: 0;
+}
+
+.dropdown-user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.dropdown-user-info h4 {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0 0 0.25rem 0;
+  letter-spacing: -0.01em;
+}
+
+.dropdown-user-info p {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #6b7280;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
+  margin: 0.5rem 0;
+}
+
+.dropdown-menu {
+  padding: 0.5rem;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  background: transparent;
+  border: none;
+  border-radius: 10px;
+  color: #0f172a;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.dropdown-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, #4f8cff, #3b82f6);
+  transform: scaleY(0);
+  transition: all 0.3s ease;
+}
+
+.dropdown-item:hover {
+  background: transparent;
+  color: #0f172a;
+  transform: translateX(4px);
+}
+
+.dropdown-item:hover::before {
+  transform: scaleY(1);
+}
+
+.dropdown-icon {
+  font-size: 1rem;
+  color: #4f8cff;
+  transition: all 0.3s ease;
+}
+
+.dropdown-item:hover .dropdown-icon {
+  transform: scale(1.1);
+}
+
+.dropdown-item.logout {
+  color: #ef4444;
+}
+
+.dropdown-item.logout .dropdown-icon {
+  color: #ef4444;
+}
+
+.dropdown-item.logout:hover {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.05), rgba(239, 68, 68, 0.1));
+}
+
+.dropdown-item.logout:hover::before {
+  background: linear-gradient(180deg, #ef4444, #dc2626);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .profile-info {
+    display: none;
+  }
+
+  .profile-trigger {
+    padding: 0.5rem;
+  }
+
+  .profile-dropdown {
+    width: 260px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-dropdown {
+    width: calc(100vw - 2rem);
+    right: -1rem;
+  }
+}
+

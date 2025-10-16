@@ -1,0 +1,168 @@
+.upcoming-shifts-container {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s ease;
+}
+
+.upcoming-shifts-container:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.upcoming-shifts-header {
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.upcoming-shifts-header::before {
+  content: '';
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 0.25rem;
+  background: var(--icon-blue, #2563eb);
+  border-radius: 0.25rem;
+}
+
+.upcoming-shifts-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.shift-timeline-entry {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 14px;
+  border-left: 4px solid #2563eb;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.shift-timeline-entry::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, #2563eb 0%, #1d4ed8 100%);
+  transition: width 0.3s ease;
+}
+
+.shift-timeline-entry:hover {
+  transform: translateX(6px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.shift-timeline-entry:hover::before {
+  width: 100%;
+  opacity: 0.05;
+}
+
+.shift-entry-date-section {
+  min-width: 70px;
+  text-align: center;
+  padding: 0.75rem;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.shift-date-day {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #2563eb;
+  line-height: 1;
+}
+
+.shift-date-month {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 0.25rem;
+}
+
+.shift-date-weekday {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  margin-top: 0.25rem;
+}
+
+.shift-entry-details {
+  flex: 1;
+}
+
+.shift-details-type {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 1.05rem;
+  margin-bottom: 0.25rem;
+}
+
+.shift-details-hours {
+  font-size: 0.9rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.shift-entry-badge {
+  padding: 0.45rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px rgba(16,24,40,0.06);
+  display: inline-flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.badge-scheduled {
+  background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(79,70,229,0.02));
+  color: #1e40af;
+}
+
+.badge-free {
+  background: linear-gradient(135deg, rgba(245,158,11,0.08), rgba(250,204,21,0.02));
+  color: #92400e;
+}
+
+.badge-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+  font-size: 1rem;
+}
+
+.badge-text {
+  display: inline-block;
+}
+
+@media (max-width: 768px) {
+  .shift-timeline-entry {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .shift-entry-badge {
+    width: 100%;
+    text-align: center;
+  }
+}
