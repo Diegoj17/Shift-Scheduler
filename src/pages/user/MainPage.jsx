@@ -8,7 +8,7 @@ import QuickActionsCard from '../../modules/user/dashboard/components/QuickActio
 import UpcomingShiftsCard from '../../modules/user/dashboard/components/UpcomingShiftsCard';
 import MonthlyStatsCard from '../../modules/user/dashboard/components/MonthlyStatsCard';
 import RemindersCard from '../../modules/user/dashboard/components/RemindersCard';
-import '../../styles/pages/user/MainPage.css';
+import '/src/styles/pages/user/MainPage.css';
 
 const MainPage = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
