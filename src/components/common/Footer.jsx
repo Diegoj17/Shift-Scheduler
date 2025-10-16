@@ -10,7 +10,7 @@ const Footer = () => {
         <div className="column">
           <div className="logo">
             <img
-              src="public/img/calendario.png"
+              src="/img/calendario.png"
               alt="Logo Shift Scheduler"
               className="logo-image"
             />
