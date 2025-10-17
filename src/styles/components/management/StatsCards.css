@@ -1,0 +1,82 @@
+.management-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 20px;
+          flex: 1;
+        }
+
+        .management-stat-card {
+          background: white;
+          padding: 24px;
+          border-radius: 12px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          transition: all 0.3s ease;
+          border: 1px solid #e8eef3;
+        }
+
+        .management-stat-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 8px 16px rgba(0,0,0,0.12);
+        }
+
+        .management-stat-icon {
+          width: 52px;
+          height: 52px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 24px;
+          flex-shrink: 0;
+          color: white;
+        }
+
+        .management-stat-icon.total-users {
+          background: linear-gradient(135deg, #4f8cff 0%, #667eea 100%);
+        }
+
+        .management-stat-icon.active-users {
+          background: linear-gradient(135deg, #10b981 0%, #34d399 100%);
+        }
+
+        .management-stat-icon.inactive-users {
+          background: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+        }
+
+        .management-stat-icon.blocked-users {
+          background: linear-gradient(135deg, #ef4444 0%, #fb7185 100%);
+        }
+
+        .management-stat-content {
+          flex: 1;
+        }
+
+        .management-stat-label {
+          font-size: 13px;
+          color: #000000;
+          font-weight: 500;
+          margin-bottom: 4px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .management-stat-value {
+          font-size: 28px;
+          font-weight: 700;
+          color: #2c3e50;
+        }
+
+        @media (max-width: 1024px) {
+          .management-stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+
+        @media (max-width: 768px) {
+          .management-stats-grid {
+            grid-template-columns: 1fr;
+          }
+        }

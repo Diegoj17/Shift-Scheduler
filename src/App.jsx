@@ -7,6 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import Dashboard from './pages/admin/DashboardPage.jsx';
 import MainPage from './pages/user/MainPage.jsx';
+import ManagementPage from './pages/admin/ManagementPage.jsx';
 
 
 
@@ -23,14 +24,16 @@ function App() {
           <Route path="/reset-password" element={<PasswordReset />} />
 
           <Route path="/dashboard" element={
-          
               <Dashboard />
-      
           } />
           <Route path="/main" element={
 
               <MainPage />
 
+          } />
+          <Route path="/management" element={
+
+              <ManagementPage />
           } />
         </Routes>
       </BrowserRouter>

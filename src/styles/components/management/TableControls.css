@@ -1,0 +1,112 @@
+.management-table-controls {
+          padding: 20px 24px;
+          border-bottom: 1px solid #e8eef3;
+          background: #fafbfc;
+        }
+
+        .management-controls-row {
+          display: flex;
+          gap: 16px;
+          align-items: center;
+          flex-wrap: wrap;
+          margin-bottom: 12px;
+        }
+
+        .management-search-box {
+          flex: 1;
+          min-width: 280px;
+          position: relative;
+          color: #000000;
+        }
+
+        .management-search-box input {
+          width: 100%;
+          padding: 11px 16px 11px 44px; /* leave space for icon */
+          border: 1px solid #dfe4ea;
+          border-radius: 8px;
+          font-size: 14px;
+          transition: all 0.2s;
+          background-color: white;
+          color: #000000;
+        }
+
+        .management-search-box input:focus {
+          outline: none;
+          border-color: #4f8cff;
+          box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.1);
+        }
+
+        /* Replace pseudo-element with an actual react-icon so we can style it */
+        .management-search-box .search-icon {
+          position: absolute;
+          left: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          font-size: 16px;
+          color: #9aa6b2;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          pointer-events: none; /* icon shouldn't block clicks */
+        }
+
+        .management-search-box .search-icon svg {
+          width: 16px;
+          height: 16px;
+        }
+
+        .management-filter-group {
+          display: flex;
+          gap: 12px;
+          align-items: center;
+          color: #000000;
+        }
+
+        .management-filter-group select {
+          padding: 10px 14px;
+          border: 1px solid #dfe4ea;
+          border-radius: 8px;
+          font-size: 14px;
+          background-color: white;
+          cursor: pointer;
+          transition: all 0.2s;
+          min-width: 160px;
+          color: #000000;
+        }
+
+        .management-filter-group select:focus {
+          outline: none;
+          border-color: #4f8cff;
+          box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.1);
+        }
+
+        .management-results-count {
+          font-size: 14px;
+          color: #7f8c8d;
+        }
+
+        .management-results-count strong {
+          color: #2c3e50;
+          font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+          .management-controls-row {
+            flex-direction: column;
+            align-items: stretch;
+          }
+
+          .management-search-box {
+            min-width: 100%;
+          }
+
+          .management-filter-group {
+            width: 100%;
+            flex-wrap: wrap;
+          }
+
+          .management-filter-group select {
+            flex: 1;
+            min-width: 0;
+          }
+        }
