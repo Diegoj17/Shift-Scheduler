@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaSearch } from "react-icons/fa";
-import userService from '../../services/userService';
+import { userService } from '../../services/userService';
 import '../../styles/components/management/TableControls.css';
 
 const TableControls = ({
