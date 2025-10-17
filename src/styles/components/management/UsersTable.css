@@ -1,0 +1,224 @@
+.management-users-table-container {
+  width: 100%;
+  overflow: hidden;
+}
+
+.management-users-table-scroll {
+  max-height: 480px;
+  overflow-y: auto;
+  overflow-x: auto;
+  width: 100%;
+}
+
+.management-users-table {
+  width: 100%;
+  border-collapse: collapse;
+
+}
+
+.management-users-table thead {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #e8eef3;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.management-users-table th {
+  padding: 16px 12px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: #000000;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.management-users-table tbody tr {
+  border-bottom: 1px solid #000000;
+  transition: all 0.2s;
+}
+
+.management-users-table tbody tr:hover {
+  background-color: #f8f9fb;
+}
+
+.management-users-table td {
+  padding: 16px 12px;
+  font-size: 14px;
+  color: #000000;
+  vertical-align: middle;
+}
+
+/* Columna USUARIO */
+.management-user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 200px;
+}
+
+.management-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.management-user-details {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.management-user-name {
+  font-weight: 600;
+  color: #000000;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.management-user-email {
+  font-size: 12px;
+  color: #000000;
+}
+
+/* Columna DEPARTAMENTO */
+.management-department {
+  font-size: 14px;
+  color: #4a5568;
+  font-weight: 500;
+  min-width: 120px;
+}
+
+/* Columna PUESTO */
+.management-position {
+  font-size: 14px;
+  color: #000000;
+  min-width: 120px;
+}
+
+/* Columna FECHA INGRESO */
+.management-date {
+  font-size: 14px;
+  color: #000000;
+  min-width: 100px;
+}
+
+/* Columna ACCIONES */
+.management-actions {
+  display: flex;
+  gap: 8px;
+  min-width: 150px;
+  justify-content: flex-start;
+}
+
+.management-action-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.management-action-btn.edit {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.management-action-btn.edit:hover {
+  background-color: #bbdefb;
+}
+
+.management-action-btn.delete {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+.management-action-btn.delete:hover {
+  background-color: #ffcdd2;
+}
+
+.management-action-btn.toggle {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+
+.management-action-btn.toggle:hover {
+  background-color: #ffe0b2;
+}
+
+/* Estados del usuario */
+.management-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+  white-space: nowrap;
+}
+
+.management-status-badge.active {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.management-status-badge.inactive {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.management-status-badge.blocked {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.no-results {
+  text-align: center;
+  padding: 3rem;
+  color: #94a3b8;
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .management-users-table-container {
+    border-radius: 8px;
+  }
+  
+  .management-users-table-scroll {
+    max-height: 500px;
+  }
+  
+  .management-users-table th,
+  .management-users-table td {
+    padding: 12px 8px;
+    font-size: 13px;
+  }
+  
+  .management-actions {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .management-action-btn {
+    padding: 4px 8px;
+    font-size: 11px;
+  }
+}

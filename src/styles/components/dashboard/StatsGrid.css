@@ -7,15 +7,15 @@
 }
 
 .stat-card {
-  background: var(--white);
+  background: #ffffff;
   padding: 1.5rem;
-  border-radius: var(--border-radius-sm);
-  box-shadow: var(--shadow-sm);
-  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 1px solid var(--border-color, #e6edf3);
   display: flex;
   align-items: center;
   gap: 1rem;
-  transition: var(--transition);
+  transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
 }
@@ -54,14 +54,17 @@
 .stat-icon {
   width: 50px;
   height: 50px;
-  border-radius: var(--border-radius-sm);
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--white);
+  color: #fff; /* fallback */
   font-size: 1.25rem;
   flex-shrink: 0;
 }
+
+/* Forzar color y tamaño del SVG dentro del icon box */
+.stat-icon svg { fill: #fff; color: #fff; width: 20px; height: 20px; }
 
 .stat-blue .stat-icon {
   background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
