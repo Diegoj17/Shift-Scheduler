@@ -7,7 +7,7 @@ import ConfirmationModal from '../../components/management/ConfirmationModal';
 import StatsCards from '../../components/management/StatsCards';
 import UsersTable from '../../components/management/UsersTable';
 import TableControls from '../../components/management/TableControls';
-import { userService } from '../../services/userService';
+import userService from '../../services/userService';
 import '../../styles/pages/admin/ManagementPage.css';
 
 // Mock de usuarios para modo preview
