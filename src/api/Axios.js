@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Usar variable de entorno o fallback a localhost
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/auth';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://shift-scheduler-main-production.up.railway.app/api/auth';
 
 // Configuración base de axios
 const apiClient = axios.create({
