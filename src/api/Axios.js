@@ -1,7 +1,7 @@
-// api/Axios.js
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:8000/api/auth';
+// Usar variable de entorno o fallback a localhost
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/auth';
 
 // Configuración base de axios
 const apiClient = axios.create({
@@ -9,12 +9,13 @@ const apiClient = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true,
 });
 
 // Interceptor para agregar el token automáticamente
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('token'); // Cambiado a 'token' para coincidir con authService
+    const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -30,7 +31,6 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Token expirado o inválido
       localStorage.removeItem('token');
       localStorage.removeItem('refresh');
       window.location.href = '/login';
@@ -40,7 +40,6 @@ apiClient.interceptors.response.use(
 );
 
 export const userAPI = {
-  // GET - Obtener todos los usuarios
   getUsers: async () => {
     try {
       const response = await apiClient.get('/users/');
@@ -50,17 +49,15 @@ export const userAPI = {
     }
   },
 
-  // POST - Crear usuario
   createUser: async (userData) => {
     try {
       const response = await apiClient.post('/users/create', userData);
       return response.data;
     } catch (error) {
-      throw error; // Lanzar el error completo para manejar mejor los detalles
+      throw error;
     }
   },
 
-  // PUT - Actualizar usuario completo
   updateUser: async (userId, userData) => {
     try {
       const response = await apiClient.put(`/users/${userId}`, userData);
@@ -70,7 +67,6 @@ export const userAPI = {
     }
   },
 
-  // DELETE - Eliminar usuario
   deleteUser: async (userId) => {
     try {
       const response = await apiClient.delete(`/users/${userId}`);
@@ -80,7 +76,6 @@ export const userAPI = {
     }
   },
 
-  // PATCH - Actualizar estado del usuario (bloquear/desbloquear)
   updateUserStatus: async (userId, status) => {
     try {
       const response = await apiClient.patch(`/users/${userId}`, { status });
