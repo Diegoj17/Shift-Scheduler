@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '/src/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { FaUser } from "react-icons/fa";
 import { Link } from 'react-router-dom';
