@@ -1,4 +1,3 @@
-// components/management/UsersTable.jsx
 import React from 'react';
 import { 
   FaEnvelope, 

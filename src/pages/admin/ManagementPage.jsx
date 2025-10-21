@@ -1,4 +1,3 @@
-// components/management/ManagementPage.jsx
 import { useState, useEffect, useCallback } from 'react';
 import Sidebar from '../../components/common/Sidebar';
 import Header from '../../components/common/Header';
