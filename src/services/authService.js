@@ -83,7 +83,23 @@ const authService = {
     localStorage.removeItem('token');
     localStorage.removeItem('refresh');
     window.location.href = '/login';
-  }
+  },
+
+  verifyToken: async (token) => {
+    try {
+      // Intenta obtener el perfil con el token
+      const response = await api.get('/me/', {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+      return response.data.user || response.data;
+    } catch (error) {
+      console.error('Verify token error:', error);
+      throw error;
+    }
+  },
+
 };
 
 export default authService;
