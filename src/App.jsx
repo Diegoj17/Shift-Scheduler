@@ -12,6 +12,7 @@ import ManagementPage from './pages/admin/ManagementPage.jsx';
 
 
 
+
 function App() {
 
   return (
@@ -23,17 +24,20 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/reset-password" element={<PasswordReset />} />
 
-          <Route path="/dashboard" element={
+          <Route path="/admin/dashboard" element={
+            <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
           } />
           <Route path="/main" element={
-
+            <ProtectedRoute>
               <MainPage />
-
+            </ProtectedRoute>
           } />
-          <Route path="/management" element={
-
+          <Route path="/admin/management" element={
+            <ProtectedRoute>
               <ManagementPage />
+            </ProtectedRoute>
           } />
         </Routes>
       </BrowserRouter>

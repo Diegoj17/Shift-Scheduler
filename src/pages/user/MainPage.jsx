@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../../components/common/Header';
-import Sidebar from '../../components/common/Sidebar';
+import SidebarEmployee from '../../modules/user/components/SidebarEmployee.jsx';
 import { FaSyncAlt, FaClock, FaCalendarAlt, FaExclamationTriangle, FaClipboardList, FaMoneyBillWave, FaBullhorn } from 'react-icons/fa';
-import WelcomeCard from '../../modules/user/dashboard/components/WelcomeCard';
-import TodayScheduleCard from '../../modules/user/dashboard/components/TodayScheduleCard';
-import QuickActionsCard from '../../modules/user/dashboard/components/QuickActionsCard';
-import UpcomingShiftsCard from '../../modules/user/dashboard/components/UpcomingShiftsCard';
-import MonthlyStatsCard from '../../modules/user/dashboard/components/MonthlyStatsCard';
-import RemindersCard from '../../modules/user/dashboard/components/RemindersCard';
+import WelcomeCard from '../../modules/user/dashboard/WelcomeCard.jsx';
+import TodayScheduleCard from '../../modules/user/dashboard/TodayScheduleCard.jsx';
+import QuickActionsCard from '../../modules/user/dashboard/QuickActionsCard.jsx';
+import UpcomingShiftsCard from '../../modules/user/dashboard/UpcomingShiftsCard.jsx';
+import MonthlyStatsCard from '../../modules/user/dashboard/MonthlyStatsCard.jsx';
+import RemindersCard from '../../modules/user/dashboard/RemindersCard.jsx';
+import menuItems from '../../modules/user/components/sidebarMenu.jsx';
 import '@/styles/components/dashboard/user/WelcomeCard.css';
+
+// Nota: moved activeItem state into component
 
 const MainPage = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [activeItem, setActiveItem] = useState('dashboard');
   // Estado local para controlar el sidebar (abierto / colapsado)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [employee] = useState({
@@ -74,9 +78,19 @@ const MainPage = () => {
     alert('Registrando entrada/salida...');
   };
 
+  const handleItemClick = (itemId) => {
+    setActiveItem(itemId);
+  };
+
   return (
     <div className="dashboard-container">
-      <Sidebar isOpen={isSidebarOpen} onToggle={handleToggleSidebar} />
+      <SidebarEmployee 
+      isOpen={isSidebarOpen} 
+      onToggle={handleToggleSidebar} 
+      activeItem={activeItem} 
+      onItemClick={handleItemClick} 
+      menuItems={menuItems}
+      />
 
       <div className={`main-content ${!isSidebarOpen ? 'sidebar-collapsed' : ''}`}>
         <Header employee={employee} onToggleSidebar={handleToggleSidebar} pageTitle={`Inicio`} />

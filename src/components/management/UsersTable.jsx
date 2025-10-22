@@ -51,12 +51,6 @@ const UsersTable = ({
             <th onClick={() => onSort('name')}>
               Usuario {getSortIcon('name')}
             </th>
-            <th onClick={() => onSort('department')}>
-              Departamento {getSortIcon('department')}
-            </th>
-            <th onClick={() => onSort('position')}>
-              Puesto {getSortIcon('position')}
-            </th>
             <th onClick={() => onSort('status')}>
               Estado {getSortIcon('status')}
             </th>
@@ -91,14 +85,9 @@ const UsersTable = ({
                   </div>
                 </td>
                 <td>
-                  <div className="department-info"><FaBuilding className="icon" /> <span>{user.department}</span></div>
-                </td>
-                <td>
-                  <span className="position-badge">{user.position}</span>
-                </td>
-                <td>
                   <span className={`management-status-badge ${user.status}`}>
-                    {user.status === 'active' ? <FaUserTimes className="status-icon" /> : null}
+                    {user.status === 'blocked' ? <FaLock className="status-icon" /> : null}
+                    {user.status === 'inactive' ? <FaUserTimes className="status-icon" /> : null}
                     {renderStatusText(user.status)}
                   </span>
                 </td>
@@ -117,9 +106,9 @@ const UsersTable = ({
                     <button
                       className="management-action-btn toggle"
                       onClick={() => onToggleStatus(user)}
-                      title={user.status === 'active' ? 'Bloquear' : 'Activar'}
+                      title={user.status === 'active' ? 'Bloquear' : (user.status === 'blocked' ? 'Desbloquear' : 'Activar')}
                     >
-                      {user.status === 'active' ? <FaLock /> : <FaUnlock />}
+                      {user.status === 'active' ? <FaLock /> : (user.status === 'blocked' ? <FaUnlock /> : <FaUnlock />)}
                     </button>
                     <button
                       className="management-action-btn delete"

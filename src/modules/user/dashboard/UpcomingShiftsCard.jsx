@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaCalendarAlt, FaSun } from 'react-icons/fa';
-import '../../../../styles/components/dashboard/user/UpcomingShiftsCard.css';
+import '../../../styles/components/dashboard/user/UpcomingShiftsCard.css';
 
 const UpcomingShiftsCard = ({ shifts = [] }) => {
   return (

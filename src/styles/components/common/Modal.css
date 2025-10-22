@@ -96,6 +96,22 @@
   font-weight: 500;
 }
 
+/* Message color variants */
+.modal-message.error {
+  color: #b91c1c; /* rojo oscuro, profesional */
+  font-weight: 600;
+}
+
+.modal-message.default,
+.modal-message.success {
+  color: #374151; /* gris oscuro para mensajes informativos */
+}
+
+.modal-message.warning {
+  color: #b91c1c; /* usar mismo rojo para advertencias/block */
+  font-weight: 600;
+}
+
 .modal-actions {
   display: flex;
   justify-content: center;
@@ -113,19 +129,24 @@
   color: white;
 }
 
-.modal-btn.default {
-  background: linear-gradient(135deg, #4f8bff 0%, #3358e6 100%);
-  box-shadow: 0 4px 12px rgba(51, 88, 230, 0.3);
+.modal-btn {
+  /* Make accept button a professional blue by default */
+  background: linear-gradient(135deg, #3563ff 0%, #2348d8 100%);
+  box-shadow: 0 6px 18px rgba(35, 72, 216, 0.18);
 }
 
+/* Variant-specific subtle outlines (keep button color blue but change focus ring) */
 .modal-btn.success {
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.12);
 }
 
 .modal-btn.error {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.12);
+}
+
+.modal-btn:focus {
+  outline: none;
+  box-shadow: 0 0 0 4px rgba(51, 88, 230, 0.14);
 }
 
 .modal-btn:hover {

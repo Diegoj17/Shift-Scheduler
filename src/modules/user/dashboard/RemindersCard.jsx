@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaClipboardList, FaMoneyBillWave, FaBullhorn } from 'react-icons/fa';
-import '../../../../styles/components/dashboard/user/RemindersCard.css';
+import '../../../styles/components/dashboard/user/RemindersCard.css';
 
 const RemindersCard = ({ reminders = [] }) => {
   

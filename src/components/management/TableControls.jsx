@@ -1,6 +1,5 @@
 import React from 'react';
 import { FaSearch } from "react-icons/fa";
-import { userService } from '../../services/userService';
 import '../../styles/components/management/TableControls.css';
 
 const TableControls = ({
@@ -8,11 +7,9 @@ const TableControls = ({
   onSearchChange,
   filterStatus,
   onStatusChange,
-  filterDepartment,
-  onDepartmentChange,
   resultsCount
 }) => {
-  const departments = userService.getDepartments();
+  
 
   return (
     <div className="management-table-controls">
@@ -35,12 +32,6 @@ const TableControls = ({
               <option value="blocked">Bloqueado</option>
             </select>
 
-            <select value={filterDepartment} onChange={(e) => onDepartmentChange(e.target.value)}>
-              <option value="all">Todos los departamentos</option>
-              {departments.map(dept => (
-                <option key={dept} value={dept}>{dept}</option>
-              ))}
-            </select>
           </div>
         </div>
 

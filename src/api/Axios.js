@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-// Usar variable de entorno o fallback a localhost
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://shift-scheduler-main-production.up.railway.app/api/auth';
+const API_BASE_URL = import.meta?.env?.VITE_API_URL || 'https://shift-scheduler-main-production.up.railway.app/api/auth';
 
 // Configuración base de axios
 const apiClient = axios.create({
@@ -10,6 +9,7 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true,
+  timeout: 10000,
 });
 
 // Interceptor para agregar el token automáticamente
@@ -51,19 +51,19 @@ export const userAPI = {
 
   createUser: async (userData) => {
     try {
-      const response = await apiClient.post('/users/create', userData);
+      const response = await apiClient.post('/users/create/', userData);
       return response.data;
     } catch (error) {
-      throw error;
+      throw new Error(error.response?.data?.detail || error.message || 'Error al crear usuario');
     }
   },
 
   updateUser: async (userId, userData) => {
     try {
-      const response = await apiClient.put(`/users/${userId}`, userData);
+      const response = await apiClient.put(`/users/${userId}/update/`, userData);
       return response.data;
     } catch (error) {
-      throw error;
+      throw new Error(error.response?.data?.detail || error.message || 'Error al actualizar usuario');
     }
   },
 

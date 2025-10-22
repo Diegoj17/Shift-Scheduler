@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useAuth } from '/src/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { FaUser } from "react-icons/fa";
@@ -11,12 +11,11 @@ const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login, error, clearError } = useAuth();
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    clearError();
     
     if (!email || !password) {
       return;
@@ -26,23 +25,42 @@ const LoginForm = () => {
     
     try {
       const result = await login(email, password);
-      if (result.success) {
-        // result.data comes from authService.login -> { token, user }
-        const user = result.data?.user;
-        const role = (user?.role || '').toString().toLowerCase();
 
-        // Roles that should go to admin dashboard
-        const adminRoles = ['admin', 'administrador', 'gerente', 'manager', 'superadmin'];
+      // Si login falla, mostramos modal con mensaje apropiado
+      if (!result.success) {
+        const msg = result.message || 'Error al iniciar sesión';
 
-        if (adminRoles.includes(role)) {
-          navigate('/admin/dashboard');
-        } else {
-          // Usuarios normales van a la página principal de usuario
-          navigate('/main');
-        }
+        // Detectar bloqueo/inactividad por el mensaje que devuelve el contexto
+        const isBlocked = /bloquead|inactivo|inactiva/i.test(msg);
+
+        setModalType(isBlocked ? 'warning' : 'error');
+        setModalTitle(isBlocked ? 'Cuenta bloqueada / inactiva' : 'Error');
+        setModalMessage(msg);
+        setModalOpen(true);
+        return;
+      }
+
+      // En caso de éxito, navegar según rol
+      // result.data comes from authService.login -> { token, refresh, user }
+      const user = result.data?.user;
+      const role = (user?.role || '').toString().toLowerCase();
+
+      // Roles that should go to admin dashboard
+      const adminRoles = ['admin', 'administrador', 'gerente', 'manager', 'superadmin'];
+
+      if (adminRoles.includes(role)) {
+        navigate('/admin/dashboard');
+      } else {
+        // Usuarios normales van a la página principal de usuario
+        navigate('/main');
       }
     } catch (err) {
       console.error('Login failed:', err);
+      // Errores inesperados de red o del servidor
+      setModalType('error');
+      setModalTitle('Error');
+      setModalMessage(err?.response?.data?.message || err?.message || 'Error al iniciar sesión');
+      setModalOpen(true);
     } finally {
       setIsLoading(false);
     }
@@ -54,14 +72,6 @@ const LoginForm = () => {
   const [modalTitle, setModalTitle] = useState('');
   const [modalMessage, setModalMessage] = useState('');
 
-  useEffect(() => {
-    if (error) {
-      setModalType('error');
-      setModalTitle('Error');
-      setModalMessage(error);
-      setModalOpen(true);
-    }
-  }, [error]);
 
   return (
     <div className="login-form-panel">
