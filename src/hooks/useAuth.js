@@ -89,21 +89,41 @@ export const useAuth = () => {
     }
   };
 
-  const changePassword = async (currentPassword, newPassword) => {
+  const confirmPasswordReset = async (data) => {
     setLoading(true);
     setError(null);
     
     try {
-      const response = await authService.changePassword(currentPassword, newPassword);
+      const response = await authService.confirmPasswordReset(data);
       setLoading(false);
       return { success: true, data: response };
     } catch (err) {
-      const errorMessage = err.response?.data?.message || 'Error al cambiar contraseña';
+      
+      let errorMessage = 'Error al confirmar el restablecimiento de contraseña';
+      
+      if (err.response?.status === 400) {
+        // Manejar errores de validación del backend
+        if (err.response.data.new_password_confirm) {
+          errorMessage = err.response.data.new_password_confirm[0];
+        } else if (err.response.data.new_password) {
+          errorMessage = err.response.data.new_password[0];
+        } else if (err.response.data.token) {
+          errorMessage = 'El enlace ha expirado o es inválido. Solicita uno nuevo.';
+        } else if (err.response.data.uid) {
+          errorMessage = 'Enlace de recuperación inválido.';
+        } else if (err.response.data.message) {
+          errorMessage = err.response.data.message;
+        }
+      } else if (err.response?.status === 404) {
+        errorMessage = 'El enlace de recuperación no es válido o ha expirado.';
+      }
+      
       setError(errorMessage);
       setLoading(false);
       return { success: false, message: errorMessage };
     }
   };
+
 
   const updateProfile = async (userData) => {
     setLoading(true);
@@ -144,7 +164,7 @@ export const useAuth = () => {
     register,
     logout: contextLogout,
     resetPassword,
-    changePassword,
+    confirmPasswordReset,
     updateProfile,
     hasRole,
     hasAnyRole,

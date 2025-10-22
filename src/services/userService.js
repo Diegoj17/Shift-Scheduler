@@ -118,9 +118,8 @@ updateUser: async (userId, userData) => {
     }
   },
 
-  // Cambiar estado (bloquear/desbloquear)
-  // Cambiar estado de usuario. Acepta el estado objetivo en frontend ('blocked'|'active'|'inactive')
-  // Para compatibilidad, si se pasa un estado actual ('active'|'inactive'), intentamos invertirlo.
+  
+
   toggleUserStatus: async (userId, statusOrTarget) => {
     try {
       let targetFrontendStatus = 'active';
