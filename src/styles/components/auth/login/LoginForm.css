@@ -67,7 +67,7 @@
 }
 
 .login-form-input {
-  padding: 0.9rem 3.5rem 0.9rem 3rem;
+  padding: 0.9rem 2rem 0.9rem 3rem;
   border: 1.5px solid var(--login-border-color);
   border-radius: 12px;
   font-size: 1rem;

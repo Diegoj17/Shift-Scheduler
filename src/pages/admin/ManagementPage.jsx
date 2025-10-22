@@ -1,4 +1,3 @@
-// components/management/ManagementPage.jsx
 import { useState, useEffect, useCallback } from 'react';
 import Sidebar from '../../components/common/Sidebar';
 import Header from '../../components/common/Header';
@@ -9,17 +8,6 @@ import UsersTable from '../../components/management/UsersTable';
 import TableControls from '../../components/management/TableControls';
 import { userService } from '../../services/userService';
 import '../../styles/pages/admin/ManagementPage.css';
-
-// Mock de usuarios para modo preview
-const mockUsers = [
-  { id: 1, name: 'Ana García', email: 'ana.garcia@ejemplo.com', employeeId: 'EMP001', department: 'Operaciones', position: 'Supervisor', status: 'active', hireDate: '2022-01-10', avatar: '' },
-  { id: 2, name: 'Carlos Ruiz', email: 'carlos.ruiz@ejemplo.com', employeeId: 'EMP002', department: 'Mantenimiento', position: 'Técnico', status: 'inactive', hireDate: '2021-06-15', avatar: '' },
-  { id: 3, name: 'María López', email: 'maria.lopez@ejemplo.com', employeeId: 'EMP003', department: 'Atención', position: 'Operador', status: 'active', hireDate: '2023-03-20', avatar: '' },
-  { id: 3, name: 'María López', email: 'maria.lopez@ejemplo.com', employeeId: 'EMP003', department: 'Atención', position: 'Operador', status: 'active', hireDate: '2023-03-20', avatar: '' },
-  { id: 3, name: 'María López', email: 'maria.lopez@ejemplo.com', employeeId: 'EMP003', department: 'Atención', position: 'Operador', status: 'active', hireDate: '2023-03-20', avatar: '' },
-  { id: 3, name: 'María López', email: 'maria.lopez@ejemplo.com', employeeId: 'EMP003', department: 'Atención', position: 'Operador', status: 'active', hireDate: '2023-03-20', avatar: '' },
-  { id: 3, name: 'María López', email: 'maria.lopez@ejemplo.com', employeeId: 'EMP003', department: 'Atención', position: 'Operador', status: 'active', hireDate: '2023-03-20', avatar: '' },
-];
 
 const ManagementPage = () => {
   const [users, setUsers] = useState([]);
@@ -39,11 +27,6 @@ const ManagementPage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeItem, setActiveItem] = useState("equipo");
 
-  // Nota: eliminadas las comprobaciones de permisos para permitir edición y pruebas locales.
-
-  // Datos estáticos para preview cuando no hay permisos o backend no está disponible
-
-  // Cargar usuarios desde la API
   const loadUsers = useCallback(async () => {
     try {
       setLoading(true);
@@ -52,11 +35,11 @@ const ManagementPage = () => {
       setUsers(usersData);
       setFilteredUsers(usersData);
     } catch (err) {
-      // Si falla la carga desde el servicio, usar datos mock como fallback
-      console.error('Error loading users from API, falling back to mock:', err);
-      setError('No se pudieron cargar usuarios desde el servidor. Mostrando datos de ejemplo.');
-      setUsers(mockUsers);
-      setFilteredUsers(mockUsers);
+      // Si falla la carga desde el servicio, no forzamos mock: mostramos error y dejamos la lista vacía
+      console.error('Error loading users from API:', err);
+      setError('No se pudieron cargar usuarios desde el servidor. Pulsa Reintentar para volver a intentar.');
+      setUsers([]);
+      setFilteredUsers([]);
     } finally {
       setLoading(false);
     }
@@ -141,7 +124,10 @@ const ManagementPage = () => {
         await userService.deleteUser(selectedUser.id);
         setUsers(users.filter(user => user.id !== selectedUser.id));
       } else if (modalAction === 'block' || modalAction === 'unblock') {
-        await userService.toggleUserStatus(selectedUser.id, selectedUser.status);
+        // Enviar el estado objetivo en lugar del estado actual.
+        // 'block' debe mapear a 'blocked' (frontend) y 'unblock' a 'active'
+        const targetStatus = modalAction === 'block' ? 'blocked' : 'active';
+        await userService.toggleUserStatus(selectedUser.id, targetStatus);
         await loadUsers();
       }
       setIsConfirmationModalOpen(false);
@@ -231,7 +217,10 @@ const ManagementPage = () => {
           {error && (
             <div className="management-error-banner">
               <span>{error}</span>
-              <button onClick={() => setError(null)}>×</button>
+              <div className="management-error-actions">
+                <button className="management-retry-btn" onClick={() => { setError(null); loadUsers(); }}>Reintentar</button>
+                <button className="management-dismiss-btn" onClick={() => setError(null)}>Cerrar</button>
+              </div>
             </div>
           )}
 

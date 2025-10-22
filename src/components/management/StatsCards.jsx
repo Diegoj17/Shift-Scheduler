@@ -1,4 +1,3 @@
-// components/management/StatsCards.jsx
 import React from 'react';
 import { 
   FaUserPlus, 

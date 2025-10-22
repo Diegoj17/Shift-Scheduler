@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { FaTimes, FaUser, FaEnvelope, FaPhone, FaBuilding, FaIdCard, FaCalendarAlt, FaLock, FaUnlock, FaEye, FaEyeSlash } from 'react-icons/fa';
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import { userService } from '../../services/userService';
 import '../../styles/components/management/UserModal.css';
+import Modal from '../common/Modal';
 
 const UserModal = ({ user, action, onSave, onClose }) => {
   const [formData, setFormData] = useState({
@@ -11,8 +9,7 @@ const UserModal = ({ user, action, onSave, onClose }) => {
     lastName: '',
     email: '',
     phone: '',
-    department: '',
-    position: '',
+    role: 'EMPLEADO',
     status: 'active',
     password: '',
     passwordConfirm: ''
@@ -21,13 +18,10 @@ const UserModal = ({ user, action, onSave, onClose }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
-  const departments = userService.getDepartments();
-  const positions = userService.getPositions();
   const [showRules, setShowRules] = useState(false);
   const rulesRef = useRef(null);
   const passwordInputRef = useRef(null);
-  const [popoverPos, setPopoverPos] = useState(null);
+  const modalRef = useRef(null);
 
   useEffect(() => {
     if (user && action === 'edit') {
@@ -37,12 +31,9 @@ const UserModal = ({ user, action, onSave, onClose }) => {
         firstName: user.firstName || nameParts[0] || '',
         lastName: user.lastName || nameParts.slice(1).join(' ') || '',
         email: user.email || '',
-        phone: user.phone || '',
-        department: user.department || '',
-        position: user.position || '',
+        phone: user.phone || user.telefono || '',
+        role: user.role || 'EMPLEADO',
         status: user.status || 'active',
-        password: '',
-        passwordConfirm: ''
       });
     } else {
       // Para crear nuevo usuario
@@ -51,8 +42,7 @@ const UserModal = ({ user, action, onSave, onClose }) => {
         lastName: '',
         email: '',
         phone: '',
-        department: 'TI',
-        position: 'Desarrollador',
+        role: 'EMPLEADO',
         status: 'active',
         password: '',
         passwordConfirm: ''
@@ -61,43 +51,24 @@ const UserModal = ({ user, action, onSave, onClose }) => {
     setErrors({});
   }, [user, action]);
 
-  // Cerrar popover de reglas al hacer click fuera
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (showRules) {
-        if (rulesRef.current && !rulesRef.current.contains(event.target) &&
-            passwordInputRef.current && !passwordInputRef.current.contains(event.target)) {
-          setShowRules(false);
-        }
+      if (showRules && 
+          rulesRef.current && 
+          !rulesRef.current.contains(event.target) &&
+          passwordInputRef.current && 
+          !passwordInputRef.current.contains(event.target)) {
+        setShowRules(false);
       }
     };
 
-    if (showRules) document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [showRules]);
-
-  // Calcular y actualizar posición del popover (fixed) para que no quede recortado por el modal
-  const updatePopoverPosition = () => {
-    const input = passwordInputRef.current;
-    if (!input) return;
-    const rect = input.getBoundingClientRect();
-    const top = rect.top; // viewport coordinates
-    const left = rect.right + 12; // place 12px to the right
-    setPopoverPos({ top, left });
-  };
-
-  useEffect(() => {
-    if (showRules) {
-      updatePopoverPosition();
-      window.addEventListener('resize', updatePopoverPosition);
-      window.addEventListener('scroll', updatePopoverPosition, true);
-    }
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      window.removeEventListener('resize', updatePopoverPosition);
-      window.removeEventListener('scroll', updatePopoverPosition, true);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [showRules]);
 
+  // Validación del formulario (sin cambios)
   const validateForm = () => {
     const newErrors = {};
 
@@ -105,7 +76,6 @@ const UserModal = ({ user, action, onSave, onClose }) => {
       newErrors.firstName = 'El nombre es requerido';
     }
 
-    // Validar que nombre solo tenga letras y espacios
     if (formData.firstName && /[^A-Za-zÀ-ÖØ-öø-ÿ\s]/.test(formData.firstName)) {
       newErrors.firstName = 'El nombre solo puede contener letras y espacios';
     }
@@ -114,7 +84,6 @@ const UserModal = ({ user, action, onSave, onClose }) => {
       newErrors.lastName = 'El apellido es requerido';
     }
 
-    // Validar que apellido solo tenga letras y espacios
     if (formData.lastName && /[^A-Za-zÀ-ÖØ-öø-ÿ\s]/.test(formData.lastName)) {
       newErrors.lastName = 'El apellido solo puede contener letras y espacios';
     }
@@ -125,7 +94,6 @@ const UserModal = ({ user, action, onSave, onClose }) => {
       newErrors.email = 'El email no es válido';
     }
 
-    // Validar teléfono: en creación es requerido y debe tener 10 dígitos
     if (action === 'create') {
       if (!formData.phone) {
         newErrors.phone = 'El teléfono es requerido';
@@ -133,18 +101,13 @@ const UserModal = ({ user, action, onSave, onClose }) => {
         newErrors.phone = 'El teléfono debe tener 10 dígitos';
       }
     } else {
-      // En edición, si el usuario provee teléfono, validar 10 dígitos
       if (formData.phone && !/^\d{10}$/.test(formData.phone)) {
         newErrors.phone = 'El teléfono debe tener 10 dígitos';
       }
     }
 
-    if (!formData.department) {
-      newErrors.department = 'El departamento es requerido';
-    }
-
-    if (!formData.position) {
-      newErrors.position = 'El puesto es requerido';
+    if (!formData.role) {
+      newErrors.role = 'El rol es requerido';
     }
 
     if (action === 'create') {
@@ -167,6 +130,8 @@ const UserModal = ({ user, action, onSave, onClose }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    console.log('🔍 Datos del formulario antes de validar:', formData);
     
     if (!validateForm()) {
       return;
@@ -176,9 +141,17 @@ const UserModal = ({ user, action, onSave, onClose }) => {
     
     try {
       await onSave(formData);
-      // No necesitamos llamar setIsSubmitting(false) aquí porque onSave maneja el cierre del modal
-    } catch  {
-      // Los errores de la API se manejan en el componente padre
+      // Mostrar modal de resultado exitoso
+      setResultModal({ isOpen: true, type: 'success', title: 'Cambio exitoso', message: action === 'create' ? 'Usuario creado correctamente.' : 'Cambios guardados correctamente.' });
+      // Auto-close: después de 1.6s cerrar modal y el modal padre
+      setTimeout(() => {
+        setResultModal(prev => ({ ...prev, isOpen: false }));
+        setIsSubmitting(false);
+        onClose();
+      }, 1600);
+    } catch (err) {
+      console.error(err);
+      setResultModal({ isOpen: true, type: 'error', title: 'Error', message: 'No se pudo guardar el usuario. Intente nuevamente.' });
       setIsSubmitting(false);
     }
   };
@@ -187,14 +160,11 @@ const UserModal = ({ user, action, onSave, onClose }) => {
     const { name, value } = e.target;
     let newValue = value;
 
-    // Sanitizar entradas según campo
     if (name === 'firstName' || name === 'lastName') {
-      // Permitir solo letras (incluye acentos) y espacios
       newValue = newValue.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s]/g, '');
     }
 
     if (name === 'phone') {
-      // Permitir solo dígitos y limitar a 10 caracteres
       newValue = newValue.replace(/\D/g, '').slice(0, 10);
     }
 
@@ -203,26 +173,20 @@ const UserModal = ({ user, action, onSave, onClose }) => {
       [name]: newValue
     }));
     
-    // Clear error when user starts typing
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
         [name]: ''
       }));
     }
-    // Live validation: si está actualizando password o passwordConfirm, comprobar coincidencia
-    if (name === 'password' || name === 'passwordConfirm') {
-      setTimeout(() => {
-        setErrors(prev => ({
-          ...prev,
-          passwordConfirm: (name === 'password' || name === 'passwordConfirm') && ( (name === 'password' ? newValue : formData.password) !== (name === 'passwordConfirm' ? newValue : formData.password) ) ? 'Las contraseñas no coinciden' : ''
-        }));
-      }, 0);
-    }
   };
 
-  const toggleShowPassword = () => setShowPassword(s => !s);
-  const toggleShowConfirmPassword = () => setShowConfirmPassword(s => !s);
+  const toggleShowPassword = () => setShowPassword(!showPassword);
+  const toggleShowConfirmPassword = () => setShowConfirmPassword(!showConfirmPassword);
+
+  const handlePasswordFocus = () => {
+    setShowRules(true);
+  };
 
   const getTitle = () => {
     switch (action) {
@@ -241,12 +205,20 @@ const UserModal = ({ user, action, onSave, onClose }) => {
     }
   };
 
+  // Estado para modal de resultado (éxito/error)
+  const [resultModal, setResultModal] = useState({ isOpen: false, type: 'success', title: '', message: '' });
+
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="user-modal" onClick={e => e.stopPropagation()}>
+      <div className="user-modal" onClick={e => e.stopPropagation()} ref={modalRef}>
         <div className="modal-header">
           <h2>{getTitle()}</h2>
-          <button className="close-btn" onClick={onClose} aria-label="Cerrar modal">
+          <button 
+            className="close-btn" 
+            onClick={onClose} 
+            aria-label="Cerrar modal"
+            disabled={isSubmitting}
+          >
             <FaTimes />
           </button>
         </div>
@@ -330,49 +302,28 @@ const UserModal = ({ user, action, onSave, onClose }) => {
 
             <div className="form-group">
               <label>
-                <FaBuilding />
-                Departamento *
-              </label>
-              <select
-                name="department"
-                value={formData.department}
-                onChange={handleChange}
-                required
-                className={errors.department ? 'error' : ''}
-                disabled={isSubmitting}
-              >
-                <option value="">Seleccionar departamento</option>
-                {departments.map(dept => (
-                  <option key={dept} value={dept}>{dept}</option>
-                ))}
-              </select>
-              {errors.department && <span className="error-message">{errors.department}</span>}
-            </div>
-
-            <div className="form-group">
-              <label>
                 <FaIdCard />
-                Puesto *
+                Rol *
               </label>
               <select
-                name="position"
-                value={formData.position}
+                name="role"
+                value={formData.role}
                 onChange={handleChange}
                 required
-                className={errors.position ? 'error' : ''}
+                className={errors.role ? 'error' : ''}
                 disabled={isSubmitting}
               >
-                <option value="">Seleccionar puesto</option>
-                {positions.map(pos => (
-                  <option key={pos} value={pos}>{pos}</option>
-                ))}
+                <option value="EMPLEADO">Empleado</option>
+                <option value="ADMIN">Administrador</option>
               </select>
-              {errors.position && <span className="error-message">{errors.position}</span>}
+              {errors.role && <span className="error-message">{errors.role}</span>}
             </div>
 
             <div className="form-group">
               <label>
-                {getStatusIcon(formData.status)}
+                <span className="status-icon">
+                  {getStatusIcon(formData.status)}
+                </span>
                 Estado *
               </label>
               <select
@@ -392,7 +343,7 @@ const UserModal = ({ user, action, onSave, onClose }) => {
 
             {action === 'create' && (
               <>
-                <div className="form-group">
+                <div className="form-group password-group">
                   <label>
                     <FaLock />
                     Contraseña *
@@ -403,8 +354,8 @@ const UserModal = ({ user, action, onSave, onClose }) => {
                       type={showPassword ? 'text' : 'password'}
                       name="password"
                       value={formData.password}
-                      onChange={(e) => { handleChange(e); setShowRules(true); }}
-                      onFocus={() => setShowRules(true)}
+                      onChange={handleChange}
+                      onFocus={handlePasswordFocus}
                       required
                       placeholder="Ingrese la contraseña"
                       className={errors.password ? 'error' : ''}
@@ -417,30 +368,30 @@ const UserModal = ({ user, action, onSave, onClose }) => {
                         onClick={toggleShowPassword}
                         disabled={isSubmitting}
                         aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
-                        aria-pressed={showPassword}
                       >
                         {showPassword ? <FaEyeSlash size={16} /> : <FaEye size={16} />}
                       </button>
                     )}
-
-                    {/* Popover de reglas de contraseña */}
-                    {showRules && (
-                      <div
-                        className={`password-rules-popover ${popoverPos ? 'fixed' : ''}`}
-                        ref={rulesRef}
-                        style={popoverPos ? { position: 'fixed', top: popoverPos.top + 'px', left: popoverPos.left + 'px' } : undefined}
-                      >
-                        <div className="popover-arrow" />
-                        <p className="rules-title">La contraseña debe tener:</p>
-                        <ul className="rules-list">
-                          <li className={formData.password.length >= 8 ? 'ok' : ''}>{formData.password.length >= 8 ? '✓ ' : '• '}Mínimo 8 caracteres</li>
-                          <li className={/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(formData.password) ? 'ok' : ''}>{/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(formData.password) ? '✓ ' : '• '}Al menos una letra</li>
-                          <li className={/\d/.test(formData.password) ? 'ok' : ''}>{/\d/.test(formData.password) ? '✓ ' : '• '}Al menos un número</li>
-                        </ul>
-                      </div>
-                    )}
+                  </div>
+                  
+                  {/* Popover simplificado - se renderiza condicionalmente */}
+                  {showRules && (
+                    <div className="password-rules-popover" ref={rulesRef}>
+                      <p className="rules-title">La contraseña debe tener:</p>
+                      <ul className="rules-list">
+                        <li className={formData.password.length >= 8 ? 'ok' : ''}>
+                          {formData.password.length >= 8 ? '✓ ' : '• '}Mínimo 8 caracteres
+                        </li>
+                        <li className={/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(formData.password) ? 'ok' : ''}>
+                          {/[A-Za-zÀ-ÖØ-öø-ÿ]/.test(formData.password) ? '✓ ' : '• '}Al menos una letra
+                        </li>
+                        <li className={/\d/.test(formData.password) ? 'ok' : ''}>
+                          {/\d/.test(formData.password) ? '✓ ' : '• '}Al menos un número
+                        </li>
+                      </ul>
                     </div>
-                      {errors.password && <span className="error-message">{errors.password}</span>}
+                  )}
+                  {errors.password && <span className="error-message">{errors.password}</span>}
                 </div>
 
                 <div className="form-group">
@@ -457,11 +408,15 @@ const UserModal = ({ user, action, onSave, onClose }) => {
                       required
                       placeholder="Confirme la contraseña"
                       className={errors.passwordConfirm ? 'error' : ''}
-                      aria-invalid={!!errors.passwordConfirm}
                       disabled={isSubmitting}
                     />
                     {formData.passwordConfirm.length > 0 && (
-                      <button type="button" className={`password-toggle ${showConfirmPassword ? 'active' : ''}`} onClick={toggleShowConfirmPassword} aria-pressed={showConfirmPassword}>
+                      <button 
+                        type="button" 
+                        className={`password-toggle ${showConfirmPassword ? 'active' : ''}`} 
+                        onClick={toggleShowConfirmPassword}
+                        disabled={isSubmitting}
+                      >
                         {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                       </button>
                     )}
@@ -490,6 +445,14 @@ const UserModal = ({ user, action, onSave, onClose }) => {
             </button>
           </div>
         </form>
+        {/* Modal de resultado */}
+        <Modal
+          isOpen={resultModal.isOpen}
+          type={resultModal.type}
+          title={resultModal.title}
+          message={resultModal.message}
+          onClose={() => setResultModal(prev => ({ ...prev, isOpen: false }))}
+        />
       </div>
     </div>
   );

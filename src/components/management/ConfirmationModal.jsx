@@ -1,7 +1,24 @@
+import React from 'react';
 import { FaExclamationTriangle, FaTrash, FaLock, FaUnlock, FaTimes } from 'react-icons/fa';
 import '../../styles/components/management/ConfirmationModal.css';
+import Modal from '../common/Modal';
 
 const ConfirmationModal = ({ user, action, onConfirm, onClose }) => {
+  const [resultModal, setResultModal] = React.useState({ isOpen: false, type: 'success', title: '', message: '' });
+
+  const handleConfirm = async () => {
+    try {
+      await onConfirm();
+      setResultModal({ isOpen: true, type: 'success', title: 'Usuario borrado', message: `${user?.name} ha sido eliminado correctamente.` });
+      setTimeout(() => {
+        setResultModal(prev => ({ ...prev, isOpen: false }));
+        onClose();
+      }, 1400);
+    } catch (err) {
+      console.error(err);
+      setResultModal({ isOpen: true, type: 'error', title: 'Error', message: 'No se pudo eliminar el usuario. Intente nuevamente.' });
+    }
+  };
   const getModalConfig = () => {
     switch (action) {
       case 'delete':
@@ -62,11 +79,18 @@ const ConfirmationModal = ({ user, action, onConfirm, onClose }) => {
           <button className="btn-cancel" onClick={onClose}>
             Cancelar
           </button>
-          <button className={`btn-confirm ${config.confirmClass}`} onClick={onConfirm}>
+          <button className={`btn-confirm ${config.confirmClass}`} onClick={handleConfirm}>
             {config.confirmText}
           </button>
         </div>
       </div>
+      <Modal
+        isOpen={resultModal.isOpen}
+        type={resultModal.type}
+        title={resultModal.title}
+        message={resultModal.message}
+        onClose={() => setResultModal(prev => ({ ...prev, isOpen: false }))}
+      />
     </div>
   );
 };

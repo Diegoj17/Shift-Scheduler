@@ -5,32 +5,53 @@ export const userService = {
   getUsers: async () => {
     try {
       const data = await userAPI.getUsers();
-      // Manejar diferentes formatos de respuesta
-      let usersArray = data;
-      
-      if (data && data.users) {
-        usersArray = data.users;
-      } else if (data && Array.isArray(data)) {
-        usersArray = data;
-      } else {
+
+      let usersArray = [];
+
+      if (!data) {
         usersArray = [];
+      } else if (Array.isArray(data)) {
+        usersArray = data;
+      } else if (data.users && Array.isArray(data.users)) {
+        usersArray = data.users;
+      } else if (data.results && Array.isArray(data.results)) {
+        usersArray = data.results;
+      } else if (data.data && Array.isArray(data.data)) {
+        usersArray = data.data;
+      } else if (data.data && Array.isArray(data.data.results)) {
+        usersArray = data.data.results;
+      } else if (data.items && Array.isArray(data.items)) {
+        usersArray = data.items;
+      } else {
+        // Intentar encontrar el primer array dentro del objeto
+        const firstArray = Object.values(data).find(v => Array.isArray(v));
+        usersArray = firstArray || [];
       }
-      
-      return usersArray.map(user => ({
-        id: user.id,
-        name: `${user.first_name} ${user.last_name}`,
-        firstName: user.first_name,
-        lastName: user.last_name,
-        email: user.email,
-        phone: user.telefono || '',
-        department: userService.mapRoleToDepartment(user.role),
-        position: userService.mapRoleToPosition(user.role),
-        employeeId: `EMP${String(user.id).padStart(3, '0')}`,
-        hireDate: user.created_at ? new Date(user.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-        status: userService.mapStatus(user.status),
-        role: user.role,
-        avatar: `/img/avatars/default.jpg`
-      }));
+
+      return usersArray.map(user => {
+        const id = user.id ?? user.pk ?? user.user_id ?? null;
+        const firstName = user.first_name || user.firstName || user.name?.split?.(' ')?.[0] || '';
+        const lastName = user.last_name || user.lastName || '';
+        const email = user.email || user.user?.email || '';
+        const telefono = user.telefono || user.phone || '';
+        const role = user.role || user.user?.role || 'EMPLEADO';
+
+        return {
+          id,
+          name: ((firstName || lastName) ? `${firstName} ${lastName}`.trim() : (user.name || user.username || email)),
+          firstName,
+          lastName,
+          email,
+          phone: telefono,
+          department: userService.mapRoleToDepartment(role),
+          position: userService.mapRoleToPosition(role),
+          employeeId: user.employee_id || user.employeeId || (id ? `EMP${String(id).padStart(3, '0')}` : ''),
+          hireDate: user.created_at ? new Date(user.created_at).toISOString().split('T')[0] : (user.hireDate || user.hired_at || new Date().toISOString().split('T')[0]),
+          status: userService.mapStatus(user.status || user.state || 'ACTIVE'),
+          role,
+          avatar: user.avatar || `/img/avatars/default.jpg`
+        };
+      });
     } catch (error) {
       console.error('Error fetching users:', error);
       throw error;
@@ -47,8 +68,8 @@ export const userService = {
         telefono: userData.phone,
         password: userData.password,
         password_confirm: userData.passwordConfirm,
-        role: userService.mapDepartmentToRole(userData.department),
-        status: userService.mapStatusToAPI(userData.status)
+        role: userData.role || 'EMPLEADO',
+        status: 'ACTIVE'
       };
 
       const response = await userAPI.createUser(apiData);
@@ -63,28 +84,28 @@ export const userService = {
     }
   },
 
-  // Actualizar usuario
-  updateUser: async (userId, userData) => {
-    try {
-      const apiData = {
-        first_name: userData.firstName,
-        last_name: userData.lastName,
-        email: userData.email,
-        telefono: userData.phone,
-        role: userService.mapDepartmentToRole(userData.department),
-        status: userService.mapStatusToAPI(userData.status)
-      };
+updateUser: async (userId, userData) => {
+  try {
+    
+    const apiData = {
+      first_name: userData.firstName,
+      last_name: userData.lastName,
+      email: userData.email,
+      telefono: userData.phone,
+      role: userData.role,
+      status: userService.mapStatusToAPI(userData.status)
+    };
 
-      const response = await userAPI.updateUser(userId, apiData);
-      return response;
-    } catch (error) {
-      console.error('Error updating user:', error);
-      if (error.response?.data) {
-        throw error.response.data;
-      }
-      throw error;
+    const response = await userAPI.updateUser(userId, apiData);
+    return response;
+  } catch (error) {
+    console.error('❌ Error updating user:', error);
+    if (error.response?.data) {
+      throw error.response.data;
     }
-  },
+    throw error;
+  }
+},
 
   // Eliminar usuario
   deleteUser: async (userId) => {
@@ -98,10 +119,26 @@ export const userService = {
   },
 
   // Cambiar estado (bloquear/desbloquear)
-  toggleUserStatus: async (userId, currentStatus) => {
+  // Cambiar estado de usuario. Acepta el estado objetivo en frontend ('blocked'|'active'|'inactive')
+  // Para compatibilidad, si se pasa un estado actual ('active'|'inactive'), intentamos invertirlo.
+  toggleUserStatus: async (userId, statusOrTarget) => {
     try {
-      const newStatus = currentStatus === 'active' ? 'INACTIVE' : 'ACTIVE';
-      const response = await userAPI.updateUserStatus(userId, newStatus);
+      let targetFrontendStatus = 'active';
+
+      // Si recibimos la acción objetivo ('blocked' o 'active' o 'inactive'), la usamos
+      if (typeof statusOrTarget === 'string') {
+        const s = statusOrTarget.toLowerCase();
+        if (s === 'blocked' || s === 'active' || s === 'inactive') {
+          targetFrontendStatus = s;
+        } else {
+          // Si recibimos el estado actual ('active'/'inactive'), invertimos
+          targetFrontendStatus = s === 'active' ? 'inactive' : 'active';
+        }
+      }
+
+      // Mapear al formato de la API
+      const apiStatus = userService.mapStatusToAPI(targetFrontendStatus);
+      const response = await userAPI.updateUserStatus(userId, apiStatus);
       return response;
     } catch (error) {
       console.error('Error toggling user status:', error);
@@ -130,19 +167,6 @@ export const userService = {
     return positionMap[role] || 'Empleado';
   },
 
-  mapDepartmentToRole: (department) => {
-    const departmentMap = {
-      'Administración': 'GERENTE',
-      'TI': 'EMPLEADO',
-      'Recursos Humanos': 'SUPERVISOR',
-      'Finanzas': 'EMPLEADO',
-      'Marketing': 'EMPLEADO',
-      'Ventas': 'EMPLEADO',
-      'Diseño': 'EMPLEADO'
-    };
-    return departmentMap[department] || 'EMPLEADO';
-  },
-
   mapStatus: (apiStatus) => {
     const statusMap = {
       'ACTIVE': 'active',
@@ -156,20 +180,12 @@ export const userService = {
     const statusMap = {
       'active': 'ACTIVE',
       'inactive': 'INACTIVE',
-      'blocked': 'INACTIVE'
+      'blocked': 'BLOCKED'
     };
     return statusMap[frontendStatus] || 'ACTIVE';
   },
 
   // Datos estáticos para selects
-  getDepartments: () => [
-    'TI', 'Diseño', 'Administración', 'Recursos Humanos', 'Finanzas', 'Marketing', 'Ventas'
-  ],
-
-  getPositions: () => [
-    'Desarrollador', 'Diseñador', 'Gerente', 'Analista', 'Coordinador', 
-    'Especialista', 'Asistente', 'Director'
-  ],
 
   getRoles: () => [
     'ADMIN', 'GERENTE', 'SUPERVISOR', 'EMPLEADO'

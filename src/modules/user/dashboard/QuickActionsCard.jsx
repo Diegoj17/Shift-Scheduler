@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaBolt } from 'react-icons/fa';
-import '../../../../styles/components/dashboard/user/QuickActionsCard.css';
+import '../../../styles/components/dashboard/user/QuickActionsCard.css';
 
 const QuickActionsCard = ({ actions, onActionClick }) => {
   return (

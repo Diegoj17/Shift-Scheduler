@@ -25,7 +25,7 @@ const Modal = ({ isOpen, type = 'success', title, message, onClose }) => {
           </div>
           <div className="modal-text">
             <h3 className="modal-title">{title}</h3>
-            <p className="modal-message">{message}</p>
+            <p className={`modal-message ${type}`}>{message}</p>
           </div>
           <div className="modal-actions">
             <button 
