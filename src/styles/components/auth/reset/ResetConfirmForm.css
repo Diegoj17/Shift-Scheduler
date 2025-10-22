@@ -1,0 +1,229 @@
+.reset-confirm-form-card-inner {
+  width: 100%;
+  max-width: 420px;
+  padding: 0;
+}
+
+.reset-confirm-form-header {
+  text-align: left;
+  margin-bottom: 1.5rem;
+}
+
+.reset-confirm-form-header h2 {
+  color: #000000;
+  margin-bottom: 0.25rem;
+  font-weight: 700;
+  font-size: 1.8rem;
+  letter-spacing: -0.5px;
+  text-align: center;
+}
+
+.reset-confirm-form-header p {
+  color: #000000;
+  font-size: 1rem;
+  margin: 0;
+  font-weight: 500;
+  text-align: center;
+}
+
+.reset-confirm-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.reset-confirm-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.reset-confirm-form-label {
+  font-size: 1rem;
+  color: #000000;
+  font-weight: 600;
+  margin-top: -0.5rem;
+}
+
+.reset-confirm-input-container {
+  position: relative;
+  width: 100%;
+}
+
+.reset-confirm-input-icon {
+  position: absolute;
+  left: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #3358e6;
+  font-size: 1.1rem;
+  z-index: 2;
+}
+
+.reset-confirm-input {
+  padding: 0.75rem 3rem 0.75rem 3rem;
+  border: 2px solid #e6eef9;
+  border-radius: 10px;
+  font-size: 0.98rem;
+  background: #ffffff;
+  transition: all 0.18s ease;
+  width: 100%;
+  color: #0b1220;
+  font-weight: 500;
+}
+
+.reset-confirm-input:focus {
+  border-color: #3358e6;
+  outline: none;
+  background: #ffffff;
+  box-shadow: 0 0 0 3px rgba(51, 88, 230, 0.07);
+}
+
+.password-toggle-btn {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: color 0.2s ease;
+}
+
+.password-toggle-btn:hover {
+  color: #3358e6;
+  background: rgba(51, 88, 230, 0.1);
+}
+
+.reset-confirm-btn {
+  background: #3358e6;
+  color: white;
+  border: none;
+  padding: 0.95rem;
+  border-radius: 10px;
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 0.5rem;
+  width: 100%;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.reset-confirm-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.reset-confirm-btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none;
+}
+
+.reset-confirm-btn.reset-confirm-loading {
+  color: transparent;
+}
+
+.reset-confirm-spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: reset-confirm-spin 0.8s ease infinite;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@keyframes reset-confirm-spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.reset-confirm-field-hint {
+  display: block;
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+  color: #6b7280;
+  line-height: 1.3;
+}
+
+.reset-confirm-error {
+  text-align: center;
+  padding: 2rem;
+}
+
+.reset-confirm-error h2 {
+  color: #ef4444;
+  margin-bottom: 1rem;
+}
+
+.reset-confirm-error p {
+  color: #64748b;
+  margin-bottom: 1.5rem;
+}
+
+.reset-back-btn {
+  background: #3358e6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.reset-back-btn:hover {
+  background: #2544c4;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+  .reset-confirm-form-header h2 {
+    font-size: 1.4rem;
+  }
+  
+  .reset-confirm-input {
+    padding: 0.75rem 2.5rem 0.75rem 2.5rem;
+  }
+  
+  .reset-confirm-input-icon {
+    left: 0.8rem;
+  }
+  
+  .password-toggle-btn {
+    right: 0.8rem;
+  }
+  .reset-confirm-input-invalid {
+    border-color: #ef4444 !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+  }
+
+  .reset-confirm-errors {
+    margin-top: 0.5rem;
+  }
+
+  .reset-confirm-error-message {
+    display: block;
+    color: #ef4444;
+    font-size: 0.85rem;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+  }
+
+  .password-toggle-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}

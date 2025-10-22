@@ -3,6 +3,7 @@ import './App.css'
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from '../src/pages/RegisterPage.jsx';
 import PasswordReset from './pages/PasswordResetPage.jsx';
+import PasswordResetConfirmPage from './pages/PasswordResetConfirmPage.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import Dashboard from './pages/admin/DashboardPage.jsx';
@@ -23,6 +24,7 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/reset-password" element={<PasswordReset />} />
+          <Route path="/reset-password/confirm" element={<PasswordResetConfirmPage />} />
 
           <Route path="/admin/dashboard" element={
             <ProtectedRoute>
