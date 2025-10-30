@@ -18,14 +18,14 @@ import '../../styles/components/common/Sidebar.css';
 const Sidebar = ({ isOpen, onToggle, activeItem, onItemClick, darkMode, menuItems: menuItemsProp }) => {
   const navigate = useNavigate();
   const defaultMenuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: <FaThLarge />, path: '/admin/dashboard' },
-    { id: 'calendario', label: 'Calendario', icon: <FaCalendarAlt />, path: '/admin/calendar-page' },
+    { id: 'dashboard', label: 'Inicio', icon: <FaThLarge />, path: '/admin/dashboard' },
+    { id: 'calendario', label: 'Calendario', icon: <FaCalendarAlt />, path: '/admin/calendar' },
     { id: 'solicitudes', label: 'Solicitudes', icon: <FaClipboardList />, path: '/admin/requests' },
     { id: 'presencia', label: 'Presencia', icon: <FaUserCheck />, path: '/admin/attendance' },
     { id: 'documentos', label: 'Documentos', icon: <FaFileAlt />, path: '/admin/documents' },
     { id: 'equipo', label: 'Equipo', icon: <FaUsers />, path: '/admin/management' },
-    { id: 'informes', label: 'Informes', icon: <FaChartBar />, path: '/reports' },
-    { id: 'configuracion', label: 'Configuración', icon: <FaCog />, path: '/settings' },
+    { id: 'informes', label: 'Informes', icon: <FaChartBar />, path: '/admin/reports' },
+    { id: 'configuracion', label: 'Configuración', icon: <FaCog />, path: '/admin/settings' },
   ];
 
   // Si se pasan menuItems por props (como en SidebarEmployee), úsalos; si no, usa los por defecto
@@ -36,6 +36,7 @@ const Sidebar = ({ isOpen, onToggle, activeItem, onItemClick, darkMode, menuItem
     dashboard: <FaThLarge />,
     calendar: <FaCalendarAlt />,
     calendarPage: <FaCalendarAlt />,
+    shiftTypeManager: <FaUsers />,
     requests: <FaClipboardList />,
     presence: <FaUserCheck />,
     documents: <FaFileAlt />,
@@ -47,13 +48,13 @@ const Sidebar = ({ isOpen, onToggle, activeItem, onItemClick, darkMode, menuItem
   // Mapeo por defecto de id -> path para items que no incluyan `path`
   const defaultPathMap = {
     dashboard: '/admin/dashboard',
-    calendario: '/calendar-page',
-    solicitudes: '/requests',
-    presencia: '/attendance',
-    documentos: '/documents',
+    calendario: '/admin/calendar',
+    solicitudes: '/admin/requests',
+    presencia: '/admin/attendance',
+    documentos: '/admin/documents',
     equipo: '/admin/management',
-    informes: '/reports',
-    configuracion: '/settings'
+    informes: '/admin/reports',
+    configuracion: '/admin/settings'
   };
 
   const handleNavigation = (path) => {

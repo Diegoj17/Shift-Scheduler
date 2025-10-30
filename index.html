@@ -22,18 +22,20 @@
 
         // Rutas del dashboard y gestión
         if (path === "/admin/dashboard") return "Inicio | Shift Scheduler";
-        if (path === "/main") return "Inicio | Shift Scheduler";
-        if (path === "/schedule") return "Programación | Shift Scheduler";
+        if (path === "/admin/calendar") return "Calendario | Shift Scheduler";
         if (path === "/admin/management") return "Gestión de Usuarios | Shift Scheduler";
         if (path === "/teams") return "Gestión de Equipos | Shift Scheduler";
         if (path === "/reports") return "Reportes | Shift Scheduler";
         if (path === "/settings") return "Configuración | Shift Scheduler";
         if (path === "/profile") return "Mi Perfil | Shift Scheduler";
+
+        if (path === "/employee/main") return "Inicio | Shift Scheduler";
+        if (path === "/employee/calendar") return "Mi Calendario | Shift Scheduler";
+        if (path === "/employee/requests") return "Mis Solicitudes | Shift Scheduler";
         
         // Rutas de administración
         if (path === "/admin") return "Administración | Shift Scheduler";
         if (path === "/admin/users") return "Gestión de Usuarios | Shift Scheduler";
-        if (path === "/admin/settings") return "Configuración del Sistema | Shift Scheduler";
         
         // Fallback
         return "Shift Scheduler";

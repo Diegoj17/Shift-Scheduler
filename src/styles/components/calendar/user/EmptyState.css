@@ -1,0 +1,48 @@
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+  background: white;
+}
+
+.empty-icon {
+  color: #bdbdbd;
+  margin-bottom: 25px;
+}
+
+.empty-state h3 {
+  color: #666;
+  margin-bottom: 15px;
+  font-weight: 500;
+  font-size: 1.5rem;
+}
+
+.empty-state p {
+  color: #999;
+  margin-bottom: 30px;
+  font-size: 1.1rem;
+  max-width: 400px;
+  line-height: 1.6;
+}
+
+.reset-btn {
+  padding: 12px 30px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.reset-btn:hover {
+  background: #5a6fd8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}

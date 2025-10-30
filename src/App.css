@@ -1,6 +1,3 @@
-/* Estilos globales para la aplicación React */
-/* Variables CSS para colores, fuentes y tamaños */
-
 :root {
   --primary-color: #4f8cff;
   --primary-dark: #3358e6;
@@ -270,4 +267,20 @@ html, body {
 .login-card {
   max-width: 100%;
   overflow-x: hidden;
+}
+
+.react-icons {
+  display: inline-block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: inherit !important;
+}
+
+.react-icons svg {
+  display: inline-block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  color: inherit !important;
+  fill: currentColor !important;
+  stroke: currentColor !important;
 }

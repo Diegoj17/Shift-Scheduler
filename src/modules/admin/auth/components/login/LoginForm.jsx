@@ -52,7 +52,7 @@ const LoginForm = () => {
         navigate('/admin/dashboard');
       } else {
         // Usuarios normales van a la página principal de usuario
-        navigate('/main');
+        navigate('/employee/main');
       }
     } catch (err) {
       console.error('Login failed:', err);

@@ -1,0 +1,385 @@
+/* ============================================
+   SHIFT DUPLICATE MODAL - ESTILOS PRINCIPALES
+   ============================================ */
+
+.calendar-shift-duplicate-modal {
+  max-width: 850px;
+  width: 95%;
+  max-height: 92vh;
+  overflow-y: auto;
+}
+
+.calendar-shift-duplicate-modal .calendar-modal-header {
+  background: linear-gradient(180deg, #4f8cff, #3b82f6);
+  color: white;
+  padding: 24px 28px;
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.calendar-shift-duplicate-modal .calendar-modal-header h3 {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+/* ============================================
+   FORMULARIO DE DUPLICACIÓN
+   ============================================ */
+
+.calendar-duplicate-form {
+  padding: 28px;
+}
+
+/* ============================================
+   CONTENEDOR DE SECCIÓN
+   ============================================ */
+
+.calendar-section-container {
+  margin-bottom: 32px;
+  padding: 24px;
+  background: linear-gradient(135deg, #f8fafc, white);
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  transition: all 0.3s ease;
+}
+
+.calendar-section-container:hover {
+  border-color: #cbd5e0;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.calendar-section-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 10px;
+}
+
+.calendar-section-icon {
+  color: #667eea;
+  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+}
+
+.calendar-section-header h4 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #000000;
+  letter-spacing: -0.2px;
+}
+
+.calendar-section-description {
+  margin: 0 0 22px 0;
+  color: #000000;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  font-weight: 500;
+}
+
+/* ============================================
+   INFORMACIÓN DE PREVIEW
+   ============================================ */
+
+.calendar-preview-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.12), rgba(139, 195, 74, 0.12));
+  border: 2px solid #4caf50;
+  border-radius: 10px;
+  margin-top: 18px;
+  color: #2e7d32;
+  font-weight: 700;
+  font-size: 0.95rem;
+  animation: calendar-preview-pulse 2s ease-in-out infinite;
+}
+
+@keyframes calendar-preview-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(76, 175, 80, 0);
+  }
+}
+
+.calendar-preview-icon {
+  font-size: 1.2rem;
+  color: #4caf50;
+  display: flex;
+  align-items: center;
+}
+
+/* ============================================
+   VISTA PREVIA DE TURNOS
+   ============================================ */
+
+.calendar-shifts-preview {
+  margin-bottom: 28px;
+  padding: 24px;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.calendar-shifts-preview h4 {
+  margin: 0 0 18px 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #2d3748;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.calendar-preview-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.calendar-preview-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: linear-gradient(135deg, #f8fafc, white);
+  border: 2px solid #e2e8f0;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.calendar-preview-item:hover {
+  background: #f1f5f9;
+  transform: translateX(6px);
+  border-color: #cbd5e0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.calendar-preview-color {
+  width: 8px;
+  height: 48px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.calendar-preview-info-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.calendar-preview-name {
+  font-weight: 700;
+  color: #2d3748;
+  font-size: 0.95rem;
+  letter-spacing: -0.1px;
+}
+
+.calendar-preview-date {
+  font-size: 0.85rem;
+  color: #718096;
+  font-weight: 600;
+}
+
+.calendar-preview-more {
+  padding: 14px;
+  text-align: center;
+  background: linear-gradient(135deg, #e2e8f0, #cbd5e0);
+  border-radius: 10px;
+  color: #4a5568;
+  font-weight: 700;
+  font-size: 0.9rem;
+  letter-spacing: 0.3px;
+}
+
+/* ============================================
+   ADVERTENCIA DE CONFLICTOS
+   ============================================ */
+
+.calendar-conflict-warning {
+  padding: 24px;
+  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+  border: 3px solid #ff9800;
+  border-radius: 14px;
+  margin-bottom: 28px;
+  box-shadow: 0 4px 12px rgba(255, 152, 0, 0.15);
+}
+
+.calendar-warning-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  color: #e65100;
+  font-size: 1.1rem;
+}
+
+.calendar-warning-header strong {
+  font-weight: 700;
+}
+
+.calendar-warning-icon {
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  animation: calendar-warning-shake 0.5s ease-in-out infinite;
+}
+
+@keyframes calendar-warning-shake {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-5deg);
+  }
+  75% {
+    transform: rotate(5deg);
+  }
+}
+
+.calendar-warning-description {
+  margin: 0 0 14px 0;
+  color: #bf360c;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.calendar-conflict-list {
+  margin: 14px 0;
+  padding-left: 28px;
+  color: #bf360c;
+}
+
+.calendar-conflict-list li {
+  margin: 8px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.calendar-conflict-list .calendar-more-conflicts {
+  font-weight: 700;
+  color: #e65100;
+  margin-top: 10px;
+}
+
+.calendar-warning-note {
+  margin: 16px 0 0 0;
+  padding-top: 16px;
+  border-top: 2px solid #ffcc80;
+  font-size: 0.9rem;
+  color: #e65100;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+/* ============================================
+   SCROLLBAR PERSONALIZADO
+   ============================================ */
+
+.calendar-shift-duplicate-modal::-webkit-scrollbar {
+  width: 10px;
+}
+
+.calendar-shift-duplicate-modal::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 5px;
+}
+
+.calendar-shift-duplicate-modal::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #cbd5e0, #a0aec0);
+  border-radius: 5px;
+  border: 2px solid #f8fafc;
+}
+
+.calendar-shift-duplicate-modal::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #a0aec0, #718096);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+  .calendar-shift-duplicate-modal {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    margin: 0;
+  }
+
+  .calendar-shift-duplicate-modal .calendar-modal-header {
+    border-radius: 0;
+  }
+
+  .calendar-duplicate-form {
+    padding: 20px 16px;
+  }
+
+  .calendar-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .calendar-section-container {
+    padding: 18px;
+  }
+
+  .calendar-modal-footer {
+    flex-direction: column-reverse;
+  }
+
+  .calendar-btn-secondary,
+  .calendar-btn-primary {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-shift-duplicate-modal .calendar-modal-header {
+    padding: 18px 16px;
+  }
+
+  .calendar-shift-duplicate-modal .calendar-modal-header h3 {
+    font-size: 1.2rem;
+  }
+
+  .calendar-duplicate-form {
+    padding: 16px;
+  }
+
+  .calendar-section-container {
+    padding: 16px;
+    margin-bottom: 24px;
+  }
+
+  .calendar-section-header h4 {
+    font-size: 1.1rem;
+  }
+
+  .calendar-shifts-preview {
+    padding: 18px;
+  }
+
+  .calendar-conflict-warning {
+    padding: 18px;
+  }
+}

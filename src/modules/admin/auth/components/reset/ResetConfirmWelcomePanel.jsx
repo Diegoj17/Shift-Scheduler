@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import '../../../../styles/components/auth/reset/ResetWelcomePanel.css';
+import '../../../../../styles/components/auth/reset/ResetConfirmForm.css';
 
 const ResetConfirmWelcomePanel = () => {
   return (

@@ -2,6 +2,7 @@
 :root {
   --sidebar-width: 280px;
   --sidebar-collapsed-width: 80px;
+  --header-height: 72px;
   --primary-color: #4f8cff;
   --primary-dark: #3a7cff;
   --secondary-color: #ff6b6b;
