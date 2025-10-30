@@ -1,9 +1,31 @@
 // components/dashboard/StatsGrid.jsx
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaClock, FaClipboardList, FaUsers, FaUserCheck } from 'react-icons/fa';
 import '../../../../styles/components/dashboard/StatsGrid.css';
+import { userService } from '../../../../services/userService';
 
 const StatsGrid = () => {
+  const [usersCount, setUsersCount] = useState('...');
+
+  useEffect(() => {
+    let mounted = true;
+    const fetchUsersCount = async () => {
+      try {
+        // mostrar indicador de carga breve
+        setUsersCount('...');
+        const users = await userService.getUsers();
+        if (!mounted) return;
+        setUsersCount(Array.isArray(users) ? users.length : (users?.length ?? 0));
+      } catch (error) {
+        console.error('Error cargando usuarios:', error);
+        if (mounted) setUsersCount(0);
+      }
+    };
+
+    fetchUsersCount();
+    return () => { mounted = false; };
+  }, []);
+
   const statsData = [
     { 
       title: "Turnos Activos", 
@@ -21,7 +43,7 @@ const StatsGrid = () => {
     },
     { 
       title: "Miembros del Equipo", 
-      value: "15", 
+      value: usersCount, 
       change: "+1", 
       icon: <FaUsers />, 
       color: "green" 

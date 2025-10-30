@@ -1,7 +1,7 @@
 // src/pages/PasswordResetConfirmPage.jsx
 import AuthLayout from '../modules/admin/auth/layout/AuthLayout';
 import ResetConfirmForm from '../modules/admin/auth/components/reset/ResetConfirmForm';
-import ResetWelcomePanel from '../modules/admin/auth/components/reset/ResetWelcomePanel';
+import ResetConfirmWelcomePanel from '../modules/admin/auth/components/reset/ResetConfirmWelcomePanel';
 import '/src/styles/pages/PasswordResetPage.css';
 
 const PasswordResetConfirmPage = () => {
@@ -11,7 +11,7 @@ const PasswordResetConfirmPage = () => {
         <div className="reset-card-container register-card-container">
           <div className="reset-card register-card">
             <div className="reset-card-left register-card-left">
-              <ResetWelcomePanel />
+              <ResetConfirmWelcomePanel />
             </div>
             <div className="reset-card-right register-card-right">
               <ResetConfirmForm />

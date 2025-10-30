@@ -9,6 +9,8 @@ import { AuthProvider } from './contexts/AuthContext.jsx';
 import Dashboard from './pages/admin/DashboardPage.jsx';
 import MainPage from './pages/user/MainPage.jsx';
 import ManagementPage from './pages/admin/ManagementPage.jsx';
+import CalendarPage from './pages/admin/CalendarPage.jsx';
+import ShiftCalendarPage from './pages/user/ShiftCalendarPage.jsx';
 
 
 
@@ -26,14 +28,16 @@ function App() {
           <Route path="/reset-password" element={<PasswordReset />} />
           <Route path="/reset-password/confirm" element={<PasswordResetConfirmPage />} />
 
+          
+
           <Route path="/admin/dashboard" element={
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
           } />
-          <Route path="/main" element={
+          <Route path="/admin/calendar" element={
             <ProtectedRoute>
-              <MainPage />
+              <CalendarPage />
             </ProtectedRoute>
           } />
           <Route path="/admin/management" element={
@@ -41,6 +45,17 @@ function App() {
               <ManagementPage />
             </ProtectedRoute>
           } />
+          <Route path="/employee/main" element={
+            <ProtectedRoute>
+              <MainPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/employee/calendar" element={
+            <ProtectedRoute>
+              <ShiftCalendarPage />
+            </ProtectedRoute>
+          } />
+          
         </Routes>
       </BrowserRouter>
     </AuthProvider>

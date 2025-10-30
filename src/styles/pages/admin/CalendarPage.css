@@ -1,0 +1,322 @@
+/* ============================================
+   CALENDAR PAGE - ESTILOS PRINCIPALES
+   ============================================ */
+
+.calendar-page-container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  animation: calendar-fade-in 0.4s ease-out;
+  position: relative;
+}
+
+@keyframes calendar-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   BARRA DE ACCIONES
+   ============================================ */
+
+.calendar-actions-bar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 0;
+}
+
+.calendar-btn-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.calendar-btn-action .calendar-icon {
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar-btn-action.calendar-btn-primary {
+  background: linear-gradient(180deg, #4f8cff, #3b82f6);
+  color: white;
+}
+
+.calendar-btn-action.calendar-btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+  background: linear-gradient(180deg, #4f8cff, #3b82f6);
+}
+
+.calendar-btn-action.calendar-btn-secondary {
+  background: white;
+  color: #3b82f6;
+  border: 2px solid #e2e8f0;
+}
+
+.calendar-btn-action.calendar-btn-secondary:hover {
+  background: #ffffff;
+  border-color: #3b82f6;
+  transform: translateY(-3px);
+  color: #3b82f6;
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.2);
+}
+
+.calendar-btn-action:active {
+  transform: translateY(-1px);
+}
+
+/* ============================================
+   SECCIÓN DE GESTIÓN DE TIPOS
+   ============================================ */
+
+.calendar-type-manager-section {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+}
+
+.calendar-type-manager-section:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* ============================================
+   CONTENEDOR PRINCIPAL DEL CALENDARIO
+   ============================================ */
+
+.calendar-full-width {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 600px;
+  width: 100%;
+  position: relative;
+}
+
+.calendar-full-width:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.calendar-full-width::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(180deg, #4f8cff, #3b82f6);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.calendar-full-width:hover::before {
+  opacity: 1;
+}
+
+/* ============================================
+   SISTEMA DE NOTIFICACIONES
+   ============================================ */
+
+.calendar-notification {
+  position: fixed;
+  top: 90px;
+  right: 24px;
+  z-index: 10000;
+  padding: 16px 24px;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  animation: calendar-slide-in 0.3s ease, calendar-slide-out 0.3s ease 3.7s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 600;
+  min-width: 320px;
+  border-left: 4px solid;
+  backdrop-filter: blur(10px);
+}
+
+@keyframes calendar-slide-in {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes calendar-slide-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+}
+
+.calendar-notification.calendar-notification-success {
+  background: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+  border-color: #4caf50;
+  color: #1b5e20;
+}
+
+.calendar-notification.calendar-notification-error {
+  background: linear-gradient(135deg, #ffebee, #ffcdd2);
+  border-color: #f44336;
+  color: #b71c1c;
+}
+
+.calendar-notification.calendar-notification-warning {
+  background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+  border-color: #ff9800;
+  color: #e65100;
+}
+
+.calendar-notification-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.calendar-notification-icon {
+  font-size: 1.4rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar-notification-success .calendar-notification-icon {
+  color: #4caf50;
+}
+
+.calendar-notification-error .calendar-notification-icon {
+  color: #f44336;
+}
+
+.calendar-notification-warning .calendar-notification-icon {
+  color: #ff9800;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 1200px) {
+  .calendar-actions-bar {
+    gap: 10px;
+  }
+  
+  .calendar-btn-action {
+    padding: 10px 20px;
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .calendar-actions-bar {
+    flex-direction: column;
+  }
+  
+  .calendar-btn-action {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .calendar-page-container {
+    gap: 1rem;
+  }
+  
+  .calendar-type-manager-section {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+  
+  .calendar-full-width {
+    border-radius: 8px;
+    min-height: 500px;
+  }
+  
+  .calendar-notification {
+    top: 80px;
+    right: 12px;
+    left: 12px;
+    min-width: auto;
+    max-width: calc(100% - 24px);
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-page-container {
+    gap: 0.75rem;
+  }
+  
+  .calendar-btn-action {
+    padding: 10px 16px;
+    font-size: 0.85rem;
+  }
+  
+  .calendar-btn-action .calendar-icon {
+    font-size: 1rem;
+  }
+  
+  .calendar-notification {
+    padding: 12px 16px;
+    font-size: 0.9rem;
+  }
+}
+
+/* ============================================
+   UTILIDADES GENERALES
+   ============================================ */
+
+.calendar-loading {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: calendar-shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes calendar-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

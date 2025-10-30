@@ -1,0 +1,197 @@
+/* ============================================
+   EMPLOYEE CARD - ESTILOS PRINCIPALES
+   ============================================ */
+
+.calendar-employee-card {
+  display: flex;
+  align-items: center;
+  padding: 18px 20px;
+  background: linear-gradient(135deg, #f8fafc, white);
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  cursor: grab;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.calendar-employee-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.calendar-employee-card:hover {
+  transform: translateY(-4px) translateX(2px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  border-color: #667eea;
+  background: linear-gradient(135deg, #f1f5f9, #f8fafc);
+}
+
+.calendar-employee-card:hover::before {
+  opacity: 1;
+}
+
+.calendar-employee-card:active {
+  cursor: grabbing;
+  transform: scale(0.98);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* ============================================
+   INDICADOR DE COLOR
+   ============================================ */
+
+.calendar-employee-color {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  margin-right: 14px;
+  flex-shrink: 0;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+  border: 2px solid white;
+  transition: all 0.3s ease;
+}
+
+.calendar-employee-card:hover .calendar-employee-color {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================
+   INFORMACIÓN DEL EMPLEADO
+   ============================================ */
+
+.calendar-employee-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.calendar-employee-info h4 {
+  margin: 0 0 6px 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2d3748;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.1px;
+  transition: color 0.3s ease;
+}
+
+.calendar-employee-card:hover .calendar-employee-info h4 {
+  color: #667eea;
+}
+
+.calendar-employee-info p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #718096;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 600;
+}
+
+/* ============================================
+   ACCIONES
+   ============================================ */
+
+.calendar-employee-actions {
+  margin-left: 14px;
+  opacity: 0.5;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.calendar-employee-card:hover .calendar-employee-actions {
+  opacity: 1;
+  transform: translateX(2px);
+}
+
+.calendar-employee-icon {
+  color: #667eea;
+  font-size: 1.1rem;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+}
+
+.calendar-employee-card:hover .calendar-employee-icon {
+  color: #764ba2;
+  transform: scale(1.15);
+}
+
+/* ============================================
+   EFECTO DE ARRASTRE
+   ============================================ */
+
+.calendar-employee-card.calendar-dragging {
+  opacity: 0.6;
+  transform: scale(0.95);
+  cursor: grabbing;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+  .calendar-employee-card {
+    padding: 16px 18px;
+  }
+
+  .calendar-employee-info h4 {
+    font-size: 0.95rem;
+  }
+
+  .calendar-employee-info p {
+    font-size: 0.8rem;
+  }
+
+  .calendar-employee-color {
+    width: 12px;
+    height: 12px;
+    margin-right: 12px;
+  }
+
+  .calendar-employee-icon {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .calendar-employee-card {
+    padding: 14px 16px;
+  }
+
+  .calendar-employee-info h4 {
+    font-size: 0.9rem;
+  }
+
+  .calendar-employee-info p {
+    font-size: 0.75rem;
+  }
+}
+
+/* ============================================
+   ACCESIBILIDAD
+   ============================================ */
+
+.calendar-employee-card:focus {
+  outline: 3px solid rgba(102, 126, 234, 0.4);
+  outline-offset: 2px;
+}
+
+.calendar-employee-card:focus:not(:focus-visible) {
+  outline: none;
+}
