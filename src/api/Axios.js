@@ -167,7 +167,7 @@ export const shiftAPI = {
   // Turnos
   getShifts: async (params = {}) => {
     try {
-      const response = await shiftsApi.get('/shifts/', { params });
+      const response = await shiftsApi.get('/api/shifts/api/shifts/', { params });
       return response.data;
     } catch (error) {
       const message = error.response?.data?.detail || error.response?.data?.message || 'Error al obtener turnos';
