@@ -177,7 +177,7 @@ export const shiftAPI = {
 
   createShift: async (shiftData) => {
     try {
-      const response = await shiftsApi.post('/api/shifts/new/', shiftData);
+      const response = await shiftsApi.post('/shifts/new/', shiftData);
       return response.data;
     } catch (error) {
       const message = error.response?.data?.detail || error.response?.data?.message || 'Error al crear turno';
@@ -189,7 +189,7 @@ export const shiftAPI = {
   getShiftTypes: async () => {
     try {
       console.log('🔄 Solicitando tipos de turno...');
-      const response = await shiftsApi.get('/api/shift-types/');
+  const response = await shiftsApi.get('/api/shift-types/');
       console.log('✅ Tipos de turno recibidos:', response.data);
       return response.data;
     } catch (error) {
@@ -204,7 +204,7 @@ export const shiftAPI = {
 
   createShiftType: async (shiftTypeData) => {
     try {
-      const response = await shiftsApi.post('/shift-types/new/', shiftTypeData);
+      const response = await shiftsApi.post('/api/shift-types/new/', shiftTypeData);
       return response.data;
     } catch (error) {
       const message = error.response?.data?.detail || error.response?.data?.message || 'Error al crear tipo de turno';
@@ -215,7 +215,7 @@ export const shiftAPI = {
   // Obtener un tipo de turno específico
   getShiftType: async (shiftTypeId) => {
     try {
-      const response = await shiftsApi.get(`/api/shift-types/${shiftTypeId}/`);
+    const response = await shiftsApi.get(`/api/shift-types/${shiftTypeId}/`);
       return response.data;
     } catch (error) {
       const message = error.response?.data?.detail || error.response?.data?.message || 'Error al obtener tipo de turno';
@@ -227,7 +227,7 @@ export const shiftAPI = {
   updateShiftType: async (shiftTypeId, shiftTypeData) => {
     try {
       // Intentar PUT al recurso estándar
-      const response = await shiftsApi.put(`/api/shift-types/${shiftTypeId}/edit/`, shiftTypeData);
+  const response = await shiftsApi.put(`/api/shift-types/${shiftTypeId}/edit/`, shiftTypeData);
       return response.data;
     } catch (error) {
       // Registrar el error de la ruta principal y fallback a ruta alternativa
@@ -245,7 +245,7 @@ export const shiftAPI = {
   // Eliminar tipo de turno
   deleteShiftType: async (shiftTypeId) => {
     try {
-      const response = await shiftsApi.delete(`/api/shift-types/${shiftTypeId}/delete/`);
+  const response = await shiftsApi.delete(`/api/shift-types/${shiftTypeId}/delete/`);
       return response.data;
     } catch (error) {
       // Registrar el error de la ruta principal y probar fallback a ruta sin /delete/
@@ -290,7 +290,7 @@ export const shiftAPI = {
 
   updateShift: async (shiftId, shiftData) => {
     try {
-      const response = await shiftsApi.put(`/shifts/${shiftId}/edit/`, shiftData);
+      const response = await shiftsApi.put(`/api/shifts/${shiftId}/edit/`, shiftData);
       return response.data;
     } catch (error) {
       const message = error.response?.data?.detail || error.response?.data?.message || 'Error al actualizar turno';
@@ -300,7 +300,7 @@ export const shiftAPI = {
 
   deleteShift: async (shiftId) => {
     try {
-      const response = await shiftsApi.delete(`/shifts/${shiftId}/delete/`);
+      const response = await shiftsApi.delete(`/api/shifts/${shiftId}/delete/`);
       return response.data;
     } catch (error) {
       const message = error.response?.data?.detail || error.response?.data?.message || 'Error al eliminar turno';
@@ -310,7 +310,7 @@ export const shiftAPI = {
 
   duplicateShifts: async (duplicateData) => {
     try {
-      const response = await shiftsApi.post('/shifts/duplicate/', duplicateData);
+      const response = await shiftsApi.post('/api/shifts/duplicate/', duplicateData);
       return response.data;
     } catch (error) {
       const message = error.response?.data?.detail || error.response?.data?.message || 'Error al duplicar turnos';
