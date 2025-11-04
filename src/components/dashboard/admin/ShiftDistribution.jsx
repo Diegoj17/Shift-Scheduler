@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaChartPie } from 'react-icons/fa';
-import '../../../../styles/components/dashboard/ShiftDistribution.css';
+import '../../../styles/components/dashboard/admin/ShiftDistribution.css';
 
 class DistribucionTurnos extends React.Component {
   constructor(props) {

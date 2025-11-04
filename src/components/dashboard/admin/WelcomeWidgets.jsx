@@ -1,7 +1,7 @@
 import React from 'react';
 import { HiOutlineCalendar, HiOutlineClipboardList, HiOutlineChartBar, HiOutlineUsers } from 'react-icons/hi';
 import { FaArrowRight } from 'react-icons/fa';
-import '../../../../styles/components/dashboard/WelcomeWidgets.css';
+import '../../../styles/components/dashboard/admin/WelcomeWidgets.css';
 
 const WelcomeWidgets = () => {
   const widgets = [

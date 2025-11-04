@@ -7,6 +7,8 @@ import ShiftTypeManager from '../../components/calendar/admin/ShiftTypeManager';
 import ShiftModal from '../../components/calendar/admin/ShiftModal';
 import ShiftDuplicateModal from '../../components/calendar/admin/ShiftDuplicateModal';
 import { timeStringToMinutes } from '../../utils/dateUtils';
+import { userService } from '../../services/userService';
+import { shiftService } from '../../services/shiftService'; // Importar el servicio actualizado
 import '/src/styles/pages/admin/DashboardPage.css';
 import '../../styles/pages/admin/CalendarPage.css';
 
@@ -16,15 +18,13 @@ const CalendarPage = () => {
   const [shifts, setShifts] = useState([]);
   const [shiftTypes, setShiftTypes] = useState([]);
   const [employees, setEmployees] = useState([]);
-  const [departments, setDepartments] = useState([]);
   const [unavailabilities, _setUnavailabilities] = useState([]);
-  
   const [isShiftModalOpen, setIsShiftModalOpen] = useState(false);
   const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
   const [isTypeManagerOpen, setIsTypeManagerOpen] = useState(false);
   const [editingShift, setEditingShift] = useState(null);
   const [notification, setNotification] = useState(null);
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const menuItems = [
     { id: "dashboard", label: "Inicio", icon: "dashboard" },
@@ -36,59 +36,120 @@ const CalendarPage = () => {
     { id: "informes", label: "Informes", icon: "reports" },
   ];
 
+  // Cargar datos iniciales desde el backend
   useEffect(() => {
     initializeData();
   }, []);
 
-  const initializeData = () => {
-    const defaultShiftTypes = [
-      { id: '1', name: 'Turno Mañana', startTime: '08:00', endTime: '16:00', color: '#667eea', createdAt: new Date().toISOString() },
-      { id: '2', name: 'Turno Tarde', startTime: '16:00', endTime: '00:00', color: '#764ba2', createdAt: new Date().toISOString() },
-      { id: '3', name: 'Turno Noche', startTime: '00:00', endTime: '08:00', color: '#4a5568', createdAt: new Date().toISOString() },
-      { id: '4', name: 'Turno General', startTime: '09:00', endTime: '18:00', color: '#4caf50', createdAt: new Date().toISOString() }
-    ];
+  // Normalizar un tipo de turno desde el backend al formato frontend
+  const normalizeShiftType = (t) => {
+    if (!t) return t;
+    const startRaw = t.start_time ?? t.startTime ?? t.start ?? '';
+    const endRaw = t.end_time ?? t.endTime ?? t.end ?? '';
+    const normalizeTime = (s) => {
+      if (!s) return '';
+      // aceptar HH:MM:SS o HH:MM o incluso 'T' timestamps
+      if (/^\d{2}:\d{2}:\d{2}$/.test(s)) return s.slice(0,5);
+      if (/^\d{2}:\d{2}$/.test(s)) return s;
+      const m = String(s).match(/(\d{2}:\d{2})/);
+      return m ? m[1] : '';
+    };
 
-    const defaultEmployees = [
-      { id: '1', name: 'Juan Pérez', position: 'Desarrollador', department: 'TI', color: '#4f8cff' },
-      { id: '2', name: 'María García', position: 'Diseñadora', department: 'Diseño', color: '#ff6b6b' },
-      { id: '3', name: 'Carlos López', position: 'Gerente', department: 'Administración', color: '#4caf50' },
-      { id: '4', name: 'Ana Martínez', position: 'Recursos Humanos', department: 'RH', color: '#ff9800' },
-      { id: '5', name: 'Pedro Rodríguez', position: 'Contador', department: 'Finanzas', color: '#9c27b0' },
-      { id: '6', name: 'Laura Sánchez', position: 'Marketing', department: 'Marketing', color: '#f44336' }
-    ];
-
-    const defaultDepartments = [
-      { id: 'all', name: 'Todos los departamentos' },
-      { id: 'TI', name: 'TI' },
-      { id: 'Diseño', name: 'Diseño' },
-      { id: 'Administración', name: 'Administración' },
-      { id: 'RH', name: 'Recursos Humanos' },
-      { id: 'Finanzas', name: 'Finanzas' },
-      { id: 'Marketing', name: 'Marketing' }
-    ];
-
-    const today = new Date();
-    const defaultShifts = [
-      {
-        id: '1',
-        employeeId: '1',
-        employeeName: 'Juan Pérez',
-        shiftTypeId: '1',
-        start: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 8, 0).toISOString(),
-        end: new Date(today.getFullYear(), today.getMonth(), today.getDate(), 16, 0).toISOString(),
-        role: 'Desarrollador Senior',
-        notes: 'Proyecto urgente',
-        backgroundColor: '#667eea',
-        title: 'Juan Pérez - Turno Mañana',
-        createdAt: new Date().toISOString()
-      }
-    ];
-
-    setShiftTypes(defaultShiftTypes);
-    setEmployees(defaultEmployees);
-    setDepartments(defaultDepartments);
-    setShifts(defaultShifts);
+    return {
+      id: t.id ?? t.pk ?? t.uuid ?? null,
+      name: t.name ?? t.title ?? '',
+      startTime: normalizeTime(startRaw),
+      endTime: normalizeTime(endRaw),
+      color: t.color ?? t.color_hex ?? t.colorHex ?? '#667eea',
+      createdAt: t.created_at ?? t.createdAt ?? null,
+      // mantener resto por si acaso
+      __raw: t
+    };
   };
+
+  const initializeData = async () => {
+  try {
+    setLoading(true);
+    console.log('🔄 Inicializando datos del calendario...');
+    
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('No hay token de autenticación');
+    }
+
+    // Cargar tipos y turnos por separado: si fallan los turnos no queremos impedir
+    // la carga de empleados (esto era la razón por la que el modal quedaba vacío)
+    let shiftTypesData = [];
+    try {
+      shiftTypesData = await shiftService.getShiftTypes();
+      console.log('✅ Tipos de turno recibidos:', shiftTypesData.length);
+      const normalizedTypes = (Array.isArray(shiftTypesData) ? shiftTypesData : (shiftTypesData.results || shiftTypesData.data || [])).map(normalizeShiftType);
+      setShiftTypes(normalizedTypes);
+    } catch (err) {
+      console.error('Error cargando tipos de turno:', err);
+      showNotification('error', 'Error al cargar tipos de turno');
+    }
+
+    try {
+      const shiftsData = await shiftService.getShiftsForCalendar();
+      console.log('✅ Turnos cargados:', shiftsData.length);
+      setShifts(shiftsData);
+    } catch (err) {
+      console.error('Error cargando turnos (no bloqueante):', err);
+      showNotification('warning', 'No se pudieron cargar los turnos (se continuará cargando los empleados)');
+    }
+
+    // CARGAR EMPLEADOS: seguir la misma lógica que en ManagementPage (userService.getUsers())
+    console.log('👥 Cargando empleados (usando userService.getUsers())...');
+    let employeesData = [];
+    try {
+      employeesData = await userService.getUsers();
+      console.log('✅ Empleados cargados con userService:', employeesData);
+    } catch (err) {
+      console.error('❌ Error al cargar empleados con userService:', err);
+      employeesData = [];
+    }
+
+    // Normalizar si es necesario (similar a ManagementPage)
+    if (!Array.isArray(employeesData)) {
+      if (employeesData && employeesData.results && Array.isArray(employeesData.results)) {
+        employeesData = employeesData.results;
+      } else if (employeesData && employeesData.data && Array.isArray(employeesData.data)) {
+        employeesData = employeesData.data;
+      } else {
+        const firstArray = employeesData ? Object.values(employeesData).find(v => Array.isArray(v)) : null;
+        employeesData = firstArray || [];
+      }
+    }
+
+    console.log('👥 Empleados normalizados (final):', employeesData.length);
+    if (employeesData.length === 0) {
+      console.warn('⚠️ No se encontraron empleados');
+      showNotification('warning', 'No se encontraron empleados en el sistema');
+    }
+    setEmployees(employeesData);
+
+  } catch (error) {
+    console.error('❌ Error inicializando datos:', error);
+    
+    let errorMessage = 'Error al cargar los datos del calendario';
+    
+    if (error.message.includes('token') || error.message.includes('autenticación')) {
+      errorMessage = 'Error de autenticación. Por favor, inicia sesión nuevamente.';
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 2000);
+    } else if (error.message.includes('empleados')) {
+      errorMessage = 'Error al cargar la lista de empleados. Verifica los permisos.';
+    } else if (error.message.includes('turnos')) {
+      errorMessage = 'Error al cargar los turnos. Verifica la conexión.';
+    }
+    
+    showNotification('error', errorMessage);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -111,178 +172,279 @@ const CalendarPage = () => {
     setTimeout(() => setNotification(null), 4000);
   };
 
-  const handleSaveShiftType = (shiftType) => {
-    setShiftTypes(prev => [...prev, shiftType]);
-    showNotification('success', 'Tipo de turno creado exitosamente');
-  };
-
-  const handleUpdateShiftType = (updatedType) => {
-    setShiftTypes(prev => prev.map(type => type.id === updatedType.id ? updatedType : type));
-    showNotification('success', 'Tipo de turno actualizado exitosamente');
-  };
-
-  const handleDeleteShiftType = (typeId) => {
-    const shiftsUsingType = shifts.filter(s => s.shiftTypeId === typeId);
-    if (shiftsUsingType.length > 0) {
-      showNotification('error', `No se puede eliminar. Hay ${shiftsUsingType.length} turno(s) usando este tipo.`);
+  // Manejo de Tipos de Turno
+  const handleSaveShiftType = async (shiftType) => {
+  try {
+    // Verificar autenticación antes de proceder
+    const token = localStorage.getItem('token');
+    if (!token) {
+      showNotification('error', 'Debes iniciar sesión para realizar esta acción');
       return;
     }
-    setShiftTypes(prev => prev.filter(type => type.id !== typeId));
-    showNotification('success', 'Tipo de turno eliminado exitosamente');
+
+    console.log('🔐 Token antes de crear tipo de turno:', token);
+    console.log('📝 Datos del tipo de turno (original):', shiftType);
+
+    // Mapear explícitamente el objeto al payload que espera el backend
+    const padSeconds = (t) => {
+      if (!t) return undefined;
+      if (/^\d{2}:\d{2}:\d{2}$/.test(t)) return t;
+      if (/^\d{2}:\d{2}$/.test(t)) return `${t}:00`;
+      const m = String(t).match(/(\d{2}:\d{2})/);
+      if (m) return `${m[1]}:00`;
+      return undefined;
+    };
+
+    const payload = {
+      name: shiftType.name,
+      start_time: padSeconds(shiftType.startTime || shiftType.start_time),
+      end_time: padSeconds(shiftType.endTime || shiftType.end_time),
+      color: shiftType.color
+    };
+
+    console.log('🟢 Payload enviado al backend (mappeado):', payload);
+
+  const newType = await shiftService.createShiftType(payload);
+  // Normalizar antes de agregar al estado
+  const normalized = normalizeShiftType(newType);
+  setShiftTypes(prev => [...prev, normalized]);
+    showNotification('success', 'Tipo de turno creado exitosamente');
+  } catch (error) {
+    console.error('Error creating shift type:', error);
+    
+    // Manejo específico de errores
+    if (error.message.includes('No tienes permisos') || error.message.includes('403')) {
+      showNotification('error', 'No tienes permisos para crear tipos de turno. Contacta al administrador.');
+    } else if (error.message.includes('token') || error.message.includes('authentication')) {
+      showNotification('error', 'Sesión expirada. Por favor, inicia sesión nuevamente.');
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 2000);
+    } else {
+      showNotification('error', error.message || 'Error al crear el tipo de turno');
+    }
+  }
+};
+
+  const handleUpdateShiftType = async (updatedType) => {
+    try {
+  const result = await shiftService.updateShiftType(updatedType.id, updatedType);
+  const normalized = normalizeShiftType(result);
+  setShiftTypes(prev => prev.map(type => type.id === updatedType.id ? normalized : type));
+      showNotification('success', 'Tipo de turno actualizado exitosamente');
+    } catch (error) {
+      console.error('Error updating shift type:', error);
+      showNotification('error', 'Error al actualizar el tipo de turno');
+    }
   };
 
-  const handleSaveShift = (shiftData) => {
-    console.log('Guardando turno:', shiftData);
-    
-    if (editingShift) {
-      setShifts(prev => prev.map(shift => {
-        if (shift.id === shiftData.id) {
-          console.log('Actualizando turno existente:', shiftData);
-          return shiftData;
-        }
-        return shift;
-      }));
-      showNotification('success', 'Turno actualizado exitosamente');
-    } else {
-      setShifts(prev => {
-        const newShifts = [...prev, shiftData];
-        console.log('Nuevo turno agregado. Total de turnos:', newShifts.length);
-        return newShifts;
-      });
-      showNotification('success', 'Turno creado exitosamente');
+  const handleDeleteShiftType = async (typeId) => {
+    try {
+      // Verificar si hay turnos usando este tipo
+      const shiftsUsingType = shifts.filter(s => s.extendedProps?.shiftTypeId === typeId);
+      if (shiftsUsingType.length > 0) {
+        showNotification('error', `No se puede eliminar. Hay ${shiftsUsingType.length} turno(s) usando este tipo.`);
+        return;
+      }
+      
+      await shiftService.deleteShiftType(typeId);
+      setShiftTypes(prev => prev.filter(type => type.id !== typeId));
+      showNotification('success', 'Tipo de turno eliminado exitosamente');
+    } catch (error) {
+      console.error('Error deleting shift type:', error);
+      showNotification('error', 'Error al eliminar el tipo de turno');
     }
-    setIsShiftModalOpen(false);
-    setEditingShift(null);
+  };
+
+  // Manejo de Turnos
+  const handleSaveShift = async (shiftData) => {
+    try {
+      if (editingShift) {
+        // Actualizar turno existente
+  await shiftService.updateShift(editingShift.id, shiftData);
+        
+        // Actualizar en el estado local
+        setShifts(prev => prev.map(shift => {
+          if (shift.id === editingShift.id) {
+            return {
+              ...shift,
+              title: `${shiftData.employeeName} - ${shiftData.shiftTypeName}`,
+              start: `${shiftData.date}T${shiftData.start_time}`,
+              end: `${shiftData.date}T${shiftData.end_time}`,
+              color: shiftData.backgroundColor,
+              extendedProps: {
+                ...shift.extendedProps,
+                role: shiftData.role,
+                notes: shiftData.notes
+              }
+            };
+          }
+          return shift;
+        }));
+        
+        showNotification('success', 'Turno actualizado exitosamente');
+      } else {
+        // Crear nuevo turno
+        const newShift = await shiftService.createShift(shiftData);
+        
+        // Agregar al estado local en formato FullCalendar
+        const calendarShift = {
+          id: newShift.id,
+          title: `${shiftData.employeeName} - ${shiftData.shiftTypeName}`,
+          start: `${newShift.date}T${newShift.start_time}`,
+          end: `${newShift.date}T${newShift.end_time}`,
+          color: newShift.shift_type?.color || shiftData.backgroundColor,
+          extendedProps: {
+            employeeId: newShift.employee,
+            employeeName: shiftData.employeeName,
+            shiftTypeId: newShift.shift_type,
+            // role intentionally omitted on create
+            notes: newShift.notes
+          }
+        };
+        
+        setShifts(prev => [...prev, calendarShift]);
+        showNotification('success', 'Turno creado exitosamente');
+      }
+      
+      setIsShiftModalOpen(false);
+      setEditingShift(null);
+    } catch (error) {
+      console.error('Error saving shift:', error);
+      showNotification('error', 'Error al guardar el turno');
+    }
   };
 
   const handleEventClick = (event) => {
     const shift = shifts.find(s => s.id === event.id);
     if (shift) {
-      setEditingShift(shift);
+      // Convertir al formato que espera ShiftModal
+      const shiftForModal = {
+        id: shift.id,
+        employeeId: shift.extendedProps?.employeeId,
+        shiftTypeId: shift.extendedProps?.shiftTypeId,
+        start: shift.start,
+        end: shift.end,
+        role: shift.extendedProps?.role,
+        notes: shift.extendedProps?.notes,
+        employeeName: shift.extendedProps?.employeeName,
+        backgroundColor: shift.color
+      };
+      
+      setEditingShift(shiftForModal);
       setIsShiftModalOpen(true);
     }
   };
 
-  const handleDeleteShift = (shiftId) => {
-    setShifts(prev => prev.filter(shift => shift.id !== shiftId));
-    setDeleteConfirm(null);
-    showNotification('success', 'Horario eliminado');
-  };
-
-  const handleRequestDelete = (shift) => {
-    setDeleteConfirm(shift);
-  };
-
-  const handleDuplicateShifts = (duplicatedShifts, conflicts) => {
-    if (duplicatedShifts.length === 0 && conflicts.length > 0) {
-      showNotification('error', 'No se pudo duplicar ningún turno debido a conflictos');
-      return;
+  const handleDeleteShift = async (shiftId) => {
+    try {
+      await shiftService.deleteShift(shiftId);
+      setShifts(prev => prev.filter(shift => shift.id !== shiftId));
+      showNotification('success', 'Horario eliminado');
+    } catch (error) {
+      console.error('Error deleting shift:', error);
+      showNotification('error', 'Error al eliminar el turno');
     }
-
-    setShifts(prev => [...prev, ...duplicatedShifts]);
-    
-    if (conflicts.length > 0) {
-      showNotification(
-        'warning', 
-        `Duplicación completada con advertencias: ${duplicatedShifts.length} turno(s) creado(s), ${conflicts.length} con conflictos omitido(s)`
-      );
-    } else {
-      showNotification('success', `Duplicación completada: ${duplicatedShifts.length} turno(s) creado(s)`);
-    }
-
-    setIsDuplicateModalOpen(false);
   };
 
-  // Función para detectar el tipo de turno según la hora
-  const detectShiftTypeByTime = (startTime, endTime) => {
-    const startTotalMinutes = startTime.getHours() * 60 + startTime.getMinutes();
-    let endTotalMinutes = endTime.getHours() * 60 + endTime.getMinutes();
+  const handleDuplicateShifts = async (duplicatedShifts, conflicts) => {
+    try {
+      // Preparar datos para el backend
+      const duplicateData = {
+        sourceStartDate: duplicatedShifts.sourceStartDate,
+        sourceEndDate: duplicatedShifts.sourceEndDate,
+        targetStartDate: duplicatedShifts.targetStartDate
+      };
 
-    if (endTotalMinutes < startTotalMinutes) {
-      endTotalMinutes += 1440;
+      const result = await shiftService.duplicateShifts(duplicateData);
+      
+      // Recargar los turnos para reflejar los cambios
+      const updatedShifts = await shiftService.getShiftsForCalendar();
+      setShifts(updatedShifts);
+      
+      if (conflicts && conflicts.length > 0) {
+        showNotification(
+          'warning', 
+          `Duplicación completada con advertencias: ${result.created_count} turno(s) creado(s), ${result.conflict_count} con conflictos omitido(s)`
+        );
+      } else {
+        showNotification('success', `Duplicación completada: ${result.created_count} turno(s) creado(s)`);
+      }
+
+      setIsDuplicateModalOpen(false);
+    } catch (error) {
+      console.error('Error duplicating shifts:', error);
+      showNotification('error', 'Error al duplicar los turnos');
     }
-
-    let bestMatch = null;
-    let bestScore = -1;
-
-    shiftTypes.forEach(type => {
-      let typeStartTotalMinutes = timeStringToMinutes(type.startTime);
-      let typeEndTotalMinutes = timeStringToMinutes(type.endTime);
-
-      if (typeEndTotalMinutes < typeStartTotalMinutes) {
-        typeEndTotalMinutes += 1440;
-      }
-
-      let score = 0;
-
-      if (startTotalMinutes === typeStartTotalMinutes && endTotalMinutes === typeEndTotalMinutes) {
-        score = 100;
-      }
-      else if (Math.abs(startTotalMinutes - typeStartTotalMinutes) <= 30 && 
-               Math.abs(endTotalMinutes - typeEndTotalMinutes) <= 30) {
-        score = 80;
-      }
-      else if (startTotalMinutes >= typeStartTotalMinutes && endTotalMinutes <= typeEndTotalMinutes) {
-        score = 60;
-      }
-      else if (startTotalMinutes < typeEndTotalMinutes && endTotalMinutes > typeStartTotalMinutes) {
-        score = 40;
-      }
-
-      if (score > bestScore) {
-        bestScore = score;
-        bestMatch = type;
-      }
-    });
-
-    return bestMatch?.id || shiftTypes[0]?.id;
   };
 
-  const handleEventDrop = (info) => {
-    const newStart = new Date(info.event.start);
-    const newEnd = new Date(info.event.end);
-  
-    console.log('Evento movido - Inicio:', newStart.toLocaleString(), 'Fin:', newEnd.toLocaleString());
+  const handleEventDrop = async (info) => {
+    try {
+      const newStart = new Date(info.event.start);
+      const newEnd = new Date(info.event.end);
 
-    // Validar que no sea antes de las 6 AM
-    const startHour = newStart.getHours();
-  
-    if (startHour < 6 && startHour >= 0) {
+      // Validar que no sea antes de las 6 AM
+      const startHour = newStart.getHours();
+      if (startHour < 6 && startHour >= 0) {
+        info.revert();
+        showNotification('error', 'Los turnos no pueden comenzar antes de las 06:00 AM');
+        return;
+      }
+
+      // Obtener el turno original
+      const originalShift = shifts.find(s => s.id === info.event.id);
+      if (!originalShift) {
+        console.error('Turno original no encontrado');
+        info.revert();
+        return;
+      }
+
+      // Preparar datos para actualizar
+      const updateData = {
+        date: newStart.toISOString().split('T')[0],
+        start_time: newStart.toTimeString().slice(0, 5),
+        end_time: newEnd.toTimeString().slice(0, 5),
+        employee: originalShift.extendedProps?.employeeId,
+        shift_type: originalShift.extendedProps?.shiftTypeId,
+        role: originalShift.extendedProps?.role,
+        notes: originalShift.extendedProps?.notes
+      };
+
+      // Actualizar en el backend
+      await shiftService.updateShift(originalShift.id, updateData);
+
+      // Actualizar en el estado local
+      setShifts(prev => prev.map(shift => {
+        if (shift.id === originalShift.id) {
+          return {
+            ...shift,
+            start: info.event.start.toISOString(),
+            end: info.event.end.toISOString()
+          };
+        }
+        return shift;
+      }));
+
+      showNotification('success', 'Turno actualizado exitosamente');
+    } catch (error) {
+      console.error('Error updating shift:', error);
       info.revert();
-      showNotification('error', 'Los turnos no pueden comenzar antes de las 06:00 AM');
-      return;
+      showNotification('error', 'Error al actualizar el turno');
     }
-
-    // Detectar automáticamente el tipo de turno según el horario completo
-    const newShiftTypeId = detectShiftTypeByTime(newStart, newEnd);
-    const newShiftType = shiftTypes.find(t => t.id === newShiftTypeId);
-
-    console.log('Nuevo tipo detectado:', newShiftType?.name);
-
-    // Buscar el turno original
-    const originalShift = shifts.find(s => s.id === info.event.id);
-    if (!originalShift) {
-      console.error('Turno original no encontrado');
-      info.revert();
-      return;
-    }
-
-    const updatedShift = {
-      ...originalShift,
-      start: newStart.toISOString(),
-      end: newEnd.toISOString(),
-      shiftTypeId: newShiftTypeId,
-      backgroundColor: newShiftType?.color || originalShift.backgroundColor,
-      title: `${originalShift.employeeName} - ${newShiftType?.name || 'Turno'}`
-    };
-
-    console.log('Turno actualizado:', updatedShift);
-
-    setShifts(prev => prev.map(shift => shift.id === updatedShift.id ? updatedShift : shift));
-    showNotification('success', `Turno movido a ${newShiftType?.name || 'nuevo horario'}`);
   };
 
   const currentPageTitle = menuItems.find((item) => item.id === activeItem)?.label || "Calendario";
+
+  if (loading) {
+    return (
+      <div className="dashboard-container">
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Cargando calendario...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dashboard-container">
@@ -339,7 +501,6 @@ const CalendarPage = () => {
                   events={shifts}
                   onEventClick={handleEventClick}
                   onEventDrop={handleEventDrop}
-                  onRequestDelete={handleRequestDelete}
                 />
               </div>
 

@@ -5,6 +5,9 @@ import RegisterPage from '../src/pages/RegisterPage.jsx';
 import PasswordReset from './pages/PasswordResetPage.jsx';
 import PasswordResetConfirmPage from './pages/PasswordResetConfirmPage.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import ProfileView from './components/profile/ProfileView.jsx';
+import EditProfile from './components/profile/EditProfile.jsx';
+import ChangePassword from './components/profile/ChangePassword.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
 import Dashboard from './pages/admin/DashboardPage.jsx';
 import MainPage from './pages/user/MainPage.jsx';
@@ -27,8 +30,6 @@ function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/reset-password" element={<PasswordReset />} />
           <Route path="/reset-password/confirm" element={<PasswordResetConfirmPage />} />
-
-          
 
           <Route path="/admin/dashboard" element={
             <ProtectedRoute>
@@ -56,6 +57,21 @@ function App() {
             </ProtectedRoute>
           } />
           
+          <Route path="/profile" element={
+            <ProtectedRoute>
+              <ProfileView />
+            </ProtectedRoute>
+          } />
+          <Route path="/edit-profile" element={
+            <ProtectedRoute>
+              <EditProfile />
+            </ProtectedRoute>
+          } />
+          <Route path="/change-password" element={
+            <ProtectedRoute>
+              <ChangePassword />
+            </ProtectedRoute>
+          } />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

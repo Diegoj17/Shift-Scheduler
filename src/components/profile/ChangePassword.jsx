@@ -8,7 +8,7 @@ import {
   FaShieldAlt
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import ProfileLayout from './layout/ProfileLayout';
 import '../../styles/components/profile/ChangePassword.css';
 
@@ -150,189 +150,187 @@ const ChangePassword = () => {
 
   return (
     <ProfileLayout pageTitle="Cambiar Contraseña">
-      <div className="change-password-container">
-      <div className="change-password-header">
-        <div className="header-content">
-          <h1>Cambiar Contraseña</h1>
-          <p>Actualiza tu contraseña de forma segura</p>
-        </div>
-      </div>
-
-      <div className="password-content">
-        {/* Security Tips */}
-        <div className="security-tips">
-          <div className="tips-header">
-            <FaShieldAlt className="tips-icon" />
-            <h3>Consejos de Seguridad</h3>
+      <div className="profile-change-password-container">
+        <div className="profile-change-password-header">
+          <div className="profile-change-password-header-content">
+            <p>Actualiza tu contraseña de forma segura</p>
           </div>
-          <ul className="tips-list">
-            <li>Usa una contraseña única que no uses en otros sitios</li>
-            <li>Combina letras, números y símbolos</li>
-            <li>Evita información personal obvia</li>
-            <li>Cambia tu contraseña regularmente</li>
-          </ul>
         </div>
 
-        {/* Password Form */}
-        <form className="password-form" onSubmit={handleSubmit}>
-          <div className="form-section">
-            <div className="section-header">
-              <FaKey className="section-icon" />
-              <h3>Actualizar Contraseña</h3>
+        <div className="profile-password-content">
+          {/* Security Tips */}
+          <div className="profile-security-tips">
+            <div className="profile-tips-header">
+              <FaShieldAlt className="profile-tips-icon" />
+              <h3>Consejos de Seguridad</h3>
             </div>
+            <ul className="profile-tips-list">
+              <li>Usa una contraseña única que no uses en otros sitios</li>
+              <li>Combina letras, números y símbolos</li>
+              <li>Evita información personal obvia</li>
+              <li>Cambia tu contraseña regularmente</li>
+            </ul>
+          </div>
 
-            {/* Contraseña Actual */}
-            <div className="form-group">
-              <label htmlFor="currentPassword">
-                Contraseña Actual <span className="required">*</span>
-              </label>
-              <div className="password-input-wrapper">
-                <FaKey className="input-icon" />
-                <input
-                  type={showPassword.current ? 'text' : 'password'}
-                  id="currentPassword"
-                  name="currentPassword"
-                  value={formData.currentPassword}
-                  onChange={handleChange}
-                  className={errors.currentPassword ? 'error' : ''}
-                  placeholder="Ingresa tu contraseña actual"
-                />
-                <button
-                  type="button"
-                  className="toggle-password"
-                  onClick={() => toggleShowPassword('current')}
-                >
-                  {showPassword.current ? <FaEyeSlash /> : <FaEye />}
-                </button>
+          {/* Password Form */}
+          <form className="profile-password-form" onSubmit={handleSubmit}>
+            <div className="profile-form-section">
+              <div className="profile-section-header">
+                <h3>Actualizar Contraseña</h3>
               </div>
-              {errors.currentPassword && (
-                <span className="error-message">{errors.currentPassword}</span>
-              )}
-            </div>
 
-            {/* Nueva Contraseña */}
-            <div className="form-group">
-              <label htmlFor="newPassword">
-                Nueva Contraseña <span className="required">*</span>
-              </label>
-              <div className="password-input-wrapper">
-                <FaKey className="input-icon" />
-                <input
-                  type={showPassword.new ? 'text' : 'password'}
-                  id="newPassword"
-                  name="newPassword"
-                  value={formData.newPassword}
-                  onChange={handleChange}
-                  className={errors.newPassword ? 'error' : ''}
-                  placeholder="Ingresa tu nueva contraseña"
-                />
-                <button
-                  type="button"
-                  className="toggle-password"
-                  onClick={() => toggleShowPassword('new')}
-                >
-                  {showPassword.new ? <FaEyeSlash /> : <FaEye />}
-                </button>
-              </div>
-              
-              {/* Barra de Fuerza */}
-              {formData.newPassword && (
-                <div className="password-strength">
-                  <div className="strength-bar">
-                    <div 
-                      className="strength-fill"
-                      style={{
-                        width: `${(passwordStrength / 5) * 100}%`,
-                        backgroundColor: getStrengthColor()
-                      }}
-                    ></div>
-                  </div>
-                  <span 
-                    className="strength-text"
-                    style={{ color: getStrengthColor() }}
+              {/* Contraseña Actual */}
+              <div className="profile-form-group">
+                <label htmlFor="currentPassword">
+                  Contraseña Actual <span className="profile-required">*</span>
+                </label>
+                <div className="profile-password-input-wrapper">
+                  <FaKey className="profile-input-icon" />
+                  <input
+                    type={showPassword.current ? 'text' : 'password'}
+                    id="currentPassword"
+                    name="currentPassword"
+                    value={formData.currentPassword}
+                    onChange={handleChange}
+                    className={errors.currentPassword ? 'error' : ''}
+                    placeholder="Ingresa tu contraseña actual"
+                  />
+                  <button
+                    type="button"
+                    className="profile-toggle-password"
+                    onClick={() => toggleShowPassword('current')}
                   >
-                    {getStrengthText()}
-                  </span>
+                    {showPassword.current ? <FaEyeSlash /> : <FaEye />}
+                  </button>
                 </div>
-              )}
-
-              {/* Requisitos */}
-              {formData.newPassword && (
-                <div className="password-requirements">
-                  {passwordRequirements.map((req, index) => (
-                    <div 
-                      key={index}
-                      className={`requirement ${req.regex.test(formData.newPassword) ? 'met' : ''}`}
-                    >
-                      {req.regex.test(formData.newPassword) ? (
-                        <FaCheck className="req-icon success" />
-                      ) : (
-                        <FaTimes className="req-icon" />
-                      )}
-                      <span>{req.text}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {errors.newPassword && (
-                <span className="error-message">{errors.newPassword}</span>
-              )}
-            </div>
-
-            {/* Confirmar Contraseña */}
-            <div className="form-group">
-              <label htmlFor="confirmPassword">
-                Confirmar Contraseña <span className="required">*</span>
-              </label>
-              <div className="password-input-wrapper">
-                <FaKey className="input-icon" />
-                <input
-                  type={showPassword.confirm ? 'text' : 'password'}
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className={errors.confirmPassword ? 'error' : ''}
-                  placeholder="Confirma tu nueva contraseña"
-                />
-                <button
-                  type="button"
-                  className="toggle-password"
-                  onClick={() => toggleShowPassword('confirm')}
-                >
-                  {showPassword.confirm ? <FaEyeSlash /> : <FaEye />}
-                </button>
+                {errors.currentPassword && (
+                  <span className="profile-error-message">{errors.currentPassword}</span>
+                )}
               </div>
-              {errors.confirmPassword && (
-                <span className="error-message">{errors.confirmPassword}</span>
-              )}
-            </div>
-          </div>
 
-          {/* Form Actions */}
-          <div className="form-actions">
-            <button 
-              type="button" 
-              className="btn-cancel"
-              onClick={handleCancel}
-              disabled={isChanging}
-            >
-              <FaTimes />
-              <span>Cancelar</span>
-            </button>
-            <button 
-              type="submit" 
-              className="btn-save"
-              disabled={isChanging}
-            >
-              <FaKey />
-              <span>{isChanging ? 'Cambiando...' : 'Cambiar Contraseña'}</span>
-            </button>
-          </div>
-        </form>
+              {/* Nueva Contraseña */}
+              <div className="profile-form-group">
+                <label htmlFor="newPassword">
+                  Nueva Contraseña <span className="profile-required">*</span>
+                </label>
+                <div className="profile-password-input-wrapper">
+                  <FaKey className="profile-input-icon" />
+                  <input
+                    type={showPassword.new ? 'text' : 'password'}
+                    id="newPassword"
+                    name="newPassword"
+                    value={formData.newPassword}
+                    onChange={handleChange}
+                    className={errors.newPassword ? 'error' : ''}
+                    placeholder="Ingresa tu nueva contraseña"
+                  />
+                  <button
+                    type="button"
+                    className="profile-toggle-password"
+                    onClick={() => toggleShowPassword('new')}
+                  >
+                    {showPassword.new ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+                
+                {/* Barra de Fuerza */}
+                {formData.newPassword && (
+                  <div className="profile-password-strength">
+                    <div className="profile-strength-bar">
+                      <div 
+                        className="profile-strength-fill"
+                        style={{
+                          width: `${(passwordStrength / 5) * 100}%`,
+                          backgroundColor: getStrengthColor()
+                        }}
+                      ></div>
+                    </div>
+                    <span 
+                      className="profile-strength-text"
+                      style={{ color: getStrengthColor() }}
+                    >
+                      {getStrengthText()}
+                    </span>
+                  </div>
+                )}
+
+                {/* Requisitos */}
+                {formData.newPassword && (
+                  <div className="profile-password-requirements">
+                    {passwordRequirements.map((req, index) => (
+                      <div 
+                        key={index}
+                        className={`profile-requirement ${req.regex.test(formData.newPassword) ? 'met' : ''}`}
+                      >
+                        {req.regex.test(formData.newPassword) ? (
+                          <FaCheck className="profile-req-icon success" />
+                        ) : (
+                          <FaTimes className="profile-req-icon" />
+                        )}
+                        <span>{req.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {errors.newPassword && (
+                  <span className="profile-error-message">{errors.newPassword}</span>
+                )}
+              </div>
+
+              {/* Confirmar Contraseña */}
+              <div className="profile-form-group">
+                <label htmlFor="confirmPassword">
+                  Confirmar Contraseña <span className="profile-required">*</span>
+                </label>
+                <div className="profile-password-input-wrapper">
+                  <FaKey className="profile-input-icon" />
+                  <input
+                    type={showPassword.confirm ? 'text' : 'password'}
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className={errors.confirmPassword ? 'error' : ''}
+                    placeholder="Confirma tu nueva contraseña"
+                  />
+                  <button
+                    type="button"
+                    className="profile-toggle-password"
+                    onClick={() => toggleShowPassword('confirm')}
+                  >
+                    {showPassword.confirm ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+                {errors.confirmPassword && (
+                  <span className="profile-error-message">{errors.confirmPassword}</span>
+                )}
+              </div>
+            </div>
+
+            {/* Form Actions */}
+            <div className="profile-form-actions">
+              <button 
+                type="button" 
+                className="profile-btn-cancel"
+                onClick={handleCancel}
+                disabled={isChanging}
+              >
+                <FaTimes />
+                <span>Cancelar</span>
+              </button>
+              <button 
+                type="submit" 
+                className="profile-btn-save"
+                disabled={isChanging}
+              >
+                <FaKey />
+                <span>{isChanging ? 'Cambiando...' : 'Cambiar Contraseña'}</span>
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
-    </div>
     </ProfileLayout>
   );
 };

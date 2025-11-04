@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaCalendarAlt, FaBell } from 'react-icons/fa';
-import '../../../../styles/components/dashboard/DashboardHeader.css';
+import '../../../styles/components/dashboard/admin/DashboardHeader.css';
 
 const DashboardHeader = () => {
   // Obtener fecha actual

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { FaTimes, FaCheck, FaExclamationTriangle, FaUser, FaClock, FaBriefcase, FaTrash } from 'react-icons/fa';
 import { detectShiftConflicts, calculateShiftDuration } from '../../../utils/shiftValidation';
 import { formatDateForInput, formatTimeForInput, combineDateAndTime, timeStringToMinutes  } from '../../../utils/dateUtils';
@@ -15,6 +15,16 @@ const ShiftModal = ({
   existingShifts,
   unavailabilities = []
 }) => {
+  // Log para depuración: ver qué prop llega aquí
+  useEffect(() => {
+    if (import.meta?.env?.DEV) {
+      try {
+        console.debug('[ShiftModal] employees prop:', employees);
+      } catch {
+        // ignore
+      }
+    }
+  }, [employees]);
   const [formData, setFormData] = useState({
     employeeId: '',
     shiftTypeId: '',
@@ -24,6 +34,21 @@ const ShiftModal = ({
     role: '',
     notes: ''
   });
+
+  useEffect(() => {
+  if (isOpen) {
+    console.log('🔍 [ShiftModal] Empleados recibidos:', {
+      employees,
+      count: employees?.length,
+      sample: employees?.[0]
+    });
+    
+    console.log('🔍 [ShiftModal] Tipos de turno recibidos:', {
+      shiftTypes,
+      count: shiftTypes?.length
+    });
+  }
+}, [isOpen, employees, shiftTypes]);
 
   const [errors, setErrors] = useState({});
   const [conflicts, setConflicts] = useState([]);
@@ -62,8 +87,8 @@ const ShiftModal = ({
     setAutoDetectedType(false);
   }, [shift, isOpen]);
 
-  // Nueva función mejorada para detectar tipos de turno
-  const detectShiftTypeByTime = (startTimeStr, endTimeStr) => {
+  // Función para detectar tipos de turno (memoizada)
+  const detectShiftTypeByTime = useCallback((startTimeStr, endTimeStr) => {
     if (!shiftTypes.length) return null;
 
     const startTotalMinutes = timeStringToMinutes(startTimeStr);
@@ -113,7 +138,7 @@ const ShiftModal = ({
     });
 
     return bestMatch;
-  };
+  }, [shiftTypes]);
 
   useEffect(() => {
     if (formData.startTime && formData.endTime && !autoDetectedType) {
@@ -129,7 +154,7 @@ const ShiftModal = ({
         setAutoDetectedType(true);
       }
     }
-  }, [formData.startTime, formData.endTime, formData.date]);
+  }, [formData.startTime, formData.endTime, formData.date, autoDetectedType, detectShiftTypeByTime, formData.shiftTypeId]);
 
   // Reset autoDetectedType cuando el usuario selecciona manualmente un tipo
   useEffect(() => {
@@ -195,9 +220,7 @@ const ShiftModal = ({
       newErrors.time = 'Selecciona hora de fin';
     }
     
-    if (!formData.role?.trim()) {
-      newErrors.role = 'Ingresa el rol en el turno';
-    }
+    // El rol ahora se obtiene del empleado seleccionado (no es ingresado manualmente)
 
     // Validación simple de horas para turnos nocturnos
     if (formData.startTime && formData.endTime) {
@@ -269,29 +292,44 @@ const ShiftModal = ({
       return;
     }
 
+    // CORRECCIÓN: Aquí estaba el error - debe ser conflicts.length > 0
     if (conflicts.length > 0) {
       return;
     }
 
-    const start = combineDateAndTime(formData.date, formData.startTime);
-    const end = combineDateAndTime(formData.date, formData.endTime);
-    
-    const selectedEmployee = employees.find(emp => emp.id === formData.employeeId);
+    const selectedEmployee = Array.isArray(employees) ? employees.find(emp => String(emp.id) === String(formData.employeeId)) : undefined;
     const selectedType = shiftTypes.find(type => type.id === formData.shiftTypeId);
 
+    // Derivar rol del empleado seleccionado y garantizar un valor por defecto
+    const derivedRole = (selectedEmployee?.position || selectedEmployee?.puesto || selectedEmployee?.role || '').toString().trim();
+    const roleToSend = derivedRole.length > 0 ? derivedRole : 'Sin especificar';
+
     const shiftData = {
-      id: shift?.id || Date.now().toString(),
+      id: shift?.id || undefined, // Dejar undefined para nuevos turnos
       employeeId: formData.employeeId,
       employeeName: selectedEmployee?.name || '',
       shiftTypeId: formData.shiftTypeId,
-      start: start.toISOString(),
-      end: end.toISOString(),
-      role: formData.role.trim(),
-      notes: formData.notes.trim(),
-      backgroundColor: selectedType?.color || '#667eea',
-      title: `${selectedEmployee?.name || 'Sin nombre'} - ${selectedType?.name || 'Turno'}`,
-      createdAt: shift?.createdAt || new Date().toISOString()
+      shiftTypeName: selectedType?.name || '',
+      // Datos para el backend Django
+      date: formData.date,
+      start_time: formData.startTime,
+      end_time: formData.endTime,
+      employee: formData.employeeId, // Para el backend
+      shift_type: formData.shiftTypeId, // Para el backend
+      // Enviar siempre un role no vacío (proviene del empleado o fallback)
+      role: roleToSend,
+      notes: formData.notes.trim(), // CORRECCIÓN: .trim() no .trial()
+      backgroundColor: selectedType?.color || '#667eea' // CORRECCIÓN: Color hexadecimal correcto
     };
+
+    // Log para verificar exactamente qué enviamos antes de pasar al servicio
+    if (import.meta?.env?.DEV) {
+      try {
+        console.debug('[ShiftModal] Enviando shiftData:', shiftData);
+      } catch {
+        // ignore
+      }
+    }
 
     onSave(shiftData);
   };
@@ -306,7 +344,7 @@ const ShiftModal = ({
 
   if (!isOpen) return null;
 
-  const selectedEmployee = employees.find(emp => emp.id === formData.employeeId);
+  const selectedEmployee = Array.isArray(employees) ? employees.find(emp => String(emp.id) === String(formData.employeeId)) : undefined;
   const selectedShiftType = shiftTypes.find(type => type.id === formData.shiftTypeId);
 
   return (
@@ -323,24 +361,42 @@ const ShiftModal = ({
 
         <form onSubmit={handleSubmit} className="calendar-shift-form">
           <div className="calendar-form-group">
-            <label htmlFor="employeeId">
-              <FaUser className="calendar-label-icon" /> Empleado *
-            </label>
-            <select
-              id="employeeId"
-              value={formData.employeeId}
-              onChange={(e) => handleChange('employeeId', e.target.value)}
-              className={errors.employeeId ? 'calendar-input-error' : ''}
-            >
-              <option value="">Seleccionar empleado...</option>
-              {employees.map(emp => (
-                <option key={emp.id} value={emp.id}>
-                  {emp.name} - {emp.position}
-                </option>
-              ))}
-            </select>
-            {errors.employeeId && <span className="calendar-error-message">{errors.employeeId}</span>}
-          </div>
+  <label htmlFor="employeeId">
+    <FaUser className="calendar-label-icon" /> Empleado *
+  </label>
+  <select
+    id="employeeId"
+    value={formData.employeeId}
+    onChange={(e) => handleChange('employeeId', e.target.value)}
+    className={errors.employeeId ? 'calendar-input-error' : ''}
+    disabled={!employees || employees.length === 0}
+  >
+    <option value="">
+      {!employees || employees.length === 0 
+        ? 'Cargando empleados...' 
+        : 'Seleccionar empleado...'
+      }
+    </option>
+    {Array.isArray(employees) && employees.map(emp => {
+      // Asegurar que el empleado tenga los campos necesarios
+      const employeeId = String(emp.id || emp.pk || emp.user_id || '');
+      const employeeName = emp.name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim() || 'Sin nombre';
+      const employeePosition = emp.position || emp.puesto || emp.jobTitle || 'Sin puesto';
+      
+      return (
+        <option key={employeeId} value={employeeId}>
+          {employeeName} - {employeePosition}
+        </option>
+      );
+    })}
+  </select>
+  {!employees || employees.length === 0 ? (
+    <div className="calendar-warning-message">
+      No hay empleados disponibles. Verifica que estén cargados en el sistema.
+    </div>
+  ) : null}
+  {errors.employeeId && <span className="calendar-error-message">{errors.employeeId}</span>}
+</div>
 
           <div className="calendar-form-group">
             <label htmlFor="shiftTypeId">
@@ -414,20 +470,7 @@ const ShiftModal = ({
 
           {errors.time && <span className="calendar-error-message">{errors.time}</span>}
 
-          <div className="calendar-form-group">
-            <label htmlFor="role">
-              <FaBriefcase className="calendar-label-icon" /> Rol en el Turno *
-            </label>
-            <input
-              type="text"
-              id="role"
-              value={formData.role}
-              onChange={(e) => handleChange('role', e.target.value)}
-              placeholder="Ej: Supervisor, Cajero, Operador..."
-              className={errors.role ? 'calendar-input-error' : ''}
-            />
-            {errors.role && <span className="calendar-error-message">{errors.role}</span>}
-          </div>
+                  {/* El campo de rol se removió: ahora usamos el rol/puesto del empleado seleccionado */}
 
           <div className="calendar-form-group">
             <label htmlFor="notes">Notas (Opcional)</label>
@@ -478,7 +521,7 @@ const ShiftModal = ({
                 </div>
                 <div className="calendar-summary-item">
                   <span className="calendar-summary-label">Rol:</span>
-                  <span className="calendar-summary-value">{formData.role || '-'}</span>
+                  <span className="calendar-summary-value">{selectedEmployee?.position || selectedEmployee?.puesto || selectedEmployee?.role || formData.role || '-'}</span>
                 </div>
               </div>
             </div>

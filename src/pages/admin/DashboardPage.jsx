@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import Header from '../../components/common/Header';
 import Sidebar from '../../components/common/Sidebar';
-import DashboardHeader from '../../modules/admin/dashboard/components/DashboardHeader';
-import StatsGrid from '../../modules/admin/dashboard/components/StatsGrid';
-import WelcomeWidgets from '../../modules/admin/dashboard/components/WelcomeWidgets';
-import DayShift from '../../modules/admin/dashboard/components/DayShift';
-import ShiftDistribution from '../../modules/admin/dashboard/components/ShiftDistribution';
-import Request from '../../modules/admin/dashboard/components/Request';
-import UpcomingShifts from '../../modules/admin/dashboard/components/UpcomingShifts';
+import DashboardHeader from '../../components/dashboard/admin/DashboardHeader';
+import StatsGrid from '../../components/dashboard/admin/StatsGrid';
+import WelcomeWidgets from '../../components/dashboard/admin/WelcomeWidgets';
+import DayShift from '../../components/dashboard/admin/DayShift';
+import ShiftDistribution from '../../components/dashboard/admin/ShiftDistribution';
+import Request from '../../components/dashboard/admin/Request';
+import UpcomingShifts from '../../components/dashboard/admin/UpcomingShifts';
 import '/src/styles/pages/admin/DashboardPage.css';
 
 const DashboardPage = () => {

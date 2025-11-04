@@ -20,12 +20,10 @@ const ManagementPage = () => {
   const [isConfirmationModalOpen, setIsConfirmationModalOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
   const [modalAction, setModalAction] = useState('create');
-  const [currentPage, setCurrentPage] = useState(1);
-  const [usersPerPage] = useState(8);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeItem, setActiveItem] = useState("equipo");
+  const [activeItem, setActiveItem] = useState('equipo');
 
   const loadUsers = useCallback(async () => {
     try {
@@ -35,7 +33,6 @@ const ManagementPage = () => {
       setUsers(usersData);
       setFilteredUsers(usersData);
     } catch (err) {
-      // Si falla la carga desde el servicio, no forzamos mock: mostramos error y dejamos la lista vacía
       console.error('Error loading users from API:', err);
       setError('No se pudieron cargar usuarios desde el servidor. Pulsa Reintentar para volver a intentar.');
       setUsers([]);
@@ -56,10 +53,10 @@ const ManagementPage = () => {
     let result = users.filter(user => {
       const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                             user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                            user.position.toLowerCase().includes(searchTerm.toLowerCase());
+                            (user.position || '').toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = filterStatus === 'all' || user.status === filterStatus;
       const matchesDepartment = filterDepartment === 'all' || user.department === filterDepartment;
-      
+
       return matchesSearch && matchesStatus && matchesDepartment;
     });
 
@@ -67,19 +64,18 @@ const ManagementPage = () => {
     result.sort((a, b) => {
       let aValue = a[sortConfig.field];
       let bValue = b[sortConfig.field];
-      
+
       if (sortConfig.field === 'hireDate') {
         aValue = new Date(aValue);
         bValue = new Date(bValue);
       }
-      
+
       if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
       if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
       return 0;
     });
 
     setFilteredUsers(result);
-    setCurrentPage(1);
   }, [users, searchTerm, filterStatus, filterDepartment, sortConfig]);
 
   // Handlers
@@ -91,28 +87,24 @@ const ManagementPage = () => {
   };
 
   const handleCreateUser = () => {
-    // Crear usuario (sin validación de permisos para facilitar edición local)
     setSelectedUser(null);
     setModalAction('create');
     setIsUserModalOpen(true);
   };
 
   const handleEditUser = (user) => {
-    // Editar usuario (sin validación de permisos)
     setSelectedUser(user);
     setModalAction('edit');
     setIsUserModalOpen(true);
   };
 
   const handleDeleteUser = (user) => {
-    // Eliminar usuario (sin validación de permisos)
     setSelectedUser(user);
     setModalAction('delete');
     setIsConfirmationModalOpen(true);
   };
 
   const handleToggleStatus = (user) => {
-    // Cambiar estado (sin validación de permisos)
     setSelectedUser(user);
     setModalAction(user.status === 'active' ? 'block' : 'unblock');
     setIsConfirmationModalOpen(true);
@@ -122,10 +114,8 @@ const ManagementPage = () => {
     try {
       if (modalAction === 'delete') {
         await userService.deleteUser(selectedUser.id);
-        setUsers(users.filter(user => user.id !== selectedUser.id));
+        setUsers(users.filter(u => u.id !== selectedUser.id));
       } else if (modalAction === 'block' || modalAction === 'unblock') {
-        // Enviar el estado objetivo en lugar del estado actual.
-        // 'block' debe mapear a 'blocked' (frontend) y 'unblock' a 'active'
         const targetStatus = modalAction === 'block' ? 'blocked' : 'active';
         await userService.toggleUserStatus(selectedUser.id, targetStatus);
         await loadUsers();
@@ -145,7 +135,7 @@ const ManagementPage = () => {
       } else if (modalAction === 'edit') {
         await userService.updateUser(selectedUser.id, userData);
       }
-      
+
       await loadUsers();
       setIsUserModalOpen(false);
     } catch (err) {
@@ -163,24 +153,17 @@ const ManagementPage = () => {
   };
 
   const menuItems = [
-    { id: "dashboard", label: "Inicio", icon: "dashboard" },
-    { id: "calendario", label: "Calendario", icon: "calendar" },
-    { id: "solicitudes", label: "Solicitudes", icon: "requests" },
-    { id: "presencia", label: "Presencia", icon: "presence" },
-    { id: "documentos", label: "Documentos", icon: "documents" },
-    { id: "equipo", label: "Equipo", icon: "team" },
-    { id: "informes", label: "Informes", icon: "reports" },
+    { id: 'dashboard', label: 'Inicio', icon: 'dashboard' },
+    { id: 'calendario', label: 'Calendario', icon: 'calendar' },
+    { id: 'solicitudes', label: 'Solicitudes', icon: 'requests' },
+    { id: 'presencia', label: 'Presencia', icon: 'presence' },
+    { id: 'documentos', label: 'Documentos', icon: 'documents' },
+    { id: 'equipo', label: 'Equipo', icon: 'team' },
+    { id: 'informes', label: 'Informes', icon: 'reports' }
   ];
 
-
-  // Paginación
-  const indexOfLastUser = currentPage * usersPerPage;
-  const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = filteredUsers.slice(indexOfFirstUser, indexOfLastUser);
-  const totalPages = Math.ceil(filteredUsers.length / usersPerPage);
-
-  // En lugar de bloquear el acceso, mostramos la página en modo preview si no tiene permisos.
-  // Esto facilita el diseño y las pruebas visuales con datos estáticos.
+  // Usar filteredUsers directamente (sin paginación)
+  const currentUsers = filteredUsers;
 
   if (loading) {
     return (
@@ -224,8 +207,6 @@ const ManagementPage = () => {
             </div>
           )}
 
-          {/* (Permisos desactivados temporalmente para edición) */}
-
           {/* Header con estadísticas */}
           <div className="management-header">
             <StatsCards users={users} />
@@ -255,36 +236,6 @@ const ManagementPage = () => {
               onToggleStatus={handleToggleStatus}
             />
 
-            {/* Paginación */}
-            {totalPages > 1 && (
-              <div className="management-pagination">
-                <button 
-                  className="management-pagination-btn"
-                  disabled={currentPage === 1}
-                  onClick={() => setCurrentPage(currentPage - 1)}
-                >
-                  Anterior
-                </button>
-                
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                  <button
-                    key={page}
-                    className={`management-pagination-btn ${currentPage === page ? 'active' : ''}`}
-                    onClick={() => setCurrentPage(page)}
-                  >
-                    {page}
-                  </button>
-                ))}
-                
-                <button 
-                  className="management-pagination-btn"
-                  disabled={currentPage === totalPages}
-                  onClick={() => setCurrentPage(currentPage + 1)}
-                >
-                  Siguiente
-                </button>
-              </div>
-            )}
           </div>
         </div>
       </div>

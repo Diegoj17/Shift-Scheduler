@@ -54,6 +54,12 @@ const UsersTable = ({
             <th onClick={() => onSort('status')}>
               Estado {getSortIcon('status')}
             </th>
+            <th onClick={() => onSort('department')}>
+              Departamento {getSortIcon('department')}
+            </th>
+            <th onClick={() => onSort('position')}>
+              Puesto {getSortIcon('position')}
+            </th>
             <th onClick={() => onSort('hireDate')}>
               Fecha Ingreso {getSortIcon('hireDate')}
             </th>
@@ -91,6 +97,14 @@ const UsersTable = ({
                     {renderStatusText(user.status)}
                   </span>
                 </td>
+                <td>
+                  <div className="management-user-department"><FaBuilding className="icon" /> <span>{user.departamento || user.department || '-'}</span></div>
+                </td>
+
+                <td>
+                  <div className="management-user-position"><FaIdCard className="icon" /> <span>{user.puesto || user.position || user.jobTitle || '-'}</span></div>
+                </td>
+
                 <td>
                   <div className="hire-date"><FaCalendarAlt className="icon" /> <span>{user.hireDate ? new Date(user.hireDate).toLocaleDateString('es-ES') : '-'}</span></div>
                 </td>

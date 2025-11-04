@@ -1,8 +1,8 @@
 // components/dashboard/StatsGrid.jsx
 import React, { useEffect, useState } from 'react';
 import { FaClock, FaClipboardList, FaUsers, FaUserCheck } from 'react-icons/fa';
-import '../../../../styles/components/dashboard/StatsGrid.css';
-import { userService } from '../../../../services/userService';
+import '../../../styles/components/dashboard/admin/StatsGrid.css';
+import { userService } from '../../../services/userService';
 
 const StatsGrid = () => {
   const [usersCount, setUsersCount] = useState('...');

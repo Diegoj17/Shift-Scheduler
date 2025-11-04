@@ -12,7 +12,7 @@ import {
   FaCog
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import '../../../styles/components/common/Sidebar.css';
+import '../../styles/components/common/Sidebar.css';
 import defaultMenuItems from './sidebarMenu';
 
 const SidebarEmployee = ({ isOpen, onToggle, activeItem, onItemClick, darkMode, menuItems }) => {
