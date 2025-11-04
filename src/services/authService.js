@@ -58,13 +58,28 @@ const authService = {
     }
   },
 
-  confirmPasswordReset: async (uid, token, newPassword) => {
+  confirmPasswordReset: async (uidOrObj, token, newPassword) => {
     try {
-      const response = await authApi.post('/password/reset/confirm/', {
-        uid,
-        token,
-        new_password: newPassword
-      });
+      let payload;
+
+      if (typeof uidOrObj === 'object' && uidOrObj !== null) {
+        const o = uidOrObj;
+        payload = {
+          uid: o.uid || o.uidb64 || o.user_id || '',
+          token: o.token,
+          new_password: o.new_password || o.newPassword || o.password || '',
+          new_password_confirm: o.new_password_confirm ?? o.newPasswordConfirm ?? o.password_confirm ?? o.passwordConfirm ?? (o.new_password || o.newPassword || '')
+        };
+      } else {
+        payload = {
+          uid: uidOrObj,
+          token,
+          new_password: newPassword,
+          new_password_confirm: newPassword
+        };
+      }
+
+      const response = await authApi.post('/password/reset/confirm/', payload);
       return response.data;
     } catch (error) {
       if (error.response?.status === 400) {

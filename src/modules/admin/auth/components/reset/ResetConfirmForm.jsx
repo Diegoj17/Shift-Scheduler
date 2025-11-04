@@ -143,6 +143,8 @@ const ResetConfirmForm = () => {
         token: String(token),
         new_password: String(formData.new_password).trim()
       };
+      // incluir confirmación para cumplir con validadores del backend
+      payload.new_password_confirm = String(formData.new_password_confirm).trim();
 
       // Nota: no incluimos new_password_confirm en el payload porque el backend no lo requiere
       const result = await confirmPasswordReset(payload);

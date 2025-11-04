@@ -99,15 +99,28 @@ const CalendarPage = () => {
       showNotification('warning', 'No se pudieron cargar los turnos (se continuará cargando los empleados)');
     }
 
-    // CARGAR EMPLEADOS: seguir la misma lógica que en ManagementPage (userService.getUsers())
-    console.log('👥 Cargando empleados (usando userService.getUsers())...');
+    // CARGAR EMPLEADOS: Preferir endpoint de empleados del módulo de turnos
+    console.log('👥 Cargando empleados (intentando shiftService.getEmployees)...');
     let employeesData = [];
     try {
-      employeesData = await userService.getUsers();
-      console.log('✅ Empleados cargados con userService:', employeesData);
+      employeesData = await shiftService.getEmployees();
+      console.log('✅ Empleados cargados con shiftService.getEmployees():', employeesData?.length);
     } catch (err) {
-      console.error('❌ Error al cargar empleados con userService:', err);
+      console.warn('⚠️ shiftService.getEmployees falló, intentando userService.getUsers():', err);
       employeesData = [];
+    }
+
+    // Si no obtuvimos empleados desde shiftService, fallback a userService para mantener compatibilidad
+    if (!employeesData || employeesData.length === 0) {
+      try {
+        console.log('👥 Intentando fallback con userService.getUsers()...');
+        const users = await userService.getUsers();
+        console.log('✅ Empleados (fallback) cargados con userService:', users?.length || 0);
+        employeesData = Array.isArray(users) ? users : (users.results || users.data || []);
+      } catch (err) {
+        console.error('❌ Error al cargar empleados con userService (fallback):', err);
+        employeesData = [];
+      }
     }
 
     // Normalizar si es necesario (similar a ManagementPage)
