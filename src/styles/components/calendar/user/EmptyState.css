@@ -1,48 +1,250 @@
-.empty-state {
+/* ============================================
+   EMPTY STATE - ESTILOS PRINCIPALES
+   ============================================ */
+
+.shift-empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
+  padding: 80px 40px;
   text-align: center;
-  background: white;
+  background: linear-gradient(135deg, #f8fafc, white);
+  border-radius: 16px;
+  border: 2px dashed #e2e8f0;
+  min-height: 500px;
+  animation: shift-empty-fade-in 0.5s ease;
 }
 
-.empty-icon {
-  color: #bdbdbd;
-  margin-bottom: 25px;
+@keyframes shift-empty-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.empty-state h3 {
-  color: #666;
-  margin-bottom: 15px;
-  font-weight: 500;
-  font-size: 1.5rem;
+/* ============================================
+   ILUSTRACIÓN
+   ============================================ */
+
+.shift-empty-illustration {
+  margin-bottom: 32px;
+  position: relative;
 }
 
-.empty-state p {
-  color: #999;
-  margin-bottom: 30px;
+.shift-empty-icon {
+  font-size: 6rem;
+  color: #cbd5e0;
+  animation: shift-float 3s ease-in-out infinite;
+  filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
+}
+
+@keyframes shift-float {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-10px) rotate(-2deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-10px) rotate(2deg);
+  }
+}
+
+.shift-empty-illustration::before {
+  content: '';
+  position: absolute;
+  bottom: -20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120px;
+  height: 8px;
+  background: radial-gradient(ellipse, rgba(0, 0, 0, 0.1), transparent);
+  border-radius: 50%;
+  animation: shift-shadow-pulse 3s ease-in-out infinite;
+}
+
+@keyframes shift-shadow-pulse {
+  0%, 100% {
+    transform: translateX(-50%) scale(1);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translateX(-50%) scale(1.2);
+    opacity: 0.5;
+  }
+}
+
+/* ============================================
+   CONTENIDO DE TEXTO
+   ============================================ */
+
+.shift-empty-content {
+  margin-bottom: 36px;
+  max-width: 500px;
+}
+
+.shift-empty-state h3 {
+  margin: 0 0 16px 0;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #2d3748;
+  letter-spacing: -0.3px;
+}
+
+.shift-empty-state p {
+  margin: 0;
   font-size: 1.1rem;
-  max-width: 400px;
+  color: #718096;
   line-height: 1.6;
+  font-weight: 500;
 }
 
-.reset-btn {
-  padding: 12px 30px;
-  background: #667eea;
+/* ============================================
+   BOTÓN DE RESET
+   ============================================ */
+
+.shift-reset-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 32px;
+  background: linear-gradient(180deg, #4f8cff, #3b82f6);
   color: white;
   border: none;
-  border-radius: 25px;
-  cursor: pointer;
+  border-radius: 12px;
+  font-weight: 700;
   font-size: 1rem;
-  font-weight: 500;
+  cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
 }
 
-.reset-btn:hover {
-  background: #5a6fd8;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+.shift-reset-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 28px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(180deg, #3b82f6, #2563eb);
+}
+
+.shift-reset-btn:active {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+}
+
+.shift-reset-icon {
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  animation: shift-spin 2s linear infinite;
+}
+
+@keyframes shift-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.shift-reset-btn:hover .shift-reset-icon {
+  animation-duration: 0.6s;
+}
+
+/* ============================================
+   VARIANTE CON MENSAJE ADICIONAL
+   ============================================ */
+
+.shift-empty-state.shift-empty-with-message::after {
+  content: attr(data-message);
+  margin-top: 24px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, rgba(79, 140, 255, 0.1), rgba(59, 130, 246, 0.1));
+  border: 2px solid rgba(59, 130, 246, 0.2);
+  border-radius: 10px;
+  color: #3b82f6;
+  font-size: 0.9rem;
+  font-weight: 600;
+  max-width: 400px;
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
+  .shift-empty-state {
+    padding: 60px 30px;
+    min-height: 400px;
+  }
+
+  .shift-empty-icon {
+    font-size: 5rem;
+  }
+
+  .shift-empty-state h3 {
+    font-size: 1.5rem;
+  }
+
+  .shift-empty-state p {
+    font-size: 1rem;
+  }
+
+  .shift-reset-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .shift-empty-state {
+    padding: 40px 20px;
+    min-height: 350px;
+  }
+
+  .shift-empty-icon {
+    font-size: 4rem;
+  }
+
+  .shift-empty-state h3 {
+    font-size: 1.3rem;
+  }
+
+  .shift-empty-state p {
+    font-size: 0.95rem;
+  }
+
+  .shift-reset-btn {
+    padding: 12px 24px;
+    font-size: 0.95rem;
+  }
+}
+
+/* ============================================
+   ACCESIBILIDAD
+   ============================================ */
+
+.shift-reset-btn:focus {
+  outline: 3px solid rgba(102, 126, 234, 0.4);
+  outline-offset: 2px;
+}
+
+/* Reducir animaciones para usuarios con preferencias de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  .shift-empty-icon,
+  .shift-empty-illustration::before,
+  .shift-reset-icon {
+    animation: none;
+  }
+  
+  .shift-empty-state {
+    animation: none;
+  }
 }

@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaClock, FaEye, FaEdit } from 'react-icons/fa';
-import '../../../../styles/components/dashboard/UpcomingShifts.css';
+import '../../../styles/components/dashboard/admin/UpcomingShifts.css';
 
 const UpcomingShifts = () => {
   const upcomingShifts = [

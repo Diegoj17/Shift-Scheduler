@@ -1,32 +1,49 @@
-/* Shift Details modal styles - use shift variables when possible */
-.modal-overlay {
+/* ============================================
+   SHIFT DETAILS MODAL - ESTILOS PRINCIPALES
+   ============================================ */
+
+.shift-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
+  background: rgba(0, 0, 0, 0.65);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--shift-primary), var(--shift-primary-dark));
   z-index: 1000;
   padding: 20px;
+  animation: shift-modal-fade-in 0.3s ease;
+  backdrop-filter: blur(4px);
+}
+
+@keyframes shift-modal-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .shift-details {
-  background: linear-gradient(135deg, var(--shift-primary), var(--shift-primary-dark));
-  border-radius: 20px;
-  padding: 30px;
-  max-width: 500px;
+  background: white;
+  border-radius: 16px;
+  max-width: 550px;
   width: 100%;
   position: relative;
-  animation: modalSlideIn 0.3s ease-out;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: shift-modal-slide-up 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  overflow: hidden;
+  max-height: 92vh;
+  overflow-y: auto;
 }
 
-@keyframes modalSlideIn {
+@keyframes shift-modal-slide-up {
   from {
     opacity: 0;
-    transform: translateY(-30px) scale(0.9);
+    transform: translateY(40px) scale(0.95);
   }
   to {
     opacity: 1;
@@ -34,153 +51,407 @@
   }
 }
 
-.close-btn {
+/* ============================================
+   BOTÓN DE CERRAR
+   ============================================ */
+
+.shift-close-btn {
   position: absolute;
   top: 20px;
   right: 20px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--shift-text-muted, #000000);
-  padding: 5px;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-}
-
-.close-btn:hover {
-  background: var(--shift-bg-tertiary, #f5f5f5);
-  color: var(--shift-text-primary, #000000);
-}
-
-.details-header {
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
-  gap: 15px;
-  margin-bottom: 25px;
-  padding-right: 40px;
-  background: linear-gradient(135deg, var(--shift-primary), var(--shift-primary-dark));
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 10px;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 10;
+  font-size: 1.2rem;
+  backdrop-filter: blur(10px);
+}
+
+.shift-close-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg) scale(1.1);
+}
+
+/* ============================================
+   HEADER DEL MODAL
+   ============================================ */
+
+.shift-details-header {
+  background: linear-gradient(180deg, #4f8cff, #3b82f6);
+  padding: 32px 28px;
+  color: white;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 18px;
 }
 
 .shift-type-indicator {
-  width: auto;
-  height: 28px;
-  border-radius: 16px;
-  flex-shrink: 0;
-  display: inline-flex;
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+  display: flex;
   align-items: center;
-  padding: 4px 10px;
-  gap: 8px;
+  justify-content: center;
+  font-size: 1.8rem;
+  color: white;
+  flex-shrink: 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  border: 3px solid rgba(255, 255, 255, 0.3);
 }
 
-.details-header h2 {
-  background: linear-gradient(135deg, var(--shift-primary), var(--shift-primary-dark));
+.shift-header-content {
+  flex: 1;
+  padding-right: 50px;
+}
+
+.shift-details-header h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: -0.3px;
+}
+
+.shift-header-subtitle {
+  margin: 0;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 500;
-  font-size: 1.5rem;
 }
 
-.details-content {
+/* ============================================
+   CONTENIDO DEL MODAL
+   ============================================ */
+
+.shift-details-content {
+  padding: 28px;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  margin-bottom: 30px;
+  gap: 24px;
 }
 
-.detail-row {
+.shift-detail-section {
+  background: linear-gradient(135deg, #f8fafc, white);
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.shift-detail-section:hover {
+  border-color: #cbd5e0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.shift-section-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 18px 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2d3748;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.shift-section-icon {
+  color: #3b82f6;
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+}
+
+.shift-detail-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.shift-detail-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 15px 0;
-  border-bottom: 1px solid var(--shift-border-light, #f0f0f0);
+  padding: 12px 0;
+  border-bottom: 1px solid #f1f5f9;
 }
 
-.detail-row:last-child {
+.shift-detail-row:last-child {
   border-bottom: none;
+  padding-bottom: 0;
 }
 
-.label {
-  color: var(--shift-text-secondary, #666);
-  font-weight: 500;
-  font-size: 0.95rem;
+.shift-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #718096;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.value {
-  color: var(--shift-text-primary, #333);
-  font-weight: 500;
+.shift-value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2d3748;
   text-align: right;
 }
 
-.role-badge {
-  background: var(--shift-bg-tertiary, #e3f2fd);
-  color: var(--shift-primary, #1976d2);
-  padding: 6px 12px;
-  border-radius: 15px;
-  font-size: 0.85rem;
-  font-weight: 500;
-}
-
-.type-badge {
-  padding: 6px 12px;
-  border-radius: 15px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  display: inline-flex;
+.shift-time-value {
+  display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.details-actions {
+.shift-time-icon {
+  color: #3b82f6;
+  font-size: 0.9rem;
   display: flex;
-  gap: 15px;
+  align-items: center;
+}
+
+/* ============================================
+   BADGES Y ETIQUETAS
+   ============================================ */
+
+.shift-role-badge {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(79, 140, 255, 0.1));
+  color: #3b82f6;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  border: 2px solid rgba(59, 130, 246, 0.2);
+}
+
+.shift-location-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  color: #2d3748;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: 2px solid #e2e8f0;
+}
+
+.shift-location-icon {
+  color: #3b82f6;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+}
+
+.shift-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+  color: #065f46;
+  border: 2px solid #6ee7b7;
+}
+
+.shift-status-icon {
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+}
+
+.shift-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+/* ============================================
+   ACCIONES DEL MODAL
+   ============================================ */
+
+.shift-details-actions {
+  padding: 20px 28px;
+  background: #f8fafc;
+  border-top: 3px solid #e2e8f0;
+  display: flex;
+  gap: 12px;
   justify-content: flex-end;
   flex-wrap: wrap;
 }
 
-.action-btn {
-  padding: 12px 20px;
+.shift-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 26px;
   border: none;
   border-radius: 10px;
-  cursor: pointer;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  font-weight: 700;
   font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.action-btn.primary {
-  background: var(--shift-primary, #667eea);
+.shift-btn-icon {
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+}
+
+.shift-btn-primary {
+  background: linear-gradient(180deg, #4f8cff, #3b82f6);
   color: white;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
 }
 
-.action-btn.primary:hover {
-  background: var(--shift-primary-dark, #5a6fd8);
-  transform: translateY(-1px);
+.shift-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+  background: linear-gradient(180deg, #3b82f6, #2563eb);
 }
 
-.action-btn.secondary {
-  background: var(--shift-bg-tertiary, #f5f5f5);
-  color: var(--shift-text-secondary, #666);
-  border: 1px solid var(--shift-border-light, #e0e0e0);
+.shift-btn-secondary {
+  background: white;
+  color: #3b82f6;
+  border: 2px solid #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.action-btn.secondary:hover {
-  background: var(--shift-border-light, #e0e0e0);
-  transform: translateY(-1px);
+.shift-btn-secondary:hover {
+  background: #f8fafc;
+  border-color: #3b82f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
-.type-icon {
-  color: rgba(255,255,255,0.95);
+/* ============================================
+   SCROLLBAR PERSONALIZADO
+   ============================================ */
+
+.shift-details::-webkit-scrollbar {
+  width: 10px;
 }
 
-@media (max-width: 480px) {
+.shift-details::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+.shift-details::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #cbd5e0, #a0aec0);
+  border-radius: 5px;
+  border: 2px solid #f8fafc;
+}
+
+.shift-details::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #a0aec0, #718096);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN
+   ============================================ */
+
+@media (max-width: 768px) {
   .shift-details {
+    width: 100%;
+    max-width: 100%;
+    height: 100vh;
+    max-height: 100vh;
+    border-radius: 0;
+    margin: 0;
+  }
+
+  .shift-details-header {
+    padding: 24px 20px;
+  }
+
+  .shift-details-header h2 {
+    font-size: 1.4rem;
+  }
+
+  .shift-details-content {
     padding: 20px;
   }
 
-  .details-actions {
+  .shift-details-actions {
     flex-direction: column;
+    padding: 16px 20px;
   }
 
-  .action-btn {
+  .shift-btn {
     width: 100%;
+    justify-content: center;
   }
 }
 
+@media (max-width: 480px) {
+  .shift-details-header {
+    padding: 20px 16px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .shift-header-content {
+    padding-right: 0;
+  }
+
+  .shift-details-header h2 {
+    font-size: 1.2rem;
+  }
+
+  .shift-type-indicator {
+    width: 48px;
+    height: 48px;
+    font-size: 1.5rem;
+  }
+
+  .shift-details-content {
+    padding: 16px;
+  }
+
+  .shift-detail-section {
+    padding: 16px;
+  }
+
+  .shift-detail-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .shift-value {
+    text-align: left;
+  }
+
+  .shift-btn {
+    padding: 12px 20px;
+    font-size: 0.9rem;
+  }
+}
+
+/* ============================================
+   ACCESIBILIDAD
+   ============================================ */
+
+.shift-close-btn:focus,
+.shift-btn:focus {
+  outline: 3px solid rgba(102, 126, 234, 0.4);
+  outline-offset: 2px;
+}

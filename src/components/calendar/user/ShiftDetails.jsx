@@ -1,8 +1,8 @@
-import React from 'react';
+import { FaTimes, FaSun, FaClock, FaCalendarDay, FaMapMarkerAlt, FaBuilding, FaCheckCircle, FaDownload, FaExchangeAlt } from 'react-icons/fa';
+import { FiSun, FiClock, FiMoon} from 'react-icons/fi';
 import '../../../styles/components/calendar/user/ShiftDetails.css';
-import { FiX, FiSun, FiMoon, FiClock } from 'react-icons/fi';
 
-const ShiftDetails = ({ shift, isOpen, onClose }) => {
+const ShiftDetails = ({ shift, isOpen, onClose, onExport }) => {
   if (!isOpen || !shift) return null;
 
   const formatTime = (dateString) => {
@@ -22,29 +22,28 @@ const ShiftDetails = ({ shift, isOpen, onClose }) => {
   };
 
   const getShiftTypeColor = (type) => {
-    // Use CSS variables defined in ShiftCalendar.css to centralize color management
-    const vars = {
-      morning: 'var(--shift-type-morning, #4CAF50)',
-      afternoon: 'var(--shift-type-afternoon, #FF9800)',
-      night: 'var(--shift-type-night, #2196F3)'
+    const colors = {
+      morning: '#4CAF50',
+      afternoon: '#FF9800',
+      night: '#2196F3'
     };
-    return vars[type] || 'var(--shift-text-muted, #757575)';
+    return colors[type] || '#757575';
   };
 
-  // Provide a header/theme gradient per shift type so the modal header updates dynamically
   const getThemeForType = (type) => {
     const themes = {
-      morning: { primary: '#2db14a', dark: '#228b3a',  icon: '☀️'  }, // verde
-      afternoon: { primary: '#ffb74d', dark: '#f57c00', icon: '⛅' }, // naranja
-      night: { primary: '#4f8cff', dark: '#3358e6', icon: '🌙' } // azul (por defecto)
+      morning: { primary: '#4CAF50', dark: '#388E3C', icon: <FiSun />, label: 'Mañana' },
+      afternoon: { primary: '#FF9800', dark: '#F57C00', icon: <FiClock />, label: 'Tarde' },
+      night: { primary: '#2196F3', dark: '#1976D2', icon: <FiMoon />, label: 'Noche' }
     };
     return themes[type] || themes['night'];
   };
 
   const theme = getThemeForType(shift.type);
+  const duration = Math.round((new Date(shift.end) - new Date(shift.start)) / (1000 * 60 * 60));
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
+    <div className="shift-modal-overlay" onClick={onClose}>
       <div
         className="shift-details"
         onClick={(e) => e.stopPropagation()}
@@ -53,74 +52,115 @@ const ShiftDetails = ({ shift, isOpen, onClose }) => {
           '--shift-primary-dark': theme.dark
         }}
       >
-        <button className="close-btn" onClick={onClose} aria-label="Cerrar">
-          <FiX size={20} aria-hidden="true" />
+        <button className="shift-close-btn" onClick={onClose} aria-label="Cerrar">
+          <FaTimes aria-hidden="true" />
         </button>
         
-        <div className="details-header">
+        <div className="shift-details-header">
           <div
             className="shift-type-indicator"
             style={{ backgroundColor: getShiftTypeColor(shift.type) }}
           >
-            {/* Icono por tipo de turno */}
-            {shift.type === 'morning' && <FiSun className="type-icon" size={16} aria-hidden="true" />}
-            {shift.type === 'afternoon' && <FiClock className="type-icon" size={16} aria-hidden="true" />}
-            {shift.type === 'night' && <FiMoon className="type-icon" size={16} aria-hidden="true" />}
+            {theme.icon}
           </div>
-          <h2>Detalles del Turno</h2>
-        </div>
-        
-        <div className="details-content">
-          <div className="detail-row">
-            <span className="label">Fecha:</span>
-            <span className="value">{formatDate(shift.start)}</span>
-          </div>
-          
-          <div className="detail-row">
-            <span className="label">Horario:</span>
-            <span className="value">
-              {formatTime(shift.start)} - {formatTime(shift.end)}
-            </span>
-          </div>
-          
-          <div className="detail-row">
-            <span className="label">Duración:</span>
-            <span className="value">
-              {Math.round((new Date(shift.end) - new Date(shift.start)) / (1000 * 60 * 60))} horas
-            </span>
-          </div>
-          
-          <div className="detail-row">
-            <span className="label">Rol:</span>
-            <span className="value role-badge">{shift.role}</span>
-          </div>
-          
-          <div className="detail-row">
-            <span className="label">Ubicación:</span>
-            <span className="value">{shift.location}</span>
-          </div>
-          
-          <div className="detail-row">
-            <span className="label">Tipo de Turno:</span>
-            <span className="value">
-              <span 
-                className="type-badge"
-                style={{ 
-                  backgroundColor: getShiftTypeColor(shift.type),
-                  color: 'white'
-                }}
-              >
-                {shift.type === 'morning' && 'Mañana'}
-                {shift.type === 'afternoon' && 'Tarde'}
-                {shift.type === 'night' && 'Noche'}
-              </span>
-            </span>
+          <div className="shift-header-content">
+            <h2>Detalles del Turno</h2>
+            <p className="shift-header-subtitle">{shift.role} • {shift.department}</p>
           </div>
         </div>
         
-        <div className="details-actions">
-          <button className="action-btn primary">Exportar a Calendario</button>
-          <button className="action-btn secondary">Solicitar Cambio</button>
+        <div className="shift-details-content">
+          <div className="shift-detail-section">
+            <h4 className="shift-section-title">
+              <FaCalendarDay className="shift-section-icon" aria-hidden="true" />
+              Información de Horario
+            </h4>
+            <div className="shift-detail-grid">
+              <div className="shift-detail-row">
+                <span className="shift-label">Fecha:</span>
+                <span className="shift-value">{formatDate(shift.start)}</span>
+              </div>
+              
+              <div className="shift-detail-row">
+                <span className="shift-label">Horario:</span>
+                <span className="shift-value shift-time-value">
+                  <FaClock className="shift-time-icon" aria-hidden="true" />
+                  {formatTime(shift.start)} - {formatTime(shift.end)}
+                </span>
+              </div>
+              
+              <div className="shift-detail-row">
+                <span className="shift-label">Duración:</span>
+                <span className="shift-value">{duration} horas</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="shift-detail-section">
+            <h4 className="shift-section-title">
+              <FaBuilding className="shift-section-icon" aria-hidden="true" />
+              Información del Puesto
+            </h4>
+            <div className="shift-detail-grid">
+              <div className="shift-detail-row">
+                <span className="shift-label">Rol:</span>
+                <span className="shift-role-badge">{shift.role}</span>
+              </div>
+              
+              <div className="shift-detail-row">
+                <span className="shift-label">Departamento:</span>
+                <span className="shift-value">{shift.department}</span>
+              </div>
+              
+              <div className="shift-detail-row">
+                <span className="shift-label">Ubicación:</span>
+                <span className="shift-location-badge">
+                  <FaMapMarkerAlt className="shift-location-icon" aria-hidden="true" />
+                  {shift.location}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className="shift-detail-section">
+            <h4 className="shift-section-title">
+              <FaCheckCircle className="shift-section-icon" aria-hidden="true" />
+              Estado y Tipo
+            </h4>
+            <div className="shift-detail-grid">
+              <div className="shift-detail-row">
+                <span className="shift-label">Estado:</span>
+                <div className="shift-status-badge">
+                  <FaCheckCircle className="shift-status-icon" aria-hidden="true" />
+                  Confirmado
+                </div>
+              </div>
+              
+              <div className="shift-detail-row">
+                <span className="shift-label">Tipo de Turno:</span>
+                <span 
+                  className="shift-type-badge"
+                  style={{ 
+                    backgroundColor: getShiftTypeColor(shift.type)
+                  }}
+                >
+                  {theme.icon}
+                  {theme.label}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div className="shift-details-actions">
+          <button onClick={onExport} className="shift-btn shift-btn-primary">
+            <FaDownload className="shift-btn-icon" aria-hidden="true" />
+            Exportar
+          </button>
+          <button className="shift-btn shift-btn-secondary">
+            <FaExchangeAlt className="shift-btn-icon" aria-hidden="true" />
+            Solicitar Cambio
+          </button>
         </div>
       </div>
     </div>

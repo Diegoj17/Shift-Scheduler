@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { FaTimes, FaUser, FaEnvelope, FaPhone, FaBuilding, FaIdCard, FaCalendarAlt, FaLock, FaUnlock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import '../../styles/components/management/UserModal.css';
 import Modal from '../common/Modal';
@@ -11,6 +11,8 @@ const UserModal = ({ user, action, onSave, onClose }) => {
     phone: '',
     role: 'EMPLEADO',
     status: 'active',
+    department: '',
+    position: '',
     password: '',
     passwordConfirm: ''
   });
@@ -22,11 +24,60 @@ const UserModal = ({ user, action, onSave, onClose }) => {
   const rulesRef = useRef(null);
   const passwordInputRef = useRef(null);
   const modalRef = useRef(null);
+  const [customPosition, setCustomPosition] = useState('');
+
+  // Listado básico de departamentos y puestos por departamento (memoizados)
+  const departments = useMemo(() => [
+    'Administración',
+    'Recursos Humanos',
+    'Operaciones',
+    'Atención al Cliente',
+    'IT',
+    'Logística',
+    'Limpieza',
+    'Seguridad',
+    'Mantenimiento',
+    'Gerencia'
+  ], []);
+
+  const positionsByDepartment = useMemo(() => ({
+    'Administración': ['Contable', 'Asistente Administrativo', 'Analista'],
+    'Recursos Humanos': ['Reclutador', 'Coordinador de RRHH', 'Generalista'],
+    'Operaciones': ['Supervisor de Turnos', 'Encargado de Área', 'Operario'],
+    'Atención al Cliente': ['Recepcionista', 'Agente de Call Center', 'Atención en Mostrador'],
+    'IT': ['Desarrollador', 'Soporte Técnico', 'Administrador de Sistemas'],
+    'Logística': ['Chofer', 'Encargado de Logística', 'Almacenista'],
+    'Limpieza': ['Operario de Limpieza', 'Coordinador de Limpieza'],
+    'Seguridad': ['Guardia', 'Supervisor de Seguridad'],
+    'Mantenimiento': ['Técnico de Mantenimiento', 'Electricista', 'Plomero'],
+    'Gerencia': ['Gerente General', 'Asistente de Gerencia']
+  }), []);
+
+  // Puestos orientados a operaciones/sala/cocina/servicio (fallback cuando no hay departamento)
+  const jobPositions = useMemo(() => [
+    'Mesero',
+    'Cocinero',
+    'Bartender',
+    'Barista',
+    'Cajero',
+    'Auxiliar de Cocina',
+    'Host/Hostess',
+    'Portero',
+    'Técnico',
+    'Operario'
+  ], []);
 
   useEffect(() => {
     if (user && action === 'edit') {
       // Para editar, separar el nombre completo en first_name y last_name
       const nameParts = user.name ? user.name.split(' ') : ['', ''];
+      const dept = user.department || user.departamento || '';
+      const incomingPos = user.position || user.jobTitle || user.puesto || '';
+
+      // Si el puesto recibido no está en las listas, lo tratamos como 'Otro' y lo guardamos en customPosition
+      const available = (positionsByDepartment[dept] || jobPositions);
+      const initialPosition = incomingPos && available.includes(incomingPos) ? incomingPos : (incomingPos ? 'Otro' : '');
+
       setFormData({
         firstName: user.firstName || nameParts[0] || '',
         lastName: user.lastName || nameParts.slice(1).join(' ') || '',
@@ -34,7 +85,11 @@ const UserModal = ({ user, action, onSave, onClose }) => {
         phone: user.phone || user.telefono || '',
         role: user.role || 'EMPLEADO',
         status: user.status || 'active',
+        department: dept,
+        position: initialPosition,
       });
+
+      setCustomPosition(initialPosition === 'Otro' ? incomingPos : '');
     } else {
       // Para crear nuevo usuario
       setFormData({
@@ -44,12 +99,14 @@ const UserModal = ({ user, action, onSave, onClose }) => {
         phone: '',
         role: 'EMPLEADO',
         status: 'active',
+        department: '',
+        position: '',
         password: '',
         passwordConfirm: ''
       });
     }
     setErrors({});
-  }, [user, action]);
+  }, [user, action, positionsByDepartment, jobPositions]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -111,6 +168,24 @@ const UserModal = ({ user, action, onSave, onClose }) => {
     }
 
     if (action === 'create') {
+      if (!formData.department || !formData.department.trim()) {
+        newErrors.department = 'El departamento es requerido';
+      } else if (/[^A-Za-zÀ-ÖØ-öø-ÿ0-9\s\-.]/.test(formData.department)) {
+        newErrors.department = 'El departamento contiene caracteres inválidos';
+      }
+
+      if (!formData.position || !formData.position.trim()) {
+        newErrors.position = 'El puesto es requerido';
+      } else if (/[^A-Za-zÀ-ÖØ-öø-ÿ0-9\s\-.]/.test(formData.position)) {
+        newErrors.position = 'El puesto contiene caracteres inválidos';
+      }
+
+      if (formData.position === 'Otro') {
+        if (!customPosition || !customPosition.trim()) {
+          newErrors.customPosition = 'El puesto es requerido';
+        }
+      }
+
       if (!formData.password) {
         newErrors.password = 'La contraseña es requerida';
       } else if (formData.password.length < 6) {
@@ -140,7 +215,16 @@ const UserModal = ({ user, action, onSave, onClose }) => {
     setIsSubmitting(true);
     
     try {
-      await onSave(formData);
+      // Map english keys to the spanish keys expected by the backend
+      const { department: _dept, position: _pos, ...rest } = formData;
+      const puestoFinal = _pos === 'Otro' ? customPosition : _pos;
+      const payload = {
+        ...rest,
+        departamento: _dept,
+        puesto: puestoFinal,
+      };
+
+      await onSave(payload);
       // Mostrar modal de resultado exitoso
       setResultModal({ isOpen: true, type: 'success', title: 'Cambio exitoso', message: action === 'create' ? 'Usuario creado correctamente.' : 'Cambios guardados correctamente.' });
       // Auto-close: después de 1.6s cerrar modal y el modal padre
@@ -166,6 +250,24 @@ const UserModal = ({ user, action, onSave, onClose }) => {
 
     if (name === 'phone') {
       newValue = newValue.replace(/\D/g, '').slice(0, 10);
+    }
+    // Si cambia el departamento, reiniciar el puesto si no pertenece al nuevo departamento
+    if (name === 'department') {
+      const available = positionsByDepartment[newValue] || jobPositions;
+      setFormData(prev => ({
+        ...prev,
+        [name]: newValue,
+        position: available.includes(prev.position) ? prev.position : ''
+      }));
+      // si al cambiar departamento el puesto previo no es válido, limpiar customPosition
+      if (!available.includes((formData.position || ''))) {
+        setCustomPosition('');
+      }
+      if (errors[name]) {
+        setErrors(prev => ({ ...prev, [name]: '' }));
+      }
+      // no seguir al final porque ya seteamos el estado
+      return;
     }
 
     setFormData(prev => ({
@@ -298,6 +400,63 @@ const UserModal = ({ user, action, onSave, onClose }) => {
                 disabled={isSubmitting}
               />
               {errors.phone && <span className="error-message">{errors.phone}</span>}
+            </div>
+
+            <div className="form-group">
+              <label>
+                <FaBuilding />
+                Departamento {action === 'create' ? '*' : ''}
+              </label>
+              <select
+                name="department"
+                value={formData.department}
+                onChange={handleChange}
+                required={action === 'create'}
+                className={errors.department ? 'error' : ''}
+                disabled={isSubmitting}
+              >
+                <option value="">-- Seleccione --</option>
+                {departments.map(dep => (
+                  <option key={dep} value={dep}>{dep}</option>
+                ))}
+              </select>
+              {errors.department && <span className="error-message">{errors.department}</span>}
+            </div>
+
+            <div className="form-group">
+              <label>
+                <FaIdCard />
+                Puesto {action === 'create' ? '*' : ''}
+              </label>
+              <select
+                name="position"
+                value={formData.position}
+                onChange={handleChange}
+                required={action === 'create'}
+                className={errors.position ? 'error' : ''}
+                disabled={isSubmitting}
+              >
+                <option value="">-- Seleccione --</option>
+                {(positionsByDepartment[formData.department] || jobPositions).map(pos => (
+                  <option key={pos} value={pos}>{pos}</option>
+                ))}
+                <option value="Otro">Otro</option>
+              </select>
+              {errors.position && <span className="error-message">{errors.position}</span>}
+              {formData.position === 'Otro' && (
+                <div className="form-group">
+                  <input
+                    type="text"
+                    name="customPosition"
+                    value={customPosition}
+                    onChange={(e) => setCustomPosition(e.target.value)}
+                    placeholder="Ingrese el puesto"
+                    className={errors.customPosition ? 'error' : ''}
+                    disabled={isSubmitting}
+                  />
+                  {errors.customPosition && <span className="error-message">{errors.customPosition}</span>}
+                </div>
+              )}
             </div>
 
             <div className="form-group">

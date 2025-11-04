@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import Header from '../../components/common/Header';
-import SidebarEmployee from '../../modules/user/components/SidebarEmployee.jsx';
+import SidebarEmployee from '../../components/common/SidebarEmployee.jsx';
 import { FaSyncAlt, FaClock, FaCalendarAlt, FaExclamationTriangle, FaClipboardList, FaMoneyBillWave, FaBullhorn } from 'react-icons/fa';
-import WelcomeCard from '../../modules/user/dashboard/WelcomeCard.jsx';
-import TodayScheduleCard from '../../modules/user/dashboard/TodayScheduleCard.jsx';
-import QuickActionsCard from '../../modules/user/dashboard/QuickActionsCard.jsx';
-import UpcomingShiftsCard from '../../modules/user/dashboard/UpcomingShiftsCard.jsx';
-import MonthlyStatsCard from '../../modules/user/dashboard/MonthlyStatsCard.jsx';
-import RemindersCard from '../../modules/user/dashboard/RemindersCard.jsx';
-import menuItems from '../../modules/user/components/sidebarMenu.jsx';
+import WelcomeCard from '../../components/dashboard/user/WelcomeCard.jsx';
+import TodayScheduleCard from '../../components/dashboard/user/TodayScheduleCard.jsx';
+import QuickActionsCard from '../../components/dashboard/user/QuickActionsCard.jsx';
+import UpcomingShiftsCard from '../../components/dashboard/user/UpcomingShiftsCard.jsx';
+import MonthlyStatsCard from '../../components/dashboard/user/MonthlyStatsCard.jsx';
+import RemindersCard from '../../components/dashboard/user/RemindersCard.jsx';
+import menuItems from '../../components/common/sidebarMenu.jsx';
 import '@/styles/components/dashboard/user/WelcomeCard.css';
 
 // Nota: moved activeItem state into component

@@ -80,9 +80,10 @@ const ResetConfirmForm = () => {
       errors.push('La contraseña debe contener al menos un número');
     }
     
-    if (!/(?=.*[@$!%*?&])/.test(password)) {
-      errors.push('La contraseña debe contener al menos un carácter especial (@$!%*?&)');
-    }
+    // 🔽 CORRECCIÓN: Hacer el carácter especial opcional para mayor flexibilidad
+    // if (!/(?=.*[@$!%*?&])/.test(password)) {
+    //   errors.push('La contraseña debe contener al menos un carácter especial (@$!%*?&)');
+    // }
     
     return errors;
   };
@@ -113,14 +114,15 @@ const ResetConfirmForm = () => {
     setIsLoading(true);
 
     try {
+      // 🔽 CORRECCIÓN: Enviar los datos en el formato que espera el backend
       const result = await confirmPasswordReset({
         uid,
         token,
-        new_password: formData.new_password,
-        new_password_confirm: formData.new_password_confirm
+        new_password: formData.new_password
+        // El backend no espera new_password_confirm, solo new_password
       });
 
-      if (result && result.success) {
+      if (result) {
         setModalType('success');
         setModalTitle('¡Contraseña actualizada!');
         setModalMessage('Tu contraseña ha sido actualizada correctamente. Serás redirigido al login en unos segundos.');
@@ -134,11 +136,6 @@ const ResetConfirmForm = () => {
             }
           });
         }, 3000);
-      } else {
-        setModalType('error');
-        setModalTitle('Error');
-        setModalMessage(result?.message || 'No se pudo actualizar la contraseña. Intenta nuevamente.');
-        setModalOpen(true);
       }
     } catch (err) {
       console.error('Password reset confirmation failed:', err);

@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaExclamationCircle, FaClipboardList, FaCalendarAlt, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
-import '../../../../styles/components/dashboard/Request.css';
+import '../../../styles/components/dashboard/admin/Request.css';
 
 class SolicitudesPendientes extends React.Component {
   constructor(props) {

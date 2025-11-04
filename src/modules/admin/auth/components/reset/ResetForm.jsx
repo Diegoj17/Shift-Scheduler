@@ -1,10 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { FaEnvelope, FaArrowLeft } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 import { useAuth } from '/src/hooks/useAuth.js';
 import '/src/styles/components/auth/reset/ResetForm.css';
 import Modal from '/src/components/common/Modal';
-import { useEffect } from 'react';
 
 const ResetForm = () => {
   const [email, setEmail] = useState('');
@@ -16,6 +15,17 @@ const ResetForm = () => {
   const [modalType, setModalType] = useState('success');
   const [modalTitle, setModalTitle] = useState('');
   const [modalMessage, setModalMessage] = useState('');
+
+  // Efecto para manejar errores del hook useAuth
+  useEffect(() => {
+    if (error) {
+      setModalType('error');
+      setModalTitle('Error');
+      setModalMessage(error);
+      setModalOpen(true);
+      clearError();
+    }
+  }, [error, clearError]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,49 +39,46 @@ const ResetForm = () => {
       return;
     }
 
+    // Validación básica de email
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setModalType('error');
+      setModalTitle('Correo inválido');
+      setModalMessage('Por favor ingresa un correo electrónico válido.');
+      setModalOpen(true);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
+      // 🔽 CORRECCIÓN: El backend espera solo el email
       const result = await resetPassword(email);
-      if (result && result.success) {
-        setModalType('success');
-        setModalTitle('Enviado');
-        setModalMessage(result.data?.message || 'Se ha enviado un enlace de recuperación a tu correo electrónico.');
-        setModalOpen(true);
-        setEmail('');
-      } else {
-        setModalType('error');
-        setModalTitle('Error');
-        setModalMessage(result?.message || 'No se pudo enviar el enlace. Intenta nuevamente.');
-        setModalOpen(true);
-      }
+
+      // 🔽 CORRECCIÓN: El backend responde con { message: "..." }
+      setModalType('success');
+      setModalTitle('¡Enlace enviado!');
+      setModalMessage(result?.message || 'Se ha enviado un enlace de recuperación a tu correo electrónico.');
+      setModalOpen(true);
+      setEmail('');
+      
     } catch (err) {
       console.error('Reset password failed:', err);
-      setModalType('error');
-      setModalTitle('Error');
-      setModalMessage('Ocurrió un error al intentar enviar el enlace.');
-      setModalOpen(true);
+      // El error ya es manejado por el hook useAuth
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Abrir modal automáticamente si useAuth proporciona un error
-  useEffect(() => {
-    if (error) {
-      setModalType('error');
-      setModalTitle('Error');
-      setModalMessage(error);
-      setModalOpen(true);
-    }
-  }, [error]);
-
   return (
     <div className="reset-form-card-inner">
+
       <form onSubmit={handleSubmit} className="reset-form">
         <div className="reset-form-header">
-          <h2 className="reset-form-title">Reestablecer Contraseña</h2>
-          <p className="reset-form-subtitle">Ingresa tu correo electrónico para recibir instrucciones</p>
+          <h2 className="reset-form-title">Restablecer Contraseña</h2>
+          <p className="reset-form-subtitle">
+            Ingresa tu correo electrónico y te enviaremos un enlace para restablecer tu contraseña
+          </p>
         </div>
 
         <div className="reset-form-group">
@@ -102,7 +109,7 @@ const ResetForm = () => {
           {isLoading ? (
             <div className="reset-spinner"></div>
           ) : (
-            'Enviar Enlace'
+            'Enviar Enlace de Recuperación'
           )}
         </button>
       </form>

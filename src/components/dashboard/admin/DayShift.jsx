@@ -1,6 +1,6 @@
 import React from 'react';
 import { FaClock, FaMapMarkerAlt, FaPhone, FaEdit, FaTrash } from 'react-icons/fa';
-import '../../../../styles/components/dashboard/DayShift.css';
+import '../../../styles/components/dashboard/admin/DayShift.css';
 
 class TurnosDelDia extends React.Component {
   constructor(props) {

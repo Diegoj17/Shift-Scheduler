@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   FaSave, 
   FaTimes, 
@@ -9,8 +9,8 @@ import {
   FaCamera
 } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import ProfileLayout from '../../components/layout/ProfileLayout';
+import { useAuth } from '../../contexts/AuthContext';
+import ProfileLayout from './layout/ProfileLayout';
 import '../../styles/components/profile/EditProfile.css';
 
 const EditProfile = () => {
@@ -25,6 +25,20 @@ const EditProfile = () => {
     location: user?.location || 'Cúcuta, Colombia',
     bio: user?.bio || 'Supervisor con 8 meses de experiencia en gestión de turnos y coordinación de equipos.'
   });
+
+  // Cuando el usuario se carga desde el contexto/backend, actualizar el formulario
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        firstName: user.first_name || user.firstName || prev.firstName,
+        lastName: user.last_name || user.lastName || prev.lastName,
+        email: user.email || prev.email,
+        phone: user.telefono || user.phone || prev.phone,
+        location: user.location || prev.location,
+        bio: user.bio || prev.bio
+      }));
+    }
+  }, [user]);
 
   const [errors, setErrors] = useState({});
   const [isSaving, setIsSaving] = useState(false);
@@ -88,7 +102,6 @@ const EditProfile = () => {
       navigate('/profile');
     } else {
       console.error('Error al actualizar perfil:', result.error);
-      // Aquí podrías mostrar un toast o alerta de error
     }
   };
 
@@ -98,175 +111,177 @@ const EditProfile = () => {
 
   return (
     <ProfileLayout pageTitle="Editar Perfil">
-      <div className="edit-profile-container">
-      <div className="edit-profile-header">
-        <div className="header-content">
-          <h1>Editar Perfil</h1>
-          <p>Actualiza tu información personal</p>
+      <div className="profile-edit-container">
+        <div className="profile-edit-header">
+          <div className="profile-edit-header-content">
+            <p>Actualiza tu información personal</p>
+          </div>
         </div>
-      </div>
 
-      <form className="edit-profile-form" onSubmit={handleSubmit}>
-        {/* Avatar Section */}
-        <div className="form-section avatar-section">
-          <div className="avatar-upload">
-            <div className="avatar-preview">AD</div>
-            <button type="button" className="avatar-upload-btn">
-              <FaCamera />
-              <span>Cambiar Foto</span>
+        <form className="profile-edit-form" onSubmit={handleSubmit}>
+          {/* Avatar Section */}
+          <div className="profile-form-section profile-avatar-section">
+            <div className="profile-avatar-upload">
+              <div className="profile-avatar-preview">AD</div>
+              <button type="button" className="profile-avatar-upload-btn">
+                <FaCamera />
+                <span>Cambiar Foto</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Columnas: Información Personal (izquierda) y Contacto (derecha) */}
+          <div className="profile-form-columns">
+            {/* Información Personal */}
+            <div className="profile-form-section">
+              <div className="profile-section-header">
+                <FaUser className="profile-section-icon" />
+                <h3>Información Personal</h3>
+              </div>
+
+              <div className="profile-form-grid">
+                <div className="profile-form-group">
+                  <label htmlFor="firstName">
+                    Nombre <span className="profile-required">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    name="firstName"
+                    value={formData.firstName}
+                    onChange={handleChange}
+                    className={errors.firstName ? 'error' : ''}
+                    placeholder="Tu nombre"
+                  />
+                  {errors.firstName && (
+                    <span className="profile-error-message">{errors.firstName}</span>
+                  )}
+                </div>
+
+                <div className="profile-form-group">
+                  <label htmlFor="lastName">
+                    Apellido <span className="profile-required">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="lastName"
+                    name="lastName"
+                    value={formData.lastName}
+                    onChange={handleChange}
+                    className={errors.lastName ? 'error' : ''}
+                    placeholder="Tu apellido"
+                  />
+                  {errors.lastName && (
+                    <span className="profile-error-message">{errors.lastName}</span>
+                  )}
+                </div>
+              </div>
+
+              <div className="profile-form-group">
+                <label htmlFor="bio">
+                  Biografía
+                </label>
+                <textarea
+                  id="bio"
+                  name="bio"
+                  value={formData.bio}
+                  onChange={handleChange}
+                  rows="4"
+                  placeholder="Cuéntanos sobre ti..."
+                />
+              </div>
+            </div>
+
+            {/* Información de Contacto */}
+            <div className="profile-form-section">
+              <div className="profile-section-header">
+                <FaEnvelope className="profile-section-icon" />
+                <h3>Información de Contacto</h3>
+              </div>
+
+              <div className="profile-form-group">
+                <label htmlFor="email">
+                  Email <span className="profile-required">*</span>
+                </label>
+                <div className="profile-input-with-icon">
+                  <FaEnvelope className="profile-input-icon" />
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    className={errors.email ? 'error' : ''}
+                    placeholder="tu@email.com"
+                  />
+                </div>
+                {errors.email && (
+                  <span className="profile-error-message">{errors.email}</span>
+                )}
+              </div>
+
+              <div className="profile-form-group">
+                <label htmlFor="phone">
+                  Teléfono <span className="profile-required">*</span>
+                </label>
+                <div className="profile-input-with-icon">
+                  <FaPhone className="profile-input-icon" />
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    className={errors.phone ? 'error' : ''}
+                    placeholder="+57 300 123 4567"
+                  />
+                </div>
+                {errors.phone && (
+                  <span className="profile-error-message">{errors.phone}</span>
+                )}
+              </div>
+
+              <div className="profile-form-group">
+                <label htmlFor="location">
+                  Ubicación
+                </label>
+                <div className="profile-input-with-icon">
+                  <FaMapMarkerAlt className="profile-input-icon" />
+                  <input
+                    type="text"
+                    id="location"
+                    name="location"
+                    value={formData.location}
+                    onChange={handleChange}
+                    placeholder="Ciudad, País"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Botones de Acción */}
+          <div className="profile-form-actions">
+            <button 
+              type="button" 
+              className="profile-btn-cancel"
+              onClick={handleCancel}
+              disabled={isSaving}
+            >
+              <FaTimes />
+              <span>Cancelar</span>
+            </button>
+            <button 
+              type="submit" 
+              className="profile-btn-save"
+              disabled={isSaving}
+            >
+              <FaSave />
+              <span>{isSaving ? 'Guardando...' : 'Guardar Cambios'}</span>
             </button>
           </div>
-        </div>
-
-        {/* Información Personal */}
-        <div className="form-section">
-          <div className="section-header">
-            <FaUser className="section-icon" />
-            <h3>Información Personal</h3>
-          </div>
-
-          <div className="form-grid">
-            <div className="form-group">
-              <label htmlFor="firstName">
-                Nombre <span className="required">*</span>
-              </label>
-              <input
-                type="text"
-                id="firstName"
-                name="firstName"
-                value={formData.firstName}
-                onChange={handleChange}
-                className={errors.firstName ? 'error' : ''}
-                placeholder="Tu nombre"
-              />
-              {errors.firstName && (
-                <span className="error-message">{errors.firstName}</span>
-              )}
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="lastName">
-                Apellido <span className="required">*</span>
-              </label>
-              <input
-                type="text"
-                id="lastName"
-                name="lastName"
-                value={formData.lastName}
-                onChange={handleChange}
-                className={errors.lastName ? 'error' : ''}
-                placeholder="Tu apellido"
-              />
-              {errors.lastName && (
-                <span className="error-message">{errors.lastName}</span>
-              )}
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="bio">
-              Biografía
-            </label>
-            <textarea
-              id="bio"
-              name="bio"
-              value={formData.bio}
-              onChange={handleChange}
-              rows="4"
-              placeholder="Cuéntanos sobre ti..."
-            />
-          </div>
-        </div>
-
-        {/* Información de Contacto */}
-        <div className="form-section">
-          <div className="section-header">
-            <FaEnvelope className="section-icon" />
-            <h3>Información de Contacto</h3>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="email">
-              Email <span className="required">*</span>
-            </label>
-            <div className="input-with-icon">
-              <FaEnvelope className="input-icon" />
-              <input
-                type="email"
-                id="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                className={errors.email ? 'error' : ''}
-                placeholder="tu@email.com"
-              />
-            </div>
-            {errors.email && (
-              <span className="error-message">{errors.email}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="phone">
-              Teléfono <span className="required">*</span>
-            </label>
-            <div className="input-with-icon">
-              <FaPhone className="input-icon" />
-              <input
-                type="tel"
-                id="phone"
-                name="phone"
-                value={formData.phone}
-                onChange={handleChange}
-                className={errors.phone ? 'error' : ''}
-                placeholder="+57 300 123 4567"
-              />
-            </div>
-            {errors.phone && (
-              <span className="error-message">{errors.phone}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="location">
-              Ubicación
-            </label>
-            <div className="input-with-icon">
-              <FaMapMarkerAlt className="input-icon" />
-              <input
-                type="text"
-                id="location"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                placeholder="Ciudad, País"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Botones de Acción */}
-        <div className="form-actions">
-          <button 
-            type="button" 
-            className="btn-cancel"
-            onClick={handleCancel}
-            disabled={isSaving}
-          >
-            <FaTimes />
-            <span>Cancelar</span>
-          </button>
-          <button 
-            type="submit" 
-            className="btn-save"
-            disabled={isSaving}
-          >
-            <FaSave />
-            <span>{isSaving ? 'Guardando...' : 'Guardar Cambios'}</span>
-          </button>
-        </div>
-      </form>
-    </div>
+        </form>
+      </div>
     </ProfileLayout>
   );
 };

@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaBars, FaBell } from 'react-icons/fa';
+import { FaBars, FaBell, FaUser, FaKey } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import ProfileMenu from '../profile/ProfileMenu';
 import NotificationMenu from '../notification/NotificationMenu';
 import '../../styles/components/common/Header.css';
 
 const Header = ({ onToggleSidebar, pageTitle = 'Dashboard' }) => {
+  const navigate = useNavigate();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const notificationsRef = useRef(null);
   const [notifications, setNotifications] = useState([
@@ -72,13 +74,10 @@ const Header = ({ onToggleSidebar, pageTitle = 'Dashboard' }) => {
     setNotificationsOpen(!notificationsOpen);
   };
 
-  // Profile menu is handled by the ProfileMenu component itself (it provides its own trigger and outside-click handling)
-
 
   return (
     <header className="main-header">
       <div className="header-left">
-
         <button className="mobile-toggle" onClick={onToggleSidebar}>
           <FaBars className="react-icon" />
         </button>
@@ -89,6 +88,7 @@ const Header = ({ onToggleSidebar, pageTitle = 'Dashboard' }) => {
       </div>
 
       <div className="header-right">
+
         {/* Menú de Notificaciones */}
         <div className="notification-container" ref={notificationsRef}>
           <button 
@@ -110,7 +110,6 @@ const Header = ({ onToggleSidebar, pageTitle = 'Dashboard' }) => {
         </div>
 
         {/* Menú de Perfil */}
-        {/* ProfileMenu renders its own trigger and dropdown */}
         <ProfileMenu />
       </div>
     </header>

@@ -1,9 +1,9 @@
-import api from '../api/Axios';
+import { authApi } from '../api/Axios';
 
 const authService = {
   login: async (email, password) => {
     try {
-      const response = await api.post('/login/', { email, password });
+      const response = await authApi.post('/login/', { email, password });
       const { access, refresh, user } = response.data;
       
       localStorage.setItem('token', access);
@@ -12,7 +12,7 @@ const authService = {
       return { token: access, refresh, user };
     } catch (error) {
       console.error('Login error:', error);
-      throw error;
+      throw new Error(error.response?.data?.detail || error.response?.data?.message || 'Error en el inicio de sesión');
     }
   },
 
@@ -28,54 +28,72 @@ const authService = {
         role: userData.role || 'EMPLEADO'
       };
 
-      const response = await api.post('/register/', payload);
+      const response = await authApi.post('/register/', payload);
       return response.data;
     } catch (error) {
       console.error('Register error:', error);
-      throw error;
+      throw new Error(error.response?.data?.detail || error.response?.data?.message || 'Error en el registro');
     }
   },
 
   getProfile: async () => {
     try {
-      const response = await api.get('/me/');
+      const response = await authApi.get('/me/');
       return response.data.user || response.data;
     } catch (error) {
       console.error('Get profile error:', error);
-      throw error;
+      throw new Error(error.response?.data?.detail || 'Error al obtener perfil');
     }
   },
 
   resetPassword: async (email) => {
     try {
-      const response = await api.post('/password/reset/', { email });
+      const response = await authApi.post('/password/reset/', { email });
       return response.data;
     } catch (error) {
-      console.error('Reset password error:', error);
-      throw error;
+      if (error.response?.status === 429) {
+        throw new Error('Ya solicitaste un restablecimiento recientemente. Espera una hora.');
+      }
+      throw new Error(error.response?.data?.message || 'Error al enviar enlace de recuperación');
+    }
+  },
+
+  confirmPasswordReset: async (uid, token, newPassword) => {
+    try {
+      const response = await authApi.post('/password/reset/confirm/', {
+        uid,
+        token,
+        new_password: newPassword
+      });
+      return response.data;
+    } catch (error) {
+      if (error.response?.status === 400) {
+        throw new Error('El enlace es inválido o ha expirado. Solicita uno nuevo.');
+      }
+      throw new Error(error.response?.data?.message || 'Error al actualizar contraseña');
     }
   },
 
   changePassword: async (currentPassword, newPassword) => {
     try {
-      const response = await api.post('/change-password/', {
+      const response = await authApi.post('/change-password/', {
         current_password: currentPassword,
         new_password: newPassword
       });
       return response.data;
     } catch (error) {
       console.error('Change password error:', error);
-      throw error;
+      throw new Error(error.response?.data?.detail || 'Error al cambiar contraseña');
     }
   },
 
   updateProfile: async (userData) => {
     try {
-      const response = await api.put('/profile/', userData);
+      const response = await authApi.put('/profile/', userData);
       return response.data;
     } catch (error) {
       console.error('Update profile error:', error);
-      throw error;
+      throw new Error(error.response?.data?.detail || 'Error al actualizar perfil');
     }
   },
 
@@ -87,8 +105,7 @@ const authService = {
 
   verifyToken: async (token) => {
     try {
-      // Intenta obtener el perfil con el token
-      const response = await api.get('/me/', {
+      const response = await authApi.get('/me/', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -96,10 +113,60 @@ const authService = {
       return response.data.user || response.data;
     } catch (error) {
       console.error('Verify token error:', error);
-      throw error;
+      throw new Error('Token inválido o expirado');
     }
   },
 
+  // Métodos adicionales para gestión de usuarios
+  getUsers: async () => {
+    try {
+      const response = await authApi.get('/users/');
+      return response.data;
+    } catch (error) {
+      console.error('Get users error:', error);
+      throw new Error(error.response?.data?.detail || 'Error al obtener usuarios');
+    }
+  },
+
+  createUser: async (userData) => {
+    try {
+      const response = await authApi.post('/users/create/', userData);
+      return response.data;
+    } catch (error) {
+      console.error('Create user error:', error);
+      throw new Error(error.response?.data?.detail || 'Error al crear usuario');
+    }
+  },
+
+  updateUser: async (userId, userData) => {
+    try {
+      const response = await authApi.put(`/users/${userId}/update/`, userData);
+      return response.data;
+    } catch (error) {
+      console.error('Update user error:', error);
+      throw new Error(error.response?.data?.detail || 'Error al actualizar usuario');
+    }
+  },
+
+  deleteUser: async (userId) => {
+    try {
+      const response = await authApi.delete(`/users/${userId}`);
+      return response.data;
+    } catch (error) {
+      console.error('Delete user error:', error);
+      throw new Error(error.response?.data?.detail || 'Error al eliminar usuario');
+    }
+  },
+
+  updateUserStatus: async (userId, status) => {
+    try {
+      const response = await authApi.patch(`/users/${userId}`, { status });
+      return response.data;
+    } catch (error) {
+      console.error('Update user status error:', error);
+      throw new Error(error.response?.data?.detail || 'Error al actualizar estado');
+    }
+  }
 };
 
 export default authService;

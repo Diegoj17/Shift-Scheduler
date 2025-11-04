@@ -5,6 +5,13 @@ export const userService = {
   getUsers: async () => {
     try {
       const data = await userAPI.getUsers();
+      if (import.meta?.env?.DEV) {
+        try {
+          console.debug('[userService] raw users data:', data);
+        } catch {
+          // ignore
+        }
+      }
 
       let usersArray = [];
 
@@ -36,6 +43,13 @@ export const userService = {
         const telefono = user.telefono || user.phone || '';
         const role = user.role || user.user?.role || 'EMPLEADO';
 
+        // Preferir los campos que venga del backend (español o inglés), si no, fallback al mapeo por role
+        const departamentoBackend = user.departamento || user.department || null;
+        const puestoBackend = user.puesto || user.position || user.jobTitle || null;
+
+        const department = departamentoBackend || userService.mapRoleToDepartment(role);
+        const position = puestoBackend || userService.mapRoleToPosition(role);
+
         return {
           id,
           name: ((firstName || lastName) ? `${firstName} ${lastName}`.trim() : (user.name || user.username || email)),
@@ -43,13 +57,13 @@ export const userService = {
           lastName,
           email,
           phone: telefono,
-          department: userService.mapRoleToDepartment(role),
-          position: userService.mapRoleToPosition(role),
+          department,
+          position,
           employeeId: user.employee_id || user.employeeId || (id ? `EMP${String(id).padStart(3, '0')}` : ''),
           hireDate: user.created_at ? new Date(user.created_at).toISOString().split('T')[0] : (user.hireDate || user.hired_at || new Date().toISOString().split('T')[0]),
           status: userService.mapStatus(user.status || user.state || 'ACTIVE'),
           role,
-          avatar: user.avatar || `/img/avatars/default.jpg`
+          avatar: user.avatar 
         };
       });
     } catch (error) {
@@ -71,6 +85,13 @@ export const userService = {
         role: userData.role || 'EMPLEADO',
         status: 'ACTIVE'
       };
+
+      // Incluir departamento/puesto si vienen desde el frontend (aceptar tanto keys en español como en inglés)
+      if (userData.departamento) apiData.departamento = userData.departamento;
+      else if (userData.department) apiData.departamento = userData.department;
+
+      if (userData.puesto) apiData.puesto = userData.puesto;
+      else if (userData.position) apiData.puesto = userData.position;
 
       const response = await userAPI.createUser(apiData);
       return response;
@@ -95,6 +116,13 @@ updateUser: async (userId, userData) => {
       role: userData.role,
       status: userService.mapStatusToAPI(userData.status)
     };
+
+    // Aceptar y mapear departamento/puesto cuando estén presentes
+    if (userData.departamento) apiData.departamento = userData.departamento;
+    else if (userData.department) apiData.departamento = userData.department;
+
+    if (userData.puesto) apiData.puesto = userData.puesto;
+    else if (userData.position) apiData.puesto = userData.position;
 
     const response = await userAPI.updateUser(userId, apiData);
     return response;
