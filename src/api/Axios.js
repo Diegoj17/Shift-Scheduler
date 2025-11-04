@@ -53,38 +53,40 @@ const createApiInstance = (baseURL) => {
 const authApi = createApiInstance(authBase);
 const shiftsApi = createApiInstance(API_BASE_URL);
 
-/ Interceptor de requests para ver qué se está enviando
-api.interceptors.request.use((config) => {
-  console.log('🚀 REQUEST:', {
-    method: config.method?.toUpperCase(),
-    url: config.url,
-    baseURL: config.baseURL,
-    fullURL: config.baseURL + config.url,
-    headers: config.headers
+// Interceptor de respuestas para manejar errores
+const handleResponseError = (error) => {
+  console.error('API Error:', {
+    status: error.response?.status,
+    data: error.response?.data,
+    url: error.config?.url
   });
+
+  if (error.response?.status === 401) {
+    localStorage.removeItem('token');
+    window.location.href = '/login';
+  }
+  
+  return Promise.reject(error);
+};
+
+authApi.interceptors.response.use(r => r, handleResponseError);
+shiftsApi.interceptors.response.use(r => r, handleResponseError);
+
+// Logging temporal de requests salientes del cliente (solo en DEV)
+shiftsApi.interceptors.request.use((config) => {
+  try {
+    if (import.meta?.env?.DEV) {
+      // Mostrar solo para endpoints relacionados con turnos
+      const isShiftEndpoint = String(config.url).includes('/shifts');
+      if (isShiftEndpoint) {
+        try {
+          console.debug('[shiftsApi] Outgoing request:', { method: config.method, url: config.url, data: config.data });
+        } catch { /* ignore */ }
+      }
+    }
+  } catch { /* ignore */ }
   return config;
 });
-
-// Interceptor de responses para ver las respuestas
-api.interceptors.response.use(
-  (response) => {
-    console.log('✅ RESPONSE:', {
-      status: response.status,
-      url: response.config.url,
-      data: response.data
-    });
-    return response;
-  },
-  (error) => {
-    console.log('❌ ERROR:', {
-      status: error.response?.status,
-      url: error.config?.url,
-      message: error.message,
-      response: error.response?.data
-    });
-    return Promise.reject(error);
-  }
-);
 
 // API para usuarios
 export const userAPI = {
@@ -163,35 +165,27 @@ export const userAPI = {
 // API para turnos - CORREGIDA
 export const shiftAPI = {
   // Turnos
-   getShifts: async (params = {}) => {
-    try {
-      console.log('🔄 Intentando obtener turnos...');
-      
-      // PRIMERO: Probar la URL más simple
-      const response = await api.get('/api/shifts/', { params });
-      return response.data;
-      
-    } catch (error) {
-      console.error('❌ Error en getShifts:', error);
-      
-      // Si falla, mostrar información detallada
-      if (error.response) {
-        // El servidor respondió con un código de error
-        console.error('📡 Respuesta del servidor:', {
-          status: error.response.status,
-          data: error.response.data,
-          headers: error.response.headers
-        });
-      } else if (error.request) {
-        // La petición se hizo pero no hubo respuesta
-        console.error('📡 No hubo respuesta del servidor:', error.request);
-      } else {
-        // Algo pasó al configurar la petición
-        console.error('📡 Error configurando la petición:', error.message);
+  getShifts: async (params = {}) => {
+    const endpoints = [
+      '/api/shifts/api/shifts/',    // ← PRIMERA OPCIÓN (más probable)
+      '/api/shifts/',               // ← SEGUNDA OPCIÓN  
+      '/shifts/',                   // ← TERCERA OPCIÓN
+    ];
+    
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`🔄 Probando endpoint: ${endpoint}`);
+        const response = await api.get(endpoint, { params });
+        console.log(`✅ Éxito con endpoint: ${endpoint}`);
+        return response.data;
+      } catch (error) {
+        console.log(`❌ Falló endpoint: ${endpoint}`, error.response?.status);
+        // Continuar con el siguiente endpoint
       }
-      
-      throw new Error(error.response?.data?.detail || 'Error al obtener turnos');
     }
+    
+    // Si todos fallan
+    throw new Error('No se pudo conectar con el servidor de turnos');
   },
 
   createShift: async (shiftData) => {
