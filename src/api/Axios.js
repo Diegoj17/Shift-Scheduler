@@ -166,13 +166,26 @@ export const userAPI = {
 export const shiftAPI = {
   // Turnos
   getShifts: async (params = {}) => {
-    try {
-      const response = await shiftsApi.get('/api/shifts/api/shifts/', { params });
-      return response.data;
-    } catch (error) {
-      const message = error.response?.data?.detail || error.response?.data?.message || 'Error al obtener turnos';
-      throw new Error(message);
+    const endpoints = [
+      '/api/shifts/api/shifts/',    // ← PRIMERA OPCIÓN (más probable)
+      '/api/shifts/',               // ← SEGUNDA OPCIÓN  
+      '/shifts/',                   // ← TERCERA OPCIÓN
+    ];
+    
+    for (const endpoint of endpoints) {
+      try {
+        console.log(`🔄 Probando endpoint: ${endpoint}`);
+        const response = await api.get(endpoint, { params });
+        console.log(`✅ Éxito con endpoint: ${endpoint}`);
+        return response.data;
+      } catch (error) {
+        console.log(`❌ Falló endpoint: ${endpoint}`, error.response?.status);
+        // Continuar con el siguiente endpoint
+      }
     }
+    
+    // Si todos fallan
+    throw new Error('No se pudo conectar con el servidor de turnos');
   },
 
   createShift: async (shiftData) => {
