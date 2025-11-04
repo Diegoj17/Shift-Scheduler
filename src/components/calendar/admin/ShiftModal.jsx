@@ -57,35 +57,49 @@ const ShiftModal = ({
   const [autoDetectedType, setAutoDetectedType] = useState(false);
 
   useEffect(() => {
-    if (shift) {
-      const startDate = new Date(shift.start);
-      const endDate = new Date(shift.end);
-      
-      setFormData({
-        employeeId: shift.employeeId || '',
-        shiftTypeId: shift.shiftTypeId || '',
-        date: formatDateForInput(startDate),
-        startTime: formatTimeForInput(startDate),
-        endTime: formatTimeForInput(endDate),
-        role: shift.role || '',
-        notes: shift.notes || ''
-      });
-    } else if (isOpen) {
-      setFormData({
-        employeeId: '',
-        shiftTypeId: '',
-        date: formatDateForInput(new Date()),
-        startTime: '09:00',
-        endTime: '17:00',
-        role: '',
-        notes: ''
-      });
-    }
-    setErrors({});
-    setConflicts([]);
-    setShowDeleteConfirm(false);
-    setAutoDetectedType(false);
-  }, [shift, isOpen]);
+  if (shift) {
+    console.log('📝 [ShiftModal] Cargando datos del shift:', shift);
+    console.log('📝 [ShiftModal] Notas del shift:', shift.notes);
+    
+    const startDate = new Date(shift.start);
+    const endDate = new Date(shift.end);
+    
+    // ✅ Convertir IDs a strings para comparación consistente
+    const employeeIdStr = shift.employeeId ? String(shift.employeeId) : '';
+    const shiftTypeIdStr = shift.shiftTypeId ? String(shift.shiftTypeId) : '';
+    
+    const newFormData = {
+      employeeId: employeeIdStr,
+      shiftTypeId: shiftTypeIdStr,
+      date: formatDateForInput(startDate),
+      startTime: formatTimeForInput(startDate),
+      endTime: formatTimeForInput(endDate),
+      role: shift.role || '',
+      notes: shift.notes || ''  // ✅ Cargar las notas
+    };
+    
+    console.log('✅ [ShiftModal] FormData configurado con notas:', newFormData);
+    console.log('✅ [ShiftModal] Valor de notes en formData:', newFormData.notes);
+    
+    setFormData(newFormData);
+  } else if (isOpen) {
+    // Resetear form para nuevo turno
+    setFormData({
+      employeeId: '',
+      shiftTypeId: '',
+      date: formatDateForInput(new Date()),
+      startTime: '09:00',
+      endTime: '17:00',
+      role: '',
+      notes: ''
+    });
+  }
+  
+  setErrors({});
+  setConflicts([]);
+  setShowDeleteConfirm(false);
+  setAutoDetectedType(false);
+}, [shift, isOpen]);
 
   // Función para detectar tipos de turno (memoizada)
   const detectShiftTypeByTime = useCallback((startTimeStr, endTimeStr) => {

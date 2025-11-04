@@ -112,72 +112,71 @@ const ResetConfirmForm = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    clearError();
-    setPasswordErrors([]);
+  e.preventDefault();
+  clearError();
+  setPasswordErrors([]);
 
-    if (!validateForm()) return;
+  if (!validateForm()) return;
 
-    setIsLoading(true);
+  setIsLoading(true);
 
-    try {
-      // Build a clean payload the backend expects (no confirm field)
-      if (!token) {
-        setModalType('error');
-        setModalTitle('Enlace inválido');
-        setModalMessage('No se encontró token en la URL. Solicita un nuevo enlace.');
-        setModalOpen(true);
-        return;
-      }
-
-      if (!uid) {
-        setModalType('error');
-        setModalTitle('Falta información');
-        setModalMessage('Falta el identificador (uid) en el enlace. Solicita un nuevo enlace de recuperación.');
-        setModalOpen(true);
-        return;
-      }
-
-      const payload = {
-        uid: String(uid),
-        token: String(token),
-        new_password: String(formData.new_password).trim()
-      };
-      // incluir confirmación para cumplir con validadores del backend
-      payload.new_password_confirm = String(formData.new_password_confirm).trim();
-
-      // Nota: no incluimos new_password_confirm en el payload porque el backend no lo requiere
-      const result = await confirmPasswordReset(payload);
-
-      // useAuth devuelve { success: true, data } o { success: false, message }
-      if (result && result.success) {
-        setModalType('success');
-        setModalTitle('¡Contraseña actualizada!');
-        setModalMessage('Tu contraseña ha sido actualizada correctamente. Serás redirigido al login en unos segundos.');
-        setModalOpen(true);
-
-        // Redirect to login after success
-        setTimeout(() => {
-          navigate('/login', { 
-            state: { 
-              message: 'Tu contraseña ha sido actualizada correctamente. Puedes iniciar sesión con tu nueva contraseña.' 
-            }
-          });
-        }, 3000);
-      } else {
-        const msg = result?.message || 'Error al actualizar la contraseña';
-        setModalType('error');
-        setModalTitle('Error');
-        setModalMessage(msg);
-        setModalOpen(true);
-      }
-    } catch (err) {
-      console.error('Password reset confirmation failed:', err);
-      // El error ya es manejado por el hook useAuth
-    } finally {
-      setIsLoading(false);
+  try {
+    if (!token) {
+      setModalType('error');
+      setModalTitle('Enlace inválido');
+      setModalMessage('No se encontró token en la URL. Solicita un nuevo enlace.');
+      setModalOpen(true);
+      return;
     }
-  };
+
+    if (!uid) {
+      setModalType('error');
+      setModalTitle('Falta información');
+      setModalMessage('Falta el identificador (uid) en el enlace. Solicita un nuevo enlace de recuperación.');
+      setModalOpen(true);
+      return;
+    }
+
+    const payload = {
+      uid: String(uid),
+      token: String(token),
+      new_password: String(formData.new_password).trim(),
+      new_password_confirm: String(formData.new_password_confirm).trim()
+    };
+
+    console.log('📤 Enviando payload:', { ...payload, new_password: '***', new_password_confirm: '***' });
+
+    const result = await confirmPasswordReset(payload);
+    
+    console.log('✅ Resultado:', result);
+
+    if (result && result.success) {
+      setModalType('success');
+      setModalTitle('¡Contraseña actualizada!');
+      setModalMessage('Tu contraseña ha sido actualizada correctamente.');
+      setModalOpen(true);
+
+      setTimeout(() => {
+        navigate('/login', { 
+          state: { 
+            message: 'Tu contraseña ha sido actualizada correctamente. Puedes iniciar sesión con tu nueva contraseña.' 
+          }
+        });
+      }, 3000);
+    } else {
+      const msg = result?.message || 'Error al actualizar la contraseña';
+      setModalType('error');
+      setModalTitle('Error');
+      setModalMessage(msg);
+      setModalOpen(true);
+    }
+  } catch (err) {
+    console.error('❌ Password reset confirmation failed:', err);
+    console.error('❌ Error response:', err.response?.data);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   // Si no hay token, mostramos el error clásico
   if (!token) {

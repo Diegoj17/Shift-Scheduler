@@ -54,6 +54,29 @@ const CalendarView = ({ events, onEventClick, onEventDrop, onDateClick}) => {
     }
   };
 
+  // ✅ CORREGIDO: Handler de click en eventos
+  const handleEventClick = (info) => {
+    console.log('🎯 [CalendarView] Event clicked:', {
+      id: info.event.id,
+      title: info.event.title,
+      start: info.event.start,
+      end: info.event.end,
+      extendedProps: info.event.extendedProps
+    });
+    
+    // Prevenir comportamiento por defecto
+    if (info.jsEvent) {
+      info.jsEvent.preventDefault();
+      info.jsEvent.stopPropagation();
+    }
+    
+    // Pasar el evento completo al padre
+    if (onEventClick) {
+      // ✅ Pasar el objeto event de FullCalendar directamente
+      onEventClick(info.event);
+    }
+  };
+
   return (
     <div className="calendar-view-wrapper">
       <div className="calendar-custom-header">
@@ -111,21 +134,25 @@ const CalendarView = ({ events, onEventClick, onEventDrop, onDateClick}) => {
           initialView={currentView}
           headerToolbar={false}
           events={events}
+          
           editable={true}
           droppable={true}
           selectable={true}
           selectMirror={true}
-          dayMaxEvents={3}
+          eventClick={handleEventClick}
+          
+          dayMaxEventRows={3}
+          eventMaxStack={3}
+          slotEventOverlap={false}
+          eventOverlap={false}
+          
           weekends={true}
           eventDrop={onEventDrop}
-          eventClick={(info) => {
-            info.jsEvent.preventDefault();
-            onEventClick && onEventClick(info.event);
-          }}
           dateClick={(info) => onDateClick && onDateClick(info.date, info.dateStr)}
           datesSet={updateTitle}
           height="100%"
           locale="es"
+          
           slotLabelFormat={{
             hour: '2-digit',
             minute: '2-digit',
@@ -136,15 +163,27 @@ const CalendarView = ({ events, onEventClick, onEventDrop, onDateClick}) => {
             minute: '2-digit',
             hour12: false
           }}
+          
           eventContent={(eventInfo) => renderEventContent(eventInfo)}
+          
           slotMinTime="06:00:00"
           slotMaxTime="24:00:00"
+          slotDuration="00:30:00"
           allDaySlot={false}
           nowIndicator={true}
+          
           businessHours={{
             daysOfWeek: [1, 2, 3, 4, 5],
             startTime: '08:00',
             endTime: '18:00'
+          }}
+          
+          eventMouseEnter={(info) => {
+            info.el.style.zIndex = '1000';
+            info.el.style.cursor = 'pointer';
+          }}
+          eventMouseLeave={(info) => {
+            info.el.style.zIndex = '';
           }}
         />
       </div>
@@ -157,7 +196,7 @@ function renderEventContent(eventInfo) {
   const view = eventInfo.view.type;
   
   return (
-    <div className="calendar-custom-event-content">
+    <div className="calendar-custom-event-content" style={{ pointerEvents: 'none' }}>
       <div className="calendar-event-title-text">{event.title}</div>
       {view !== 'dayGridMonth' && (
         <div className="calendar-event-time-text">{eventInfo.timeText}</div>

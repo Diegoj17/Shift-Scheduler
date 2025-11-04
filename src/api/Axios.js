@@ -280,23 +280,6 @@ export const shiftAPI = {
       throw new Error(message);
     }
   },
-
-  // EMPLEADOS
-  getEmployees: async () => {
-    try {
-      const response = await shiftsApi.get('/employees/');
-      return response.data;
-    } catch (error) {
-      // Fallback: intentar obtener usuarios desde authApi
-      console.warn('Endpoint /employees/ no disponible, usando /users/ como fallback');
-      try {
-        const response = await authApi.get('/users/');
-        return response.data;
-      } catch (err) {
-        throw new Error('Error al obtener empleados');
-      }
-    }
-  },
 };
 
 export { authApi, shiftsApi };
