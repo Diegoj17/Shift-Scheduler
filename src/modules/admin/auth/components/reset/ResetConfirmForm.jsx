@@ -29,10 +29,17 @@ const ResetConfirmForm = () => {
   const token = searchParams.get('token');
 
   useEffect(() => {
-    if (!uid || !token) {
+    // Si no hay token, el enlace es inválido.
+    if (!token) {
       setModalType('error');
       setModalTitle('Enlace inválido');
       setModalMessage('El enlace de recuperación es inválido o ha expirado.');
+      setModalOpen(true);
+    } else if (!uid) {
+      // Hay token pero falta uid: mejor mensaje para el usuario
+      setModalType('warning');
+      setModalTitle('Falta información en el enlace');
+      setModalMessage('Se recibió un token pero falta el identificador (uid) en la URL. Intenta solicitar un nuevo enlace de recuperación desde la página correspondiente.');
       setModalOpen(true);
     }
   }, [uid, token]);
@@ -145,7 +152,8 @@ const ResetConfirmForm = () => {
     }
   };
 
-  if (!uid || !token) {
+  // Si no hay token, mostramos el error clásico
+  if (!token) {
     return (
       <div className="reset-confirm-error">
         <h2>Enlace inválido</h2>
@@ -156,6 +164,30 @@ const ResetConfirmForm = () => {
         >
           Solicitar nuevo enlace
         </button>
+      </div>
+    );
+  }
+
+  // Si hay token pero falta uid, explicamos qué pasó y ofrecemos opciones (no podemos adivinar el uid)
+  if (token && !uid) {
+    return (
+      <div className="reset-confirm-error">
+        <h2>Falta información en el enlace</h2>
+        <p>Se detectó un token en la URL pero falta el identificador (uid). Esto suele ocurrir cuando el enlace fue alterado o la plantilla de correo no incluye el uid.</p>
+        <div style={{display: 'flex', gap: '12px', justifyContent: 'center', marginTop: '16px'}}>
+          <button 
+            onClick={() => navigate('/reset-password')}
+            className="reset-back-btn"
+          >
+            Solicitar nuevo enlace
+          </button>
+          <button 
+            onClick={() => navigate('/login')}
+            className="reset-back-btn"
+          >
+            Volver al inicio
+          </button>
+        </div>
       </div>
     );
   }

@@ -2,7 +2,18 @@
 import axios from 'axios';
 
 // IMPORTANTE: Verifica que esta URL sea correcta para tu backend
-const API_BASE_URL = import.meta?.env?.VITE_API_URL || 'https://shift-scheduler-main-production.up.railway.app/api';
+const RAW_API_URL = import.meta?.env?.VITE_API_URL || 'https://shift-scheduler-main-production.up.railway.app/api';
+
+// Normalizar la URL base: eliminar barras finales y manejar si la env ya incluye `/auth`
+const _normalized = String(RAW_API_URL).replace(/\/+$/g, '');
+// Si la URL ya termina en /auth dejamos authBase tal cual, y apiBase será la versión sin /auth.
+const authBase = _normalized.endsWith('/auth') ? _normalized : `${_normalized}/auth`;
+const apiBase = _normalized.endsWith('/auth') ? _normalized.replace(/\/auth$/, '') : _normalized;
+
+const API_BASE_URL = apiBase;
+
+// Log para facilitar debugging en producción (se puede remover después)
+console.debug('API URL config:', { RAW_API_URL, API_BASE_URL, authBase });
 
 // Helper para leer cookies
 function getCookie(name) {
@@ -39,7 +50,7 @@ const createApiInstance = (baseURL) => {
 };
 
 // Crear instancias
-const authApi = createApiInstance(`${API_BASE_URL}/auth`);
+const authApi = createApiInstance(authBase);
 const shiftsApi = createApiInstance(API_BASE_URL);
 
 // Interceptor de respuestas para manejar errores

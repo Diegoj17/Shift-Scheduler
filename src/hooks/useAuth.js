@@ -89,18 +89,34 @@ export const useAuth = () => {
     }
   };
 
-  const confirmPasswordReset = async (data) => {
+  // confirmPasswordReset: acepta dos formas de entrada:
+  //  - un objeto { uid, token, new_password } (lo que usa ResetConfirmForm actualmente)
+  //  - tres argumentos (uid, token, newPassword)
+  const confirmPasswordReset = async (dataOrUid, maybeToken, maybeNewPassword) => {
     setLoading(true);
     setError(null);
-    
+
     try {
-      const response = await authService.confirmPasswordReset(data);
+      let uid, token, newPassword;
+
+      if (typeof dataOrUid === 'object' && dataOrUid !== null && maybeToken === undefined && maybeNewPassword === undefined) {
+        // Recibimos un objeto
+        uid = dataOrUid.uid || dataOrUid.uidb64 || dataOrUid.user_id;
+        token = dataOrUid.token;
+        newPassword = dataOrUid.new_password || dataOrUid.newPassword || dataOrUid.password;
+      } else {
+        // Recibimos parámetros separados
+        uid = dataOrUid;
+        token = maybeToken;
+        newPassword = maybeNewPassword;
+      }
+
+      const response = await authService.confirmPasswordReset(uid, token, newPassword);
       setLoading(false);
       return { success: true, data: response };
     } catch (err) {
-      
       let errorMessage = 'Error al confirmar el restablecimiento de contraseña';
-      
+
       if (err.response?.status === 400) {
         // Manejar errores de validación del backend
         if (err.response.data.new_password_confirm) {
@@ -117,7 +133,7 @@ export const useAuth = () => {
       } else if (err.response?.status === 404) {
         errorMessage = 'El enlace de recuperación no es válido o ha expirado.';
       }
-      
+
       setError(errorMessage);
       setLoading(false);
       return { success: false, message: errorMessage };
