@@ -121,20 +121,39 @@ const ResetConfirmForm = () => {
     setIsLoading(true);
 
     try {
-      // 🔽 CORRECCIÓN: Enviar los datos en el formato que espera el backend
-      const result = await confirmPasswordReset({
-        uid,
-        token,
-        new_password: formData.new_password
-        // El backend no espera new_password_confirm, solo new_password
-      });
+      // Build a clean payload the backend expects (no confirm field)
+      if (!token) {
+        setModalType('error');
+        setModalTitle('Enlace inválido');
+        setModalMessage('No se encontró token en la URL. Solicita un nuevo enlace.');
+        setModalOpen(true);
+        return;
+      }
 
-      if (result) {
+      if (!uid) {
+        setModalType('error');
+        setModalTitle('Falta información');
+        setModalMessage('Falta el identificador (uid) en el enlace. Solicita un nuevo enlace de recuperación.');
+        setModalOpen(true);
+        return;
+      }
+
+      const payload = {
+        uid: String(uid),
+        token: String(token),
+        new_password: String(formData.new_password).trim()
+      };
+
+      // Nota: no incluimos new_password_confirm en el payload porque el backend no lo requiere
+      const result = await confirmPasswordReset(payload);
+
+      // useAuth devuelve { success: true, data } o { success: false, message }
+      if (result && result.success) {
         setModalType('success');
         setModalTitle('¡Contraseña actualizada!');
         setModalMessage('Tu contraseña ha sido actualizada correctamente. Serás redirigido al login en unos segundos.');
         setModalOpen(true);
-        
+
         // Redirect to login after success
         setTimeout(() => {
           navigate('/login', { 
@@ -143,6 +162,12 @@ const ResetConfirmForm = () => {
             }
           });
         }, 3000);
+      } else {
+        const msg = result?.message || 'Error al actualizar la contraseña';
+        setModalType('error');
+        setModalTitle('Error');
+        setModalMessage(msg);
+        setModalOpen(true);
       }
     } catch (err) {
       console.error('Password reset confirmation failed:', err);

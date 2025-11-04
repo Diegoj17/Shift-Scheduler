@@ -30,8 +30,8 @@ export const shiftService = {
         date: shiftData.date || shiftData.start?.split('T')[0],
         start_time: padSeconds(shiftData.start_time || shiftData.startTime || shiftData.start?.split('T')[1]?.substring(0, 5)),
         end_time: padSeconds(shiftData.end_time || shiftData.endTime || shiftData.end?.split('T')[1]?.substring(0, 5)),
-        employee: shiftData.employee_id || shiftData.employeeId || shiftData.employee,
-        shift_type: shiftData.shift_type_id || shiftData.shiftTypeId || shiftData.shiftType,
+  employee: Number(shiftData.employee_id || shiftData.employeeId || shiftData.employee),
+  shift_type: Number(shiftData.shift_type_id || shiftData.shiftTypeId || shiftData.shiftType),
         notes: shiftData.notes || ''
       };
 
@@ -48,6 +48,29 @@ export const shiftService = {
       return response;
     } catch (error) {
       console.error('Error creating shift:', error);
+
+      const data = error.response?.data;
+      // Si el backend devuelve errores de validación en forma de objeto, unirlos en un mensaje legible
+      if (data && typeof data === 'object') {
+        try {
+          const parts = [];
+          Object.keys(data).forEach(key => {
+            const val = data[key];
+            if (Array.isArray(val)) {
+              parts.push(`${key}: ${val.join(' ')}`);
+            } else if (typeof val === 'string') {
+              parts.push(`${key}: ${val}`);
+            } else if (typeof val === 'object') {
+              parts.push(`${key}: ${JSON.stringify(val)}`);
+            }
+          });
+          const composed = parts.join(' | ');
+          throw new Error(composed || error.message || 'Error al crear turno');
+        } catch {
+          throw new Error(error.message || 'Error al crear turno');
+        }
+      }
+
       throw new Error(error.response?.data?.detail || error.message || 'Error al crear turno');
     }
   },
