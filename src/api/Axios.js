@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 // IMPORTANTE: Verifica que esta URL sea correcta para tu backend
-const API_BASE_URL = import.meta?.env?.VITE_API_URL || 'https://shift-scheduler-main-production.up.railway.app';
+const RAW_API_URL = import.meta?.env?.VITE_API_URL || 'https://shift-scheduler-main-production.up.railway.app/api';
 
 // Normalizar la URL base: eliminar barras finales y manejar si la env ya incluye `/auth`
 const _normalized = String(RAW_API_URL).replace(/\/+$/g, '');
