@@ -100,20 +100,20 @@ export const useAuth = () => {
       let uid, token, newPassword;
 
       if (typeof dataOrUid === 'object' && dataOrUid !== null && maybeToken === undefined && maybeNewPassword === undefined) {
-        // Recibimos un objeto
-        uid = dataOrUid.uid || dataOrUid.uidb64 || dataOrUid.user_id;
-        token = dataOrUid.token;
-        newPassword = dataOrUid.new_password || dataOrUid.newPassword || dataOrUid.password;
+        // Recibimos un objeto: pasar entero al servicio para mantener new_password_confirm si existe
+        const response = await authService.confirmPasswordReset(dataOrUid);
+        setLoading(false);
+        return { success: true, data: response };
       } else {
         // Recibimos parámetros separados
         uid = dataOrUid;
         token = maybeToken;
         newPassword = maybeNewPassword;
-      }
 
-      const response = await authService.confirmPasswordReset(uid, token, newPassword);
-      setLoading(false);
-      return { success: true, data: response };
+        const response = await authService.confirmPasswordReset(uid, token, newPassword);
+        setLoading(false);
+        return { success: true, data: response };
+  }
     } catch (err) {
       let errorMessage = 'Error al confirmar el restablecimiento de contraseña';
 

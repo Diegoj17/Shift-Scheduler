@@ -20,13 +20,15 @@ const mapFrontendToBackend = (f) => ({
 export const shiftService = {
   // Crear un nuevo turno
   createShift: async (shiftData) => {
+    let payload;
+
     try {
       // Debug: mostrar el objeto recibido desde el frontend antes de mapear
       if (import.meta?.env?.DEV) {
         console.debug && console.debug('[shiftService] received shiftData:', shiftData);
       }
       // Mapeo específico para el backend Django
-      const payload = {
+  payload = {
         date: shiftData.date || shiftData.start?.split('T')[0],
         start_time: padSeconds(shiftData.start_time || shiftData.startTime || shiftData.start?.split('T')[1]?.substring(0, 5)),
         end_time: padSeconds(shiftData.end_time || shiftData.endTime || shiftData.end?.split('T')[1]?.substring(0, 5)),
@@ -48,6 +50,56 @@ export const shiftService = {
       return response;
     } catch (error) {
       console.error('Error creating shift:', error);
+
+      // Loguear el body de la respuesta (si existe) para facilitar diagnóstico
+      console.error('Error response data:', error.response?.data);
+
+      // Intento inteligente: si el backend rechaza por 'employee' (p.ej. enviaste User.id en lugar de Employee.id),
+      // intentar mapear usando el endpoint de empleados y reintentar una vez.
+      try {
+        const data = error.response?.data;
+        const lower = JSON.stringify(data || '').toLowerCase();
+        const isEmployeeError = data && (data.employee || lower.includes('emplead') || lower.includes('employee'));
+
+        if (isEmployeeError && payload && payload.employee) {
+          console.log('[shiftService] Detectado error de employee, intentando resolver Employee.pk a partir de listado de empleados...');
+
+          const all = await shiftAPI.getEmployees();
+          let candidates = Array.isArray(all) ? all : (all?.results || all?.data || all?.employees || []);
+
+          // Tratar de encontrar una correspondencia por user id u otros campos comunes
+          const originalUserId = Number(payload.employee);
+          const matched = candidates.find(c => {
+            // varias formas posibles de representar el link entre Employee y User
+            // si c.user es un objeto con id
+            if (c.user && typeof c.user === 'object' && (c.user.id || c.user.pk)) {
+              const uid = Number(c.user.id ?? c.user.pk);
+              if (!Number.isNaN(uid) && uid === originalUserId) return true;
+            }
+            // si el empleado tiene user_id/employee_id
+            if (c.user_id && Number(c.user_id) === originalUserId) return true;
+            if (c.employee_id && Number(c.employee_id) === originalUserId) return true;
+            // si el listado es en realidad users, comparar id directo
+            if (c.id && Number(c.id) === originalUserId) return true;
+            return false;
+          });
+
+          if (matched) {
+            const newEmployeeId = matched.id ?? matched.pk ?? matched.employee_id ?? matched.user_id;
+            if (newEmployeeId && Number(newEmployeeId) !== originalUserId) {
+              console.log('[shiftService] Mapeo encontrado. Reintentando creación con employee =', newEmployeeId);
+              const newPayload = { ...payload, employee: Number(newEmployeeId) };
+              const retryResp = await shiftAPI.createShift(newPayload);
+              return retryResp;
+            }
+          } else {
+            console.warn('[shiftService] No se encontró correspondencia entre User.id y Employee.pk en el listado de empleados');
+          }
+        }
+      } catch (retryErr) {
+        console.warn('[shiftService] Reintento para resolver employee falló:', retryErr);
+        // seguir con el manejo normal del error más abajo
+      }
 
       const data = error.response?.data;
       // Si el backend devuelve errores de validación en forma de objeto, unirlos en un mensaje legible
