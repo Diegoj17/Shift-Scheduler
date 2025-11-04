@@ -67,7 +67,7 @@ const CalendarPage = () => {
     };
   };
 
-  const initializeData = async () => {
+const initializeData = async () => {
   try {
     setLoading(true);
     console.log('🔄 Inicializando datos del calendario...');
@@ -77,45 +77,115 @@ const CalendarPage = () => {
       throw new Error('No hay token de autenticación');
     }
 
-    // Cargar tipos y turnos por separado: si fallan los turnos no queremos impedir
-    // la carga de empleados (esto era la razón por la que el modal quedaba vacío)
+    // ==========================================
+    // 1️⃣ CARGAR TIPOS DE TURNO
+    // ==========================================
     let shiftTypesData = [];
     try {
       shiftTypesData = await shiftService.getShiftTypes();
-      console.log('✅ Tipos de turno recibidos:', shiftTypesData.length);
-      const normalizedTypes = (Array.isArray(shiftTypesData) ? shiftTypesData : (shiftTypesData.results || shiftTypesData.data || [])).map(normalizeShiftType);
+      console.log('✅ Tipos de turno recibidos:', shiftTypesData?.length);
+      
+      // Normalizar tipos de turno
+      const normalizedTypes = (
+        Array.isArray(shiftTypesData) 
+          ? shiftTypesData 
+          : (shiftTypesData.results || shiftTypesData.data || [])
+      ).map(normalizeShiftType);
+      
+      console.log('✅ Tipos de turno normalizados:', normalizedTypes.length);
       setShiftTypes(normalizedTypes);
     } catch (err) {
-      console.error('Error cargando tipos de turno:', err);
+      console.error('❌ Error cargando tipos de turno:', err);
       showNotification('error', 'Error al cargar tipos de turno');
     }
 
+    // ==========================================
+    // 2️⃣ CARGAR TURNOS
+    // ==========================================
     try {
-      const shiftsData = await shiftService.getShiftsForCalendar();
-      console.log('✅ Turnos cargados:', shiftsData.length);
-      setShifts(shiftsData);
-    } catch (err) {
-      console.error('Error cargando turnos (no bloqueante):', err);
-      showNotification('warning', 'No se pudieron cargar los turnos (se continuará cargando los empleados)');
-    }
+  const shiftsData = await shiftService.getShiftsForCalendar();
+  console.log('✅ Turnos cargados desde backend:', shiftsData?.length);
+  
+  // Verificar muestra del primer turno
+  if (shiftsData && shiftsData.length > 0) {
+    console.log('📊 Muestra de turno raw del backend:', shiftsData[0]);
+  }
 
-    // CARGAR EMPLEADOS: Preferir endpoint de empleados del módulo de turnos
-    console.log('👥 Cargando empleados (intentando shiftService.getEmployees)...');
+  // ✅ Formatear turnos para FullCalendar con TODOS los campos
+  const formattedShifts = (shiftsData || []).map(shift => {
+    // Extraer datos del turno
+    const shiftId = shift.id || shift.pk;
+    const employeeId = shift.employeeId || shift.employee_id || shift.employee;
+    const employeeName = shift.employeeName || shift.employee_name || shift.title?.split(' - ')[0] || 'Sin nombre';
+    const shiftTypeId = shift.shiftTypeId || shift.shift_type_id || shift.shift_type;
+    const shiftTypeName = shift.shiftTypeName || shift.shift_type_name || '';
+    
+    // ✅ CRÍTICO: Extraer notes correctamente
+    const notes = shift.notes || shift.note || '';
+    const role = shift.role || '';
+    
+    const color = shift.backgroundColor || shift.color || shift.color_hex || '#667eea';
+    
+    // Fechas/horas
+    const startDateTime = shift.start || shift.start_datetime;
+    const endDateTime = shift.end || shift.end_datetime;
+
+    console.log(`📝 Turno ${shiftId} - Notes:`, notes); // ✅ Log individual
+
+    return {
+      id: shiftId,
+      title: shift.title || `${employeeName}${shiftTypeName ? ' - ' + shiftTypeName : ''}`,
+      start: startDateTime,
+      end: endDateTime,
+      backgroundColor: color,
+      borderColor: color,
+      
+      // ✅ CRÍTICO: Guardar TODOS los datos en extendedProps
+      extendedProps: {
+        employeeId: employeeId,
+        employeeName: employeeName,
+        shiftTypeId: shiftTypeId,
+        shiftTypeName: shiftTypeName,
+        role: role,
+        notes: notes  // ✅ Asegurar que notes se guarde aquí
+      }
+    };
+  });
+
+  console.log('✅ Turnos formateados para calendario:', formattedShifts.length);
+  if (formattedShifts.length > 0) {
+    console.log('📊 Muestra de turno formateado:', formattedShifts[0]);
+    console.log('📝 ExtendedProps del primer turno:', formattedShifts[0].extendedProps);
+  }
+  
+  setShifts(formattedShifts);
+} catch (err) {
+  console.error('❌ Error cargando turnos:', err);
+  showNotification('warning', 'No se pudieron cargar los turnos');
+  setShifts([]);
+}
+
+    // ==========================================
+    // 3️⃣ CARGAR EMPLEADOS
+    // ==========================================
+    console.log('👥 Cargando empleados...');
     let employeesData = [];
+    
+    // Intento 1: shiftService.getEmployees()
     try {
       employeesData = await shiftService.getEmployees();
       console.log('✅ Empleados cargados con shiftService.getEmployees():', employeesData?.length);
     } catch (err) {
-      console.warn('⚠️ shiftService.getEmployees falló, intentando userService.getUsers():', err);
+      console.warn('⚠️ shiftService.getEmployees() falló:', err.message);
       employeesData = [];
     }
 
-    // Si no obtuvimos empleados desde shiftService, fallback a userService para mantener compatibilidad
+    // Intento 2: userService.getUsers() (fallback)
     if (!employeesData || employeesData.length === 0) {
       try {
         console.log('👥 Intentando fallback con userService.getUsers()...');
         const users = await userService.getUsers();
-        console.log('✅ Empleados (fallback) cargados con userService:', users?.length || 0);
+        console.log('✅ Usuarios cargados con userService:', users?.length || 0);
         employeesData = Array.isArray(users) ? users : (users.results || users.data || []);
       } catch (err) {
         console.error('❌ Error al cargar empleados con userService (fallback):', err);
@@ -123,24 +193,39 @@ const CalendarPage = () => {
       }
     }
 
-    // Normalizar si es necesario (similar a ManagementPage)
+    // Normalizar empleados (por si viene en formato paginado)
     if (!Array.isArray(employeesData)) {
       if (employeesData && employeesData.results && Array.isArray(employeesData.results)) {
         employeesData = employeesData.results;
       } else if (employeesData && employeesData.data && Array.isArray(employeesData.data)) {
         employeesData = employeesData.data;
       } else {
+        // Buscar primer array en el objeto
         const firstArray = employeesData ? Object.values(employeesData).find(v => Array.isArray(v)) : null;
         employeesData = firstArray || [];
       }
     }
 
-    console.log('👥 Empleados normalizados (final):', employeesData.length);
-    if (employeesData.length === 0) {
+    // ✅ Normalizar estructura de empleados para consistencia
+    const normalizedEmployees = employeesData.map(emp => ({
+      id: emp.id || emp.pk || emp.user_id,
+      name: emp.name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim() || 'Sin nombre',
+      position: emp.position || emp.puesto || emp.jobTitle || emp.role || 'Sin puesto',
+      email: emp.email || '',
+      // Mantener datos originales por compatibilidad
+      ...emp
+    }));
+
+    console.log('👥 Empleados normalizados (final):', normalizedEmployees.length);
+    
+    if (normalizedEmployees.length > 0) {
+      console.log('📊 Muestra de empleado:', normalizedEmployees[0]);
+      setEmployees(normalizedEmployees);
+    } else {
       console.warn('⚠️ No se encontraron empleados');
       showNotification('warning', 'No se encontraron empleados en el sistema');
+      setEmployees([]);
     }
-    setEmployees(employeesData);
 
   } catch (error) {
     console.error('❌ Error inicializando datos:', error);
@@ -159,6 +244,11 @@ const CalendarPage = () => {
     }
     
     showNotification('error', errorMessage);
+    
+    // Establecer estados vacíos en caso de error crítico
+    setShiftTypes([]);
+    setShifts([]);
+    setEmployees([]);
   } finally {
     setLoading(false);
   }
@@ -271,83 +361,207 @@ const CalendarPage = () => {
 
   // Manejo de Turnos
   const handleSaveShift = async (shiftData) => {
-    try {
-      if (editingShift) {
-        // Actualizar turno existente
-  await shiftService.updateShift(editingShift.id, shiftData);
-        
-        // Actualizar en el estado local
-        setShifts(prev => prev.map(shift => {
-          if (shift.id === editingShift.id) {
-            return {
-              ...shift,
-              title: `${shiftData.employeeName} - ${shiftData.shiftTypeName}`,
-              start: `${shiftData.date}T${shiftData.start_time}`,
-              end: `${shiftData.date}T${shiftData.end_time}`,
-              color: shiftData.backgroundColor,
-              extendedProps: {
-                ...shift.extendedProps,
-                role: shiftData.role,
-                notes: shiftData.notes
-              }
-            };
-          }
-          return shift;
-        }));
-        
-        showNotification('success', 'Turno actualizado exitosamente');
-      } else {
-        // Crear nuevo turno
-        const newShift = await shiftService.createShift(shiftData);
-        
-        // Agregar al estado local en formato FullCalendar
-        const calendarShift = {
-          id: newShift.id,
-          title: `${shiftData.employeeName} - ${shiftData.shiftTypeName}`,
-          start: `${newShift.date}T${newShift.start_time}`,
-          end: `${newShift.date}T${newShift.end_time}`,
-          color: newShift.shift_type?.color || shiftData.backgroundColor,
-          extendedProps: {
-            employeeId: newShift.employee,
-            employeeName: shiftData.employeeName,
-            shiftTypeId: newShift.shift_type,
-            // role intentionally omitted on create
-            notes: newShift.notes
-          }
-        };
-        
-        setShifts(prev => [...prev, calendarShift]);
-        showNotification('success', 'Turno creado exitosamente');
-      }
-      
-      setIsShiftModalOpen(false);
-      setEditingShift(null);
-    } catch (error) {
-      console.error('Error saving shift:', error);
-      showNotification('error', 'Error al guardar el turno');
-    }
-  };
-
-  const handleEventClick = (event) => {
-    const shift = shifts.find(s => s.id === event.id);
-    if (shift) {
-      // Convertir al formato que espera ShiftModal
-      const shiftForModal = {
-        id: shift.id,
-        employeeId: shift.extendedProps?.employeeId,
-        shiftTypeId: shift.extendedProps?.shiftTypeId,
-        start: shift.start,
-        end: shift.end,
-        role: shift.extendedProps?.role,
-        notes: shift.extendedProps?.notes,
-        employeeName: shift.extendedProps?.employeeName,
-        backgroundColor: shift.color
+  try {
+    console.log('💾 [CalendarPage] Guardando turno - Data recibida:', shiftData);
+    
+    if (editingShift) {
+      // ✅ Actualizar turno existente
+      const updateData = {
+        date: shiftData.date,
+        start_time: shiftData.start_time,
+        end_time: shiftData.end_time,
+        employeeId: shiftData.employeeId,
+        shiftTypeId: shiftData.shiftTypeId,
+        notes: shiftData.notes || ''
       };
       
-      setEditingShift(shiftForModal);
-      setIsShiftModalOpen(true);
+      console.log('🔄 [CalendarPage] Actualizando turno:', editingShift.id, updateData);
+      
+      await shiftService.updateShift(editingShift.id, updateData);
+      
+      // Actualizar en el estado local
+      setShifts(prev => prev.map(shift => {
+        if (shift.id === editingShift.id) {
+          return {
+            ...shift,
+            title: `${shiftData.employeeName} - ${shiftData.shiftTypeName}`,
+            start: `${shiftData.date}T${shiftData.start_time}`,
+            end: `${shiftData.date}T${shiftData.end_time}`,
+            backgroundColor: shiftData.backgroundColor,
+            color: shiftData.backgroundColor,
+            extendedProps: {
+              ...shift.extendedProps,
+              employeeId: shiftData.employeeId,
+              employeeName: shiftData.employeeName,
+              shiftTypeId: shiftData.shiftTypeId,
+              shiftTypeName: shiftData.shiftTypeName,
+              role: shiftData.role,
+              notes: shiftData.notes
+            }
+          };
+        }
+        return shift;
+      }));
+      
+      showNotification('success', 'Turno actualizado exitosamente');
+      
+    } else {
+      // ✅ Crear nuevo turno - CORREGIDO
+      const createData = {
+        date: shiftData.date,
+        start_time: shiftData.start_time,
+        end_time: shiftData.end_time,
+        employee: parseInt(shiftData.employeeId),  // ✅ Usar employeeId
+        shift_type: parseInt(shiftData.shiftTypeId),  // ✅ Usar shiftTypeId
+        notes: shiftData.notes || ''
+      };
+      
+      console.log('➕ [CalendarPage] Creando turno:', createData);
+      
+      // Verificar que los datos sean válidos
+      if (!createData.employee || isNaN(createData.employee)) {
+        throw new Error('ID de empleado inválido');
+      }
+      if (!createData.shift_type || isNaN(createData.shift_type)) {
+        throw new Error('ID de tipo de turno inválido');
+      }
+      
+      const newShift = await shiftService.createShift(createData);
+      
+      console.log('✅ [CalendarPage] Turno creado:', newShift);
+      
+      // Agregar al estado local
+      const calendarShift = {
+        id: newShift.id,
+        title: `${shiftData.employeeName} - ${shiftData.shiftTypeName}`,
+        start: `${newShift.date}T${newShift.start_time}`,
+        end: `${newShift.date}T${newShift.end_time}`,
+        backgroundColor: shiftData.backgroundColor,
+        color: shiftData.backgroundColor,
+        extendedProps: {
+          employeeId: newShift.employee,
+          employeeName: shiftData.employeeName,
+          shiftTypeId: newShift.shift_type,
+          shiftTypeName: shiftData.shiftTypeName,
+          role: shiftData.role,
+          notes: newShift.notes
+        }
+      };
+      
+      setShifts(prev => [...prev, calendarShift]);
+      showNotification('success', 'Turno creado exitosamente');
     }
+    
+    setIsShiftModalOpen(false);
+    setEditingShift(null);
+    
+  } catch (error) {
+    console.error('❌ [CalendarPage] Error saving shift:', error);
+    console.error('Error details:', error.response?.data);
+    
+    let errorMessage = 'Error al guardar el turno';
+    
+    if (error.message.includes('inválido')) {
+      errorMessage = error.message;
+    } else if (error.response?.data?.detail) {
+      errorMessage = error.response.data.detail;
+    } else if (error.response?.data?.employee) {
+      errorMessage = `Error de empleado: ${error.response.data.employee}`;
+    } else if (error.response?.data?.shift_type) {
+      errorMessage = `Error de tipo de turno: ${error.response.data.shift_type}`;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    showNotification('error', errorMessage);
+  }
+};
+
+  const handleEventClick = (event) => {
+  console.log('🔓 [CalendarPage] Abriendo modal con evento:', {
+    id: event.id,
+    title: event.title,
+    start: event.start,
+    end: event.end,
+    extendedProps: event.extendedProps
+  });
+
+  // ✅ Buscar el shift completo
+  const shift = shifts.find(s => String(s.id) === String(event.id));
+  
+  if (!shift) {
+    console.error('❌ Shift no encontrado para ID:', event.id);
+    showNotification('error', 'No se pudo cargar la información del turno');
+    return;
+  }
+
+  console.log('✅ Shift encontrado completo:', shift);
+  console.log('📝 ExtendedProps del shift:', shift.extendedProps);
+
+  // ✅ Extraer todos los datos correctamente
+  const employeeId = shift.extendedProps?.employeeId || event.extendedProps?.employeeId;
+  const shiftTypeId = shift.extendedProps?.shiftTypeId || event.extendedProps?.shiftTypeId;
+  const notes = shift.extendedProps?.notes || event.extendedProps?.notes || '';
+  const role = shift.extendedProps?.role || event.extendedProps?.role || '';
+  
+  console.log('📝 Notas extraídas:', notes);
+  console.log('👔 Rol extraído:', role);
+  
+  // ✅ Si no encontramos el employeeId, intentar buscarlo por nombre
+  let finalEmployeeId = employeeId;
+  if (!finalEmployeeId && shift.extendedProps?.employeeName) {
+    const foundEmployee = employees.find(emp => 
+      emp.name === shift.extendedProps.employeeName ||
+      `${emp.first_name} ${emp.last_name}`.trim() === shift.extendedProps.employeeName
+    );
+    if (foundEmployee) {
+      finalEmployeeId = foundEmployee.id;
+      console.log('✅ EmployeeId encontrado por nombre:', finalEmployeeId);
+    }
+  }
+
+  // ✅ Buscar shiftTypeId por nombre si no existe
+  let finalShiftTypeId = shiftTypeId;
+  if (!finalShiftTypeId && shift.extendedProps?.shiftTypeName) {
+    const foundShiftType = shiftTypes.find(type => 
+      type.name === shift.extendedProps.shiftTypeName
+    );
+    if (foundShiftType) {
+      finalShiftTypeId = foundShiftType.id;
+      console.log('✅ ShiftTypeId encontrado por nombre:', finalShiftTypeId);
+    }
+  }
+
+  // ✅ Transformar al formato que espera ShiftModal
+  const shiftForModal = {
+    id: shift.id,
+    employeeId: finalEmployeeId,
+    employeeName: shift.extendedProps?.employeeName || shift.title?.split(' - ')[0] || '',
+    shiftTypeId: finalShiftTypeId,
+    shiftTypeName: shift.extendedProps?.shiftTypeName || '',
+    start: shift.start || event.start,
+    end: shift.end || event.end,
+    role: role,
+    notes: notes,  // ✅ Asegurar que las notas se pasen
+    backgroundColor: shift.backgroundColor || shift.color || event.backgroundColor
   };
+
+  console.log('📤 Datos completos para modal:', shiftForModal);
+
+  // Verificar que tenemos los datos necesarios
+  if (!shiftForModal.employeeId) {
+    console.warn('⚠️ No se pudo determinar el employeeId');
+  }
+  if (!shiftForModal.shiftTypeId) {
+    console.warn('⚠️ No se pudo determinar el shiftTypeId');
+  }
+  if (!shiftForModal.notes) {
+    console.warn('⚠️ No hay notas en este turno');
+  }
+
+  setEditingShift(shiftForModal);
+  setIsShiftModalOpen(true);
+};
 
   const handleDeleteShift = async (shiftId) => {
     try {
@@ -360,36 +574,33 @@ const CalendarPage = () => {
     }
   };
 
-  const handleDuplicateShifts = async (duplicatedShifts, conflicts) => {
-    try {
-      // Preparar datos para el backend
-      const duplicateData = {
-        sourceStartDate: duplicatedShifts.sourceStartDate,
-        sourceEndDate: duplicatedShifts.sourceEndDate,
-        targetStartDate: duplicatedShifts.targetStartDate
-      };
+  const handleDuplicateShifts = async (duplicateData) => {
+  try {
+    console.log('🔄 [CalendarPage] Duplicando turnos:', duplicateData);
 
-      const result = await shiftService.duplicateShifts(duplicateData);
-      
-      // Recargar los turnos para reflejar los cambios
-      const updatedShifts = await shiftService.getShiftsForCalendar();
-      setShifts(updatedShifts);
-      
-      if (conflicts && conflicts.length > 0) {
-        showNotification(
-          'warning', 
-          `Duplicación completada con advertencias: ${result.created_count} turno(s) creado(s), ${result.conflict_count} con conflictos omitido(s)`
-        );
-      } else {
-        showNotification('success', `Duplicación completada: ${result.created_count} turno(s) creado(s)`);
-      }
-
-      setIsDuplicateModalOpen(false);
-    } catch (error) {
-      console.error('Error duplicating shifts:', error);
-      showNotification('error', 'Error al duplicar los turnos');
+    const result = await shiftService.duplicateShifts(duplicateData);
+    
+    console.log('✅ [CalendarPage] Resultado de duplicación:', result);
+    
+    // Recargar los turnos completos
+    await initializeData();
+    
+    // Mostrar notificación según el resultado
+    if (result.conflicts > 0) {
+      showNotification(
+        'warning', 
+        `Duplicación completada: ${result.created} turno(s) creado(s), ${result.conflicts} con conflictos omitido(s)`
+      );
+    } else {
+      showNotification('success', `Duplicación completada: ${result.created} turno(s) creado(s)`);
     }
-  };
+
+    setIsDuplicateModalOpen(false);
+  } catch (error) {
+    console.error('❌ [CalendarPage] Error duplicating shifts:', error);
+    showNotification('error', error.message || 'Error al duplicar los turnos');
+  }
+};
 
   const handleEventDrop = async (info) => {
     try {

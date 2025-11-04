@@ -8,20 +8,16 @@ const ShiftDuplicateModal = ({
   onClose, 
   onDuplicate, 
   shifts,
-  employees,
-  unavailabilities = []
+  employees
 }) => {
   const [formData, setFormData] = useState({
     sourceStartDate: formatDateForInput(new Date()),
     sourceEndDate: formatDateForInput(new Date()),
-    targetStartDate: formatDateForInput(new Date()),
-    targetEndDate: formatDateForInput(new Date())
+    targetStartDate: formatDateForInput(new Date())
   });
 
   const [errors, setErrors] = useState({});
-  const [conflicts, setConflicts] = useState([]);
   const [shiftsInRange, setShiftsInRange] = useState([]);
-  const [previewCount, setPreviewCount] = useState(0);
 
   useEffect(() => {
     if (!isOpen) {
@@ -32,16 +28,14 @@ const ShiftDuplicateModal = ({
       setFormData({
         sourceStartDate: formatDateForInput(today),
         sourceEndDate: formatDateForInput(today),
-        targetStartDate: formatDateForInput(nextWeek),
-        targetEndDate: formatDateForInput(nextWeek)
+        targetStartDate: formatDateForInput(nextWeek)
       });
       setErrors({});
-      setConflicts([]);
       setShiftsInRange([]);
-      setPreviewCount(0);
     }
   }, [isOpen]);
 
+  // ✅ Calcular turnos en el rango de origen
   useEffect(() => {
     if (formData.sourceStartDate && formData.sourceEndDate) {
       const start = new Date(formData.sourceStartDate);
@@ -53,8 +47,10 @@ const ShiftDuplicateModal = ({
         return shiftDate >= start && shiftDate <= end;
       });
       
+      console.log('📊 [ShiftDuplicateModal] Turnos en rango:', shiftsToShow);
       setShiftsInRange(shiftsToShow);
-      setPreviewCount(shiftsToShow.length);
+    } else {
+      setShiftsInRange([]);
     }
   }, [formData.sourceStartDate, formData.sourceEndDate, shifts]);
 
@@ -68,132 +64,50 @@ const ShiftDuplicateModal = ({
   const validateForm = () => {
     const newErrors = {};
 
-    const sourceStart = new Date(formData.sourceStartDate);
-    const sourceEnd = new Date(formData.sourceEndDate);
-    const targetStart = new Date(formData.targetStartDate);
-    const targetEnd = new Date(formData.targetEndDate);
-
-    if (sourceStart > sourceEnd) {
-      newErrors.sourceRange = 'La fecha de inicio debe ser anterior a la fecha fin';
+    if (!formData.sourceStartDate) {
+      newErrors.source = 'La fecha de inicio origen es requerida';
     }
 
-    if (targetStart > targetEnd) {
-      newErrors.targetRange = 'La fecha de inicio debe ser anterior a la fecha fin';
+    if (!formData.sourceEndDate) {
+      newErrors.source = 'La fecha de fin origen es requerida';
+    }
+
+    if (!formData.targetStartDate) {
+      newErrors.target = 'La fecha de inicio destino es requerida';
+    }
+
+    const sourceStart = new Date(formData.sourceStartDate);
+    const sourceEnd = new Date(formData.sourceEndDate);
+
+    if (sourceStart > sourceEnd) {
+      newErrors.source = 'La fecha de inicio debe ser anterior a la fecha fin';
     }
 
     if (shiftsInRange.length === 0) {
-      newErrors.sourceRange = 'No hay turnos en el rango origen seleccionado';
-    }
-
-    const sourceDays = Math.ceil((sourceEnd - sourceStart) / (1000 * 60 * 60 * 24)) + 1;
-    const targetDays = Math.ceil((targetEnd - targetStart) / (1000 * 60 * 60 * 24)) + 1;
-
-    if (sourceDays !== targetDays) {
-      newErrors.targetRange = `El rango destino debe tener la misma duración (${sourceDays} días)`;
+      newErrors.source = 'No hay turnos en el rango origen seleccionado';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const detectConflicts = () => {
-    const detectedConflicts = [];
-    const sourceStart = new Date(formData.sourceStartDate);
-    const targetStart = new Date(formData.targetStartDate);
-    const daysDiff = Math.ceil((targetStart - sourceStart) / (1000 * 60 * 60 * 24));
-
-    shiftsInRange.forEach(shift => {
-      const shiftDate = new Date(shift.start);
-      const newDate = new Date(shiftDate);
-      newDate.setDate(newDate.getDate() + daysDiff);
-
-      // Verificar solapamiento con turnos existentes
-      const overlapping = shifts.find(existingShift => {
-        const existingStart = new Date(existingShift.start);
-        const existingEnd = new Date(existingShift.end);
-        
-        const newShiftStart = new Date(shift.start);
-        newShiftStart.setDate(newShiftStart.getDate() + daysDiff);
-        const newShiftEnd = new Date(shift.end);
-        newShiftEnd.setDate(newShiftEnd.getDate() + daysDiff);
-
-        return existingShift.employeeId === shift.employeeId &&
-               ((newShiftStart >= existingStart && newShiftStart < existingEnd) ||
-                (newShiftEnd > existingStart && newShiftEnd <= existingEnd) ||
-                (newShiftStart <= existingStart && newShiftEnd >= existingEnd));
-      });
-
-      if (overlapping) {
-        const employee = employees.find(e => e.id === shift.employeeId);
-        detectedConflicts.push({
-          type: 'overlap',
-          message: `${employee?.name || 'Empleado'} - ${newDate.toLocaleDateString('es-ES')}: Solapamiento con turno existente`,
-          shiftId: shift.id
-        });
-      }
-
-      // Verificar indisponibilidad
-      const unavailable = unavailabilities.find(unav => {
-        const unavStart = new Date(unav.start);
-        const unavEnd = new Date(unav.end);
-        
-        const newShiftStart = new Date(shift.start);
-        newShiftStart.setDate(newShiftStart.getDate() + daysDiff);
-        const newShiftEnd = new Date(shift.end);
-        newShiftEnd.setDate(newShiftEnd.getDate() + daysDiff);
-
-        return unav.employeeId === shift.employeeId &&
-               ((newShiftStart >= unavStart && newShiftStart < unavEnd) ||
-                (newShiftEnd > unavStart && newShiftEnd <= unavEnd));
-      });
-
-      if (unavailable) {
-        const employee = employees.find(e => e.id === shift.employeeId);
-        detectedConflicts.push({
-          type: 'unavailable',
-          message: `${employee?.name || 'Empleado'} - ${newDate.toLocaleDateString('es-ES')}: Empleado no disponible`,
-          shiftId: shift.id
-        });
-      }
-    });
-
-    setConflicts(detectedConflicts);
-    return detectedConflicts;
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
+    if (!validateForm()) {
+      console.warn('⚠️ Validación fallida');
+      return;
+    }
 
-    const detectedConflicts = detectConflicts();
+    // ✅ Enviar solo las fechas al backend
+    const duplicateData = {
+      sourceStartDate: formData.sourceStartDate,
+      sourceEndDate: formData.sourceEndDate,
+      targetStartDate: formData.targetStartDate
+    };
 
-    const sourceStart = new Date(formData.sourceStartDate);
-    const targetStart = new Date(formData.targetStartDate);
-    const daysDiff = Math.ceil((targetStart - sourceStart) / (1000 * 60 * 60 * 24));
-
-    // Filtrar turnos conflictuados
-    const conflictedShiftIds = detectedConflicts.map(c => c.shiftId);
-    const validShifts = shiftsInRange.filter(shift => !conflictedShiftIds.includes(shift.id));
-
-    // Crear turnos duplicados
-    const duplicatedShifts = validShifts.map(shift => {
-      const newStart = new Date(shift.start);
-      newStart.setDate(newStart.getDate() + daysDiff);
-      const newEnd = new Date(shift.end);
-      newEnd.setDate(newEnd.getDate() + daysDiff);
-
-      return {
-        ...shift,
-        id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
-        start: newStart.toISOString(),
-        end: newEnd.toISOString(),
-        createdAt: new Date().toISOString()
-      };
-    });
-
-    onDuplicate(duplicatedShifts, detectedConflicts);
-    onClose();
+    console.log('📤 [ShiftDuplicateModal] Enviando datos:', duplicateData);
+    onDuplicate(duplicateData);
   };
 
   if (!isOpen) return null;
@@ -211,6 +125,7 @@ const ShiftDuplicateModal = ({
         </div>
 
         <form onSubmit={handleSubmit} className="calendar-duplicate-form">
+          {/* Rango Origen */}
           <div className="calendar-section-container">
             <div className="calendar-section-header">
               <FaCalendarAlt className="calendar-section-icon" />
@@ -228,7 +143,7 @@ const ShiftDuplicateModal = ({
                   id="sourceStartDate"
                   value={formData.sourceStartDate}
                   onChange={(e) => handleChange('sourceStartDate', e.target.value)}
-                  className={errors.sourceRange ? 'calendar-input-error' : ''}
+                  className={errors.source ? 'calendar-input-error' : ''}
                 />
               </div>
 
@@ -239,23 +154,25 @@ const ShiftDuplicateModal = ({
                   id="sourceEndDate"
                   value={formData.sourceEndDate}
                   onChange={(e) => handleChange('sourceEndDate', e.target.value)}
-                  className={errors.sourceRange ? 'calendar-input-error' : ''}
+                  className={errors.source ? 'calendar-input-error' : ''}
+                  min={formData.sourceStartDate}
                 />
               </div>
             </div>
 
-            {errors.sourceRange && (
-              <span className="calendar-error-message">{errors.sourceRange}</span>
+            {errors.source && (
+              <span className="calendar-error-message">{errors.source}</span>
             )}
 
-            {previewCount > 0 && (
+            {shiftsInRange.length > 0 && (
               <div className="calendar-preview-info">
                 <FaCheck className="calendar-preview-icon" />
-                <span>Se duplicarán {previewCount} turno(s)</span>
+                <span>Se duplicarán {shiftsInRange.length} turno(s)</span>
               </div>
             )}
           </div>
 
+          {/* Rango Destino */}
           <div className="calendar-section-container">
             <div className="calendar-section-header">
               <FaCalendarAlt className="calendar-section-icon" />
@@ -265,52 +182,53 @@ const ShiftDuplicateModal = ({
               Selecciona el período donde se copiarán los turnos
             </p>
             
-            <div className="calendar-form-row">
-              <div className="calendar-form-group">
-                <label htmlFor="targetStartDate">Fecha Inicio *</label>
-                <input
-                  type="date"
-                  id="targetStartDate"
-                  value={formData.targetStartDate}
-                  onChange={(e) => handleChange('targetStartDate', e.target.value)}
-                  className={errors.targetRange ? 'calendar-input-error' : ''}
-                />
-              </div>
-
-              <div className="calendar-form-group">
-                <label htmlFor="targetEndDate">Fecha Fin *</label>
-                <input
-                  type="date"
-                  id="targetEndDate"
-                  value={formData.targetEndDate}
-                  onChange={(e) => handleChange('targetEndDate', e.target.value)}
-                  className={errors.targetRange ? 'calendar-input-error' : ''}
-                />
-              </div>
+            <div className="calendar-form-group">
+              <label htmlFor="targetStartDate">Fecha Inicio *</label>
+              <input
+                type="date"
+                id="targetStartDate"
+                value={formData.targetStartDate}
+                onChange={(e) => handleChange('targetStartDate', e.target.value)}
+                className={errors.target ? 'calendar-input-error' : ''}
+              />
             </div>
 
-            {errors.targetRange && (
-              <span className="calendar-error-message">{errors.targetRange}</span>
+            {errors.target && (
+              <span className="calendar-error-message">{errors.target}</span>
             )}
           </div>
 
+          {/* Vista Previa */}
           {shiftsInRange.length > 0 && (
             <div className="calendar-shifts-preview">
               <h4>Vista Previa de Turnos a Duplicar</h4>
               <div className="calendar-preview-list">
                 {shiftsInRange.slice(0, 5).map((shift, idx) => {
-                  const employee = employees.find(e => e.id === shift.employeeId);
+                  // ✅ Buscar empleado correctamente
+                  const employeeId = shift.extendedProps?.employeeId;
+                  const employee = employees.find(e => String(e.id) === String(employeeId));
+                  const employeeName = shift.extendedProps?.employeeName || employee?.name || 'Desconocido';
                   const shiftDate = new Date(shift.start);
+                  const startTime = shift.start.split('T')[1]?.substring(0, 5) || '';
+                  const endTime = shift.end.split('T')[1]?.substring(0, 5) || '';
+                  
+                  console.log('👤 Shift preview:', { 
+                    employeeId, 
+                    employee, 
+                    employeeName,
+                    extendedProps: shift.extendedProps 
+                  });
+                  
                   return (
                     <div key={idx} className="calendar-preview-item">
                       <div 
                         className="calendar-preview-color" 
-                        style={{ backgroundColor: shift.backgroundColor }}
+                        style={{ backgroundColor: shift.backgroundColor || shift.color }}
                       ></div>
                       <div className="calendar-preview-info-text">
-                        <span className="calendar-preview-name">{employee?.name || 'Desconocido'}</span>
+                        <span className="calendar-preview-name">{employeeName}</span>
                         <span className="calendar-preview-date">
-                          {shiftDate.toLocaleDateString('es-ES')} - {shift.role}
+                          {shiftDate.toLocaleDateString('es-ES')} • {startTime} - {endTime}
                         </span>
                       </div>
                     </div>
@@ -325,31 +243,6 @@ const ShiftDuplicateModal = ({
             </div>
           )}
 
-          {conflicts.length > 0 && (
-            <div className="calendar-conflict-warning">
-              <div className="calendar-warning-header">
-                <FaExclamationTriangle className="calendar-warning-icon" />
-                <strong>Conflictos Detectados</strong>
-              </div>
-              <p className="calendar-warning-description">
-                Los siguientes turnos tienen conflictos y NO serán duplicados:
-              </p>
-              <ul className="calendar-conflict-list">
-                {conflicts.slice(0, 3).map((conflict, idx) => (
-                  <li key={idx}>{conflict.message}</li>
-                ))}
-                {conflicts.length > 3 && (
-                  <li className="calendar-more-conflicts">
-                    +{conflicts.length - 3} conflicto(s) más
-                  </li>
-                )}
-              </ul>
-              <p className="calendar-warning-note">
-                Se crearán únicamente los turnos sin conflictos ({previewCount - conflicts.length} de {previewCount})
-              </p>
-            </div>
-          )}
-
           <div className="calendar-modal-footer">
             <button type="button" className="calendar-btn-secondary" onClick={onClose}>
               Cancelar
@@ -357,9 +250,9 @@ const ShiftDuplicateModal = ({
             <button 
               type="submit" 
               className="calendar-btn-primary"
-              disabled={previewCount === 0}
+              disabled={shiftsInRange.length === 0}
             >
-              <FaCopy /> Duplicar Horarios
+              <FaCopy /> Duplicar {shiftsInRange.length} Turno(s)
             </button>
           </div>
         </form>
