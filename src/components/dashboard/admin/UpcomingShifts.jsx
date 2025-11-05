@@ -1,53 +1,45 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { FaClock, FaEye, FaEdit } from 'react-icons/fa';
 import '../../../styles/components/dashboard/admin/UpcomingShifts.css';
+import { shiftService } from '../../../services/shiftService';
 
 const UpcomingShifts = () => {
-  const upcomingShifts = [
-    { 
-      id: 1,
-      name: "María González", 
-      time: "09:00 - 17:00", 
-      role: "Supervisor", 
-      status: "active",
-      statusLabel: "Activo"
-    },
-    { 
-      id: 2,
-      name: "Carlos Rodríguez", 
-      time: "10:00 - 18:00", 
-      role: "Técnico", 
-      status: "pending",
-      statusLabel: "Pendiente"
-    },
-    { 
-      id: 3,
-      name: "Ana Martínez", 
-      time: "14:00 - 22:00", 
-      role: "Operador", 
-      status: "active",
-      statusLabel: "Activo"
-    },
-    { 
-      id: 4,
-      name: "Luis Fernández", 
-      time: "22:00 - 06:00", 
-      role: "Nocturno", 
-      status: "active",
-      statusLabel: "Activo"
-    },
-    { 
-      id: 5,
-      name: "Patricia Silva", 
-      time: "08:00 - 16:00", 
-      role: "Asistente", 
-      status: "pending",
-      statusLabel: "Pendiente"
-    }
-  ];
+  const [upcomingShifts, setUpcomingShifts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let mounted = true;
+    const fetch = async () => {
+      try {
+        setLoading(true);
+        const shifts = await shiftService.getShiftsForCalendar();
+        if (!mounted) return;
+        // Ordenar por fecha de inicio y tomar los próximos N
+        const sorted = (shifts || []).slice().sort((a,b) => new Date(a.start) - new Date(b.start));
+        const next = sorted.slice(0, 6).map((s, idx) => ({
+          id: s.id || idx,
+          name: s.extendedProps?.employeeName || s.title || 'Sin nombre',
+          time: s.start && s.end ? `${new Date(s.start).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})} - ${new Date(s.end).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}` : '',
+          role: s.extendedProps?.role || '',
+          status: 'active',
+          statusLabel: 'Activo'
+        }));
+
+        setUpcomingShifts(next);
+      } catch (err) {
+        console.error('Error cargando próximos turnos:', err);
+        setUpcomingShifts([]);
+      } finally {
+        if (mounted) setLoading(false);
+      }
+    };
+
+    fetch();
+    return () => { mounted = false; };
+  }, []);
 
   const getInitials = (name) => {
-    return name.split(' ').map(n => n[0]).join('');
+    return (name || '').split(' ').map(n => n[0]).join('');
   };
 
   return (
@@ -60,6 +52,8 @@ const UpcomingShifts = () => {
       </div>
       
       <div className="shifts-list">
+        {loading && <div style={{padding:12}}>Cargando próximos turnos...</div>}
+        {!loading && upcomingShifts.length === 0 && <div style={{padding:12, color:'#777'}}>No hay próximos turnos programados</div>}
         {upcomingShifts.map((shift) => (
           <div key={shift.id} className="shift-item">
             <div className="shift-avatar">

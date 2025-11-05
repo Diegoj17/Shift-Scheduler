@@ -1,4 +1,33 @@
 /* ============================================
+   CONTENEDOR DE FILTROS - ANIMACIÓN
+   ============================================ */
+
+.shift-filters-container {
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease-in-out;
+  transform-origin: top;
+}
+
+/* Estado visible */
+.shift-filters-visible {
+  opacity: 1;
+  transform: translateY(0) scaleY(1);
+  height: auto;
+  overflow: visible;
+  pointer-events: all;
+}
+
+/* Estado oculto */
+.shift-filters-hidden {
+  opacity: 0;
+  transform: translateY(-10px) scaleY(0.8);
+  height: 0;
+  overflow: hidden;
+  pointer-events: none;
+  margin-bottom: 0;
+}
+
+/* ============================================
    SHIFT FILTERS - ESTILOS PRINCIPALES
    ============================================ */
 
@@ -14,6 +43,10 @@
 .shift-filters:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
   transform: translateY(-2px);
+}
+
+.shift-filters-hidden .shift-filters {
+  pointer-events: none;
 }
 
 /* ============================================
@@ -102,10 +135,14 @@
   font-weight: 500;
 }
 
+.shift-input-group input:hover:not(:disabled) {
+  border-color: #cbd5e0;
+}
+
 .shift-input-group input:focus {
   outline: none;
   border-color: #3b82f6;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
   background: #fafbfc;
 }
 
@@ -170,12 +207,18 @@
   transform: translateY(0);
 }
 
+.shift-quick-btn:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.4);
+  outline-offset: 2px;
+}
+
 .shift-quick-btn:disabled {
   background: #f8fafc;
   color: #a0aec0;
   cursor: not-allowed;
   transform: none;
   border-color: #e2e8f0;
+  box-shadow: none;
 }
 
 .shift-quick-icon {
@@ -204,6 +247,11 @@
   .shift-filters {
     padding: 20px;
     border-radius: 12px;
+  }
+
+  .shift-filters-header {
+    margin-bottom: 20px;
+    padding-bottom: 16px;
   }
 
   .shift-date-inputs {
@@ -237,8 +285,8 @@
   }
 
   .shift-filters-header {
-    margin-bottom: 20px;
-    padding-bottom: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
   }
 
   .shift-filters-header h3 {
@@ -260,12 +308,7 @@
    ACCESIBILIDAD
    ============================================ */
 
-.shift-quick-btn:focus {
-  outline: 3px solid rgba(102, 126, 234, 0.4);
-  outline-offset: 2px;
-}
-
-.shift-input-group input:focus {
-  outline: 3px solid rgba(102, 126, 234, 0.4);
+.shift-input-group input:focus-visible {
+  outline: 3px solid rgba(59, 130, 246, 0.4);
   outline-offset: 2px;
 }

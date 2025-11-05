@@ -3,15 +3,16 @@ import React, { useEffect, useState } from 'react';
 import { FaClock, FaClipboardList, FaUsers, FaUserCheck } from 'react-icons/fa';
 import '../../../styles/components/dashboard/admin/StatsGrid.css';
 import { userService } from '../../../services/userService';
+import { shiftService } from '../../../services/shiftService';
 
 const StatsGrid = () => {
   const [usersCount, setUsersCount] = useState('...');
+  const [shiftsCount, setShiftsCount] = useState('...');
 
   useEffect(() => {
     let mounted = true;
     const fetchUsersCount = async () => {
       try {
-        // mostrar indicador de carga breve
         setUsersCount('...');
         const users = await userService.getUsers();
         if (!mounted) return;
@@ -22,14 +23,30 @@ const StatsGrid = () => {
       }
     };
 
+    const fetchShiftsCount = async () => {
+      try {
+        setShiftsCount('...');
+        const resp = await shiftService.getShifts();
+        // resp puede ser un array o un objeto con .results o .data
+        const data = Array.isArray(resp) ? resp : (resp?.results || resp?.data || []);
+        const count = Array.isArray(data) ? data.length : 0;
+        if (!mounted) return;
+        setShiftsCount(count);
+      } catch (error) {
+        console.error('Error cargando turnos:', error);
+        if (mounted) setShiftsCount(0);
+      }
+    };
+
     fetchUsersCount();
+    fetchShiftsCount();
     return () => { mounted = false; };
   }, []);
 
   const statsData = [
     { 
       title: "Turnos Activos", 
-      value: "24", 
+      value: shiftsCount, 
       change: "+2", 
       icon: <FaClock />, 
       color: "blue" 

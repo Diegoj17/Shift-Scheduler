@@ -19,20 +19,45 @@ const ShiftFilters = ({ onDateRangeChange, loading }) => {
     
     // Solo ejecutar si ambas fechas están completas
     if (newDateRange.start && newDateRange.end) {
-      onDateRangeChange(new Date(newDateRange.start), new Date(newDateRange.end));
+      const startDate = new Date(newDateRange.start);
+      const endDate = new Date(newDateRange.end);
+      
+      // Validar que la fecha de inicio no sea mayor que la de fin
+      if (startDate <= endDate) {
+        onDateRangeChange(startDate, endDate);
+      } else {
+        console.warn('La fecha de inicio no puede ser mayor que la fecha de fin');
+        // Opcional: mostrar mensaje al usuario o intercambiar fechas
+      }
     }
   };
 
   const setQuickRange = (days) => {
     const end = new Date();
     const start = new Date();
-    start.setDate(start.getDate() - days);
+    start.setDate(start.getDate() - days + 1); // +1 para incluir el día actual
     
-    setDateRange({
+    const newDateRange = {
       start: start.toISOString().split('T')[0],
       end: end.toISOString().split('T')[0]
-    });
+    };
     
+    setDateRange(newDateRange);
+    onDateRangeChange(start, end);
+  };
+
+  // Función para establecer rango futuro
+  const setFutureRange = (days) => {
+    const start = new Date();
+    const end = new Date();
+    end.setDate(end.getDate() + days);
+    
+    const newDateRange = {
+      start: start.toISOString().split('T')[0],
+      end: end.toISOString().split('T')[0]
+    };
+    
+    setDateRange(newDateRange);
     onDateRangeChange(start, end);
   };
 
@@ -60,6 +85,7 @@ const ShiftFilters = ({ onDateRangeChange, loading }) => {
               onChange={handleDateChange}
               disabled={loading}
               className={loading ? 'shift-input-disabled' : ''}
+              max={dateRange.end || undefined} // ✅ Limitar fecha máxima
             />
           </div>
           
@@ -76,6 +102,7 @@ const ShiftFilters = ({ onDateRangeChange, loading }) => {
               onChange={handleDateChange}
               disabled={loading}
               className={loading ? 'shift-input-disabled' : ''}
+              min={dateRange.start || undefined} // ✅ Limitar fecha mínima
             />
           </div>
         </div>
@@ -84,31 +111,34 @@ const ShiftFilters = ({ onDateRangeChange, loading }) => {
           <span className="shift-quick-label">Rápidos:</span>
           <div className="shift-quick-buttons">
             <button
+              type="button"
               onClick={() => setQuickRange(7)}
               disabled={loading}
               className="shift-quick-btn"
               aria-label="Últimos 7 días"
             >
               <FaClock className="shift-quick-icon" aria-hidden="true" />
-              Últimos 7 días
+              7 días
             </button>
             <button
+              type="button"
               onClick={() => setQuickRange(30)}
               disabled={loading}
               className="shift-quick-btn"
               aria-label="Últimos 30 días"
             >
               <FaClock className="shift-quick-icon" aria-hidden="true" />
-              Últimos 30 días
+              30 días
             </button>
             <button
-              onClick={() => setQuickRange(90)}
+              type="button"
+              onClick={() => setFutureRange(30)}
               disabled={loading}
               className="shift-quick-btn"
-              aria-label="Últimos 3 meses"
+              aria-label="Próximos 30 días"
             >
               <FaClock className="shift-quick-icon" aria-hidden="true" />
-              Últimos 3 meses
+              Próximos 30 días
             </button>
           </div>
         </div>
