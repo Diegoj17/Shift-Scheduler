@@ -183,6 +183,28 @@ export const shiftAPI = {
     }
   },
 
+  getMyShifts: async (params = {}) => {
+    try {
+      console.log('🔄 Obteniendo mis turnos...');
+      const response = await shiftsApi.get('/shifts/my/', { params });
+      console.log('✅ Mis turnos obtenidos:', response.data?.results?.length || response.data?.length || 0);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error obteniendo mis turnos:', error.response?.status, error.response?.data);
+      throw new Error(error.response?.data?.detail || 'No se pudo obtener tus turnos');
+    }
+  },
+  
+  getShift: async (shiftId) => {
+    try {
+      const response = await shiftsApi.get(`/shifts/${shiftId}/`);
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.detail || error.response?.data?.message || 'Error al obtener turno';
+      throw new Error(message);
+    }
+  },
+
   createShift: async (shiftData) => {
     try {
       const response = await shiftsApi.post('/shifts/new/', shiftData);

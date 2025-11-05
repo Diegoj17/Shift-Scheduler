@@ -393,7 +393,121 @@ export const shiftService = {
     } catch {
       return [];
     }
+  },
+
+  getMyShifts: async (params = {}) => {
+  try {
+    console.log('🔄 [shiftService] Obteniendo mis turnos...');
+    
+    // CORREGIDO: Buscar 'token' en lugar de 'access_token'
+    const token = localStorage.getItem('token');
+    console.log('🔐 [shiftService] Token encontrado:', token ? 'Sí' : 'No');
+    
+    if (!token) {
+      console.warn('⚠️ [shiftService] No hay token de autenticación');
+      return [];
+    }
+    
+    const response = await shiftAPI.getMyShifts(params);
+    
+    if (!response) {
+      console.warn('⚠️ [shiftService] Respuesta vacía de getMyShifts');
+      return [];
+    }
+    
+    const shiftsData = Array.isArray(response) ? response : (response.results || response.data || []);
+    console.log(`✅ [shiftService] Se obtuvieron ${shiftsData.length} turnos propios`);
+    
+    return shiftsData;
+  } catch (error) {
+    console.error('❌ [shiftService] Error fetching my shifts:', error);
+    return [];
   }
+},
+  
+  // En shiftService.js - getMyShiftsForCalendar
+getMyShiftsForCalendar: async (params = {}) => {
+  try {
+    console.log('🔄 [shiftService] Obteniendo mis turnos para calendario...');
+    const shiftsData = await shiftService.getMyShifts(params);
+    
+    if (!Array.isArray(shiftsData) || shiftsData.length === 0) {
+      console.log('📭 [shiftService] No hay turnos para mostrar');
+      return [];
+    }
+    
+    console.log('📊 Primer turno raw:', shiftsData[0]);
+    
+    const shifts = shiftsData.map(shift => {
+      // Ya viene con start y end formateados desde el backend
+      const start = shift.start || (shift.date && shift.start_time ? `${shift.date}T${shift.start_time}` : null);
+      const end = shift.end || (shift.date && shift.end_time ? `${shift.date}T${shift.end_time}` : null);
+      
+      if (!start || !end) {
+        console.warn('⚠️ Turno sin start/end:', shift);
+        return null;
+      }
+      
+      const employeeName = shift.employee_name || '';
+      const shiftTypeName = shift.shift_type_name || '';
+      
+      // ✅ USAR employee_position COMO ROL
+      const role = shift.employee_position || shift.role || '';
+      const notes = shift.notes || '';
+      
+      // Determinar tipo de turno basado en la hora
+      let shiftType = 'night';
+      if (shift.start_time) {
+        const hour = parseInt(shift.start_time.split(':')[0]);
+        if (hour >= 6 && hour < 14) {
+          shiftType = 'morning';
+        } else if (hour >= 14 && hour < 22) {
+          shiftType = 'afternoon';
+        }
+      }
+      
+      // Título que se mostrará en el calendario
+      const title = role ? `${shiftTypeName} - ${role}` : shiftTypeName;
+      const color = shift.shift_type_color || 
+                   (shiftType === 'morning' ? '#4CAF50' : 
+                    shiftType === 'afternoon' ? '#FF9800' : '#2196F3');
+      
+      return {
+        id: shift.id,
+        title,
+        start,
+        end,
+        role,
+        type: shiftType,
+        location: shift.location || 'Sucursal Principal',
+        department: shift.department || 'General',
+        status: shift.status || 'confirmed',
+        backgroundColor: color,
+        borderColor: 'transparent',
+        textColor: 'white',
+        extendedProps: {
+          employeeId: shift.employee,
+          employeeName,
+          employeePosition: shift.employee_position, // ← AGREGAR ESTO
+          shiftTypeId: shift.shift_type,
+          shiftTypeName,
+          role,
+          notes,
+          type: shiftType,
+          location: shift.location || 'Sucursal Principal',
+          department: shift.department || 'General',
+          status: shift.status || 'confirmed'
+        }
+      };
+    }).filter(Boolean);
+    
+    console.log('✅ Turnos formateados para calendario:', shifts.length);
+    return shifts;
+  } catch (error) {
+    console.error('❌ [shiftService] Error fetching my shifts for calendar:', error);
+    throw error;
+  }
+},
 };
 
 export default shiftService;

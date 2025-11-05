@@ -1,6 +1,7 @@
 import React from 'react';
 import { HiOutlineCalendar, HiOutlineClipboardList, HiOutlineChartBar, HiOutlineUsers } from 'react-icons/hi';
 import { FaArrowRight } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import '../../../styles/components/dashboard/admin/WelcomeWidgets.css';
 
 const WelcomeWidgets = () => {
@@ -8,7 +9,8 @@ const WelcomeWidgets = () => {
     {
       icon: <HiOutlineCalendar />,
       title: "Gestión de Turnos",
-      description: "Organiza y gestiona los turnos de tu equipo de forma eficiente."
+      description: "Organiza y gestiona los turnos de tu equipo de forma eficiente.",
+      path: '/admin/calendar'
     },
     {
       icon: <HiOutlineClipboardList />,
@@ -23,9 +25,11 @@ const WelcomeWidgets = () => {
     {
       icon: <HiOutlineUsers />,
       title: "Equipo",
-      description: "Gestiona los miembros de tu equipo y sus horarios."
+      description: "Gestiona los miembros de tu equipo y sus horarios.",
+      path: '/admin/management'
     }
   ];
+  const navigate = useNavigate();
 
   return (
     <div className="widgets-section">
@@ -35,7 +39,14 @@ const WelcomeWidgets = () => {
       </h3>
       <div className="welcome-widgets">
         {widgets.map((widget, index) => (
-          <div key={index} className="welcome-card">
+          <div
+            key={index}
+            className={`welcome-card ${widget.path ? 'clickable' : ''}`}
+            role={widget.path ? 'button' : undefined}
+            tabIndex={widget.path ? 0 : undefined}
+            onClick={() => widget.path && navigate(widget.path)}
+            onKeyPress={(e) => { if (widget.path && (e.key === 'Enter' || e.key === ' ')) navigate(widget.path); }}
+          >
             <div className="card-icon">
               {widget.icon}
             </div>
