@@ -47,59 +47,47 @@ const authService = {
   },
 
   resetPassword: async (email) => {
-  try {
-    const response = await authApi.post('/password/reset/', { email });
-    
-    // 🔽 CORRECCIÓN: Verificar si el backend indica que el correo no existe
-    if (response.data.message && (
-        response.data.message.toLowerCase().includes('no existe') || 
-        response.data.message.toLowerCase().includes('no encontrado') ||
-        response.data.message.toLowerCase().includes('no registrado') ||
-        response.data.message.toLowerCase().includes('inexistente')
-    )) {
-      throw new Error('No existe usuario con ese correo');
-    }
-    
-    return response.data;
-  } catch (error) {
-    const remoteMsg = String(error.response?.data?.message || '').toLowerCase();
+    try {
+      const response = await authApi.post('/password/reset/', { email });
 
-    // Si el backend devuelve el mensaje genérico de privacidad (p. ej. "Si el email existe, recibirás instrucciones")
-    // algunas APis devuelven esto con status != 200. Aquí lo tratamos como respuesta válida para mostrar el modal de éxito.
-    if (remoteMsg && (
-      remoteMsg.includes('si el email existe') ||
-      remoteMsg.includes('si el correo existe') ||
-      remoteMsg.includes('if the email exists') ||
-      remoteMsg.includes('si el email') ||
-      remoteMsg.includes('si el correo') ||
-      remoteMsg.includes('recibirás instrucciones') ||
-      remoteMsg.includes('recibirá instrucciones')
-    )) {
-      return { message: error.response.data.message };
-    }
+      // Solo un status 2xx llega aquí (try block)
+      const rawMsg = response.data?.message || response.data?.detail || '';
+      const lower = String(rawMsg).toLowerCase();
 
-    // Si el backend indica explícitamente que el usuario no existe
-    if (remoteMsg && (
-      remoteMsg.includes('no existe') ||
-      remoteMsg.includes('no encontrado') ||
-      remoteMsg.includes('no registrado') ||
-      remoteMsg.includes('inexistente')
-    )) {
-      throw new Error('No existe usuario con ese correo');
-    }
+      // Doble verificación: incluso en respuesta exitosa, revisar si dice "no existe"
+      if (lower.includes('no existe') || lower.includes('no encontrado') || lower.includes('no registrado') || lower.includes('inexistente')) {
+        throw new Error('No existe usuario con ese correo');
+      }
 
-    if (error.response?.status === 429) {
-      throw new Error('Ya solicitaste un restablecimiento recientemente. Espera una hora.');
-    }
+      // Mensaje de éxito real
+      const successMessage = rawMsg || 'Se ha enviado un enlace de recuperación a tu correo electrónico.';
+      return { success: true, message: successMessage, data: response.data };
 
-    // Si ya es nuestro error personalizado, lo propagamos
-    if (error.message === 'No existe usuario con ese correo') {
-      throw error;
-    }
+    } catch (error) {
+      // Aquí llegan todos los errores (status 4xx, 5xx, errores de red, etc.)
+      const remoteRaw = error.response?.data?.message || error.response?.data?.detail || '';
+      const remoteMsg = String(remoteRaw).toLowerCase();
 
-    throw new Error(error.response?.data?.message || 'Error al enviar enlace de recuperación');
-  }
-},
+      // Rate limit
+      if (error.response?.status === 429) {
+        throw new Error('Ya solicitaste un restablecimiento recientemente. Espera una hora.');
+      }
+
+      // Usuario no existe (status 400, 404, etc.)
+      if (remoteMsg && (remoteMsg.includes('no existe') || remoteMsg.includes('no encontrado') || remoteMsg.includes('no registrado') || remoteMsg.includes('inexistente') || remoteMsg.includes('not found') || remoteMsg.includes('does not exist'))) {
+        throw new Error('No existe usuario con ese correo');
+      }
+
+      // Cualquier otro error del servidor con status 4xx o 5xx
+      if (error.response?.status >= 400) {
+        const errorMsg = remoteRaw || 'Error al enviar enlace de recuperación';
+        throw new Error(String(errorMsg));
+      }
+
+      // Error de red u otro tipo
+      throw new Error(error.message || 'Error al enviar enlace de recuperación');
+    }
+  },
 
   confirmPasswordReset: async (uidOrObj, token, newPassword) => {
     try {
