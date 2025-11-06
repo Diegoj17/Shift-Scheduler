@@ -47,16 +47,59 @@ const authService = {
   },
 
   resetPassword: async (email) => {
-    try {
-      const response = await authApi.post('/password/reset/', { email });
-      return response.data;
-    } catch (error) {
-      if (error.response?.status === 429) {
-        throw new Error('Ya solicitaste un restablecimiento recientemente. Espera una hora.');
-      }
-      throw new Error(error.response?.data?.message || 'Error al enviar enlace de recuperación');
+  try {
+    const response = await authApi.post('/password/reset/', { email });
+    
+    // 🔽 CORRECCIÓN: Verificar si el backend indica que el correo no existe
+    if (response.data.message && (
+        response.data.message.toLowerCase().includes('no existe') || 
+        response.data.message.toLowerCase().includes('no encontrado') ||
+        response.data.message.toLowerCase().includes('no registrado') ||
+        response.data.message.toLowerCase().includes('inexistente')
+    )) {
+      throw new Error('No existe usuario con ese correo');
     }
-  },
+    
+    return response.data;
+  } catch (error) {
+    const remoteMsg = String(error.response?.data?.message || '').toLowerCase();
+
+    // Si el backend devuelve el mensaje genérico de privacidad (p. ej. "Si el email existe, recibirás instrucciones")
+    // algunas APis devuelven esto con status != 200. Aquí lo tratamos como respuesta válida para mostrar el modal de éxito.
+    if (remoteMsg && (
+      remoteMsg.includes('si el email existe') ||
+      remoteMsg.includes('si el correo existe') ||
+      remoteMsg.includes('if the email exists') ||
+      remoteMsg.includes('si el email') ||
+      remoteMsg.includes('si el correo') ||
+      remoteMsg.includes('recibirás instrucciones') ||
+      remoteMsg.includes('recibirá instrucciones')
+    )) {
+      return { message: error.response.data.message };
+    }
+
+    // Si el backend indica explícitamente que el usuario no existe
+    if (remoteMsg && (
+      remoteMsg.includes('no existe') ||
+      remoteMsg.includes('no encontrado') ||
+      remoteMsg.includes('no registrado') ||
+      remoteMsg.includes('inexistente')
+    )) {
+      throw new Error('No existe usuario con ese correo');
+    }
+
+    if (error.response?.status === 429) {
+      throw new Error('Ya solicitaste un restablecimiento recientemente. Espera una hora.');
+    }
+
+    // Si ya es nuestro error personalizado, lo propagamos
+    if (error.message === 'No existe usuario con ese correo') {
+      throw error;
+    }
+
+    throw new Error(error.response?.data?.message || 'Error al enviar enlace de recuperación');
+  }
+},
 
   confirmPasswordReset: async (uidOrObj, token, newPassword) => {
     try {
