@@ -96,7 +96,11 @@ const authService = {
     if (error.message === 'No existe usuario con ese correo') {
       throw error;
     }
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 4a7aac5ebb7577e4481600b6efbc4e56e39714cc
     throw new Error(error.response?.data?.message || 'Error al enviar enlace de recuperación');
   }
 },
