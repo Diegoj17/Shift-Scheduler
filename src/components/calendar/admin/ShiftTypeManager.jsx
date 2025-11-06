@@ -51,52 +51,71 @@ const ShiftTypeManager = ({ shiftTypes, onSave, onUpdate, onDelete }) => {
   };
 
   const validateForm = () => {
-    const newErrors = {};
+  const newErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'El nombre es requerido';
-    } else {
-      const nameValidation = validateShiftTypeName(formData.name, shiftTypes, editingType?.id);
-      if (!nameValidation.valid) {
-        newErrors.name = nameValidation.message;
-      }
+  if (!formData.name.trim()) {
+    newErrors.name = 'El nombre es requerido';
+  } else {
+    const nameValidation = validateShiftTypeName(formData.name, shiftTypes, editingType?.id);
+    if (!nameValidation.valid) {
+      newErrors.name = nameValidation.message;
     }
+  }
 
-    const rangeValidation = validateShiftTypeRange(formData.startTime, formData.endTime);
-    if (!rangeValidation.valid) {
-      newErrors.time = rangeValidation.message;
-    }
+  // ✅ CORREGIDO: Validación mejorada para turnos nocturnos
+  const start = new Date(`1970-01-01T${formData.startTime}`);
+  const end = new Date(`1970-01-01T${formData.endTime}`);
+  const isOvernight = end < start; // Si end < start, es turno nocturno
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
+  if (!isOvernight && start >= end) {
+    // Solo validar para turnos del mismo día
+    newErrors.time = 'La hora de fin debe ser mayor a la hora de inicio';
+  }
+
+  // Para turnos nocturnos, no mostramos error (es normal)
+
+  setErrors(newErrors);
+  return Object.keys(newErrors).length === 0;
+};
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    
-    if (!validateForm()) return;
+  e.preventDefault();
+  
+  if (!validateForm()) return;
 
-    const shiftTypeData = {
-      id: editingType?.id || Date.now().toString(),
-      name: formData.name.trim(),
-      startTime: formData.startTime,
-      endTime: formData.endTime,
-      color: formData.color,
-      createdAt: editingType?.createdAt || new Date().toISOString()
-    };
-
-    if (editingType) {
-      onUpdate(shiftTypeData);
-    } else {
-      onSave(shiftTypeData);
-    }
-
-    handleCloseModal();
+  // ✅ CORREGIDO: Usar los nombres de campo que espera el backend
+  const shiftTypeData = {
+    name: formData.name.trim(),
+    start_time: formData.startTime, // El servicio lo convertirá
+    end_time: formData.endTime,     // El servicio lo convertirá  
+    color: formData.color
   };
 
-  const handleDelete = (typeId) => {
-    onDelete(typeId);
+  console.log('📤 Enviando datos al servicio:', shiftTypeData);
+
+  if (editingType) {
+    onUpdate(editingType.id, shiftTypeData); // Pasar ID y datos
+  } else {
+    onSave(shiftTypeData);
+  }
+
+  handleCloseModal();
+};
+
+  // Eliminar tipo de turno
+  const handleDelete = (id) => {
+    // Cerrar el overlay de confirmación primero
     setShowDeleteConfirm(null);
+
+    if (onDelete && typeof onDelete === 'function') {
+      try {
+        onDelete(id);
+      } catch (err) {
+        console.error('Error al eliminar tipo de turno:', err);
+      }
+    } else {
+      console.warn('onDelete prop no definida en ShiftTypeManager');
+    }
   };
 
   return (

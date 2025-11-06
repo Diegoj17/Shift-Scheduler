@@ -16,6 +16,13 @@ const mapFrontendToBackend = (f) => ({
   end_time: padSeconds(f.end_time || f.endTime),
   color: f.color
 });
+// Helper: detecta si un rango de tiempo cruza medianoche (p.ej. 22:00 - 06:00)
+const isOvernight = (startTime, endTime) => {
+  if (!startTime || !endTime) return false;
+  const start = new Date(`1970-01-01T${startTime}`);
+  const end = new Date(`1970-01-01T${endTime}`);
+  return end < start; // Si end es menor que start, cruza medianoche
+};
 
 export const shiftService = {
   // Crear un nuevo turno
@@ -297,32 +304,73 @@ export const shiftService = {
   },
 
   createShiftType: async (shiftTypeData) => {
-    try {
-      console.log('🔄 shiftService: Creando tipo de turno...', shiftTypeData);
-      
-      // Validar datos requeridos
-      if (!shiftTypeData.name || !shiftTypeData.start_time || !shiftTypeData.end_time) {
-        throw new Error('Faltan datos requeridos: name, start_time, end_time');
-      }
-
-      const payload = {
-        name: shiftTypeData.name,
-        start_time: padSeconds(shiftTypeData.start_time),
-        end_time: padSeconds(shiftTypeData.end_time),
-        color: shiftTypeData.color 
-      };
-
-      console.log('📤 Payload para crear tipo de turno:', payload);
-      
-      const response = await shiftAPI.createShiftType(payload);
-      console.log('✅ Tipo de turno creado exitosamente:', response);
-      
-      return response;
-    } catch (error) {
-      console.error('❌ shiftService: Error creating shift type:', error);
-      throw error;
+  try {
+    console.log('🔄 shiftService: Creando tipo de turno...', shiftTypeData);
+    
+    // Validar datos requeridos
+    if (!shiftTypeData.name?.trim()) {
+      throw new Error('El nombre es requerido');
     }
-  },
+    if (!shiftTypeData.start_time && !shiftTypeData.startTime) {
+      throw new Error('La hora de inicio es requerida');
+    }
+    if (!shiftTypeData.end_time && !shiftTypeData.endTime) {
+      throw new Error('La hora de fin es requerida');
+    }
+
+    const payload = {
+      name: shiftTypeData.name.trim(),
+      start_time: padSeconds(shiftTypeData.start_time || shiftTypeData.startTime),
+      end_time: padSeconds(shiftTypeData.end_time || shiftTypeData.endTime),
+      color: shiftTypeData.color || '#3788d8'
+    };
+
+    console.log('📤 Payload para crear tipo de turno:', payload);
+    
+    // ✅ CORREGIDO: Validación mejorada para turnos nocturnos
+    const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
+    if (!timeRegex.test(payload.start_time) || !timeRegex.test(payload.end_time)) {
+      throw new Error('Formato de hora inválido. Use HH:MM o HH:MM:SS');
+    }
+
+    // ✅ NUEVA LÓGICA: Detectar si es un turno nocturno (cruza medianoche)
+    const isOvernightShift = isOvernight(payload.start_time, payload.end_time);
+    
+    if (!isOvernightShift) {
+      // Para turnos normales (mismo día), validar que end > start
+      const start = new Date(`1970-01-01T${payload.start_time}`);
+      const end = new Date(`1970-01-01T${payload.end_time}`);
+      if (start >= end) {
+        throw new Error('La hora de fin debe ser mayor a la hora de inicio');
+      }
+    }
+    // Para turnos nocturnos, no hacemos esta validación porque es normal que end < start
+
+    console.log('🚀 Enviando request a la API...');
+    const response = await shiftAPI.createShiftType(payload);
+    console.log('✅ Tipo de turno creado exitosamente:', response);
+    
+    return response;
+  } catch (error) {
+    console.error('❌ shiftService: Error creating shift type:', error);
+    console.error('❌ Error response:', error.response?.data);
+    
+    if (error.response?.data) {
+      const errorData = error.response.data;
+      if (typeof errorData === 'object') {
+        const errorMessages = Object.entries(errorData).map(([key, value]) => {
+          if (Array.isArray(value)) return `${key}: ${value.join(', ')}`;
+          return `${key}: ${value}`;
+        });
+        throw new Error(errorMessages.join(' | '));
+      }
+      throw new Error(errorData.detail || errorData.error || 'Error del servidor');
+    }
+    
+    throw error;
+  }
+},
+
 
   updateShiftType: async (shiftTypeId, shiftTypeData) => {
     try {
@@ -426,9 +474,10 @@ export const shiftService = {
 },
   
   // En shiftService.js - getMyShiftsForCalendar
+// En shiftService.js - getMyShiftsForCalendar
 getMyShiftsForCalendar: async (params = {}) => {
   try {
-    console.log('🔄 [shiftService] Obteniendo mis turnos para calendario...');
+    console.log('🔄 [shiftService] Obteniendo mis turnos para calendario con params:', params);
     const shiftsData = await shiftService.getMyShifts(params);
     
     if (!Array.isArray(shiftsData) || shiftsData.length === 0) {
@@ -436,67 +485,62 @@ getMyShiftsForCalendar: async (params = {}) => {
       return [];
     }
     
-    console.log('📊 Primer turno raw:', shiftsData[0]);
+    console.log('📊 Turnos raw recibidos:', shiftsData.length);
     
     const shifts = shiftsData.map(shift => {
-      // Ya viene con start y end formateados desde el backend
-      const start = shift.start || (shift.date && shift.start_time ? `${shift.date}T${shift.start_time}` : null);
-      const end = shift.end || (shift.date && shift.end_time ? `${shift.date}T${shift.end_time}` : null);
+      // Construir fechas ISO
+      const startISO = shift.start || (shift.date && shift.start_time ? `${shift.date}T${shift.start_time}` : null);
+      const endISO = shift.end || (shift.date && shift.end_time ? `${shift.date}T${shift.end_time}` : null);
       
-      if (!start || !end) {
+      if (!startISO || !endISO) {
         console.warn('⚠️ Turno sin start/end:', shift);
         return null;
       }
       
-      const employeeName = shift.employee_name || '';
-      const shiftTypeName = shift.shift_type_name || '';
+      // Convertir a objetos Date para FullCalendar
+      const startDate = new Date(startISO);
+      const endDate = new Date(endISO);
       
-      // ✅ USAR employee_position COMO ROL
+      // Validar que las fechas sean válidas
+      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+        console.warn('⚠️ Fechas inválidas:', { startISO, endISO });
+        return null;
+      }
+      
+      const employeeName = shift.employee_name || '';
+      const shiftTypeName = shift.shift_type_name || 'Turno';
       const role = shift.employee_position || shift.role || '';
       const notes = shift.notes || '';
       
-      // Determinar tipo de turno basado en la hora
-      let shiftType = 'night';
-      if (shift.start_time) {
-        const hour = parseInt(shift.start_time.split(':')[0]);
-        if (hour >= 6 && hour < 14) {
-          shiftType = 'morning';
-        } else if (hour >= 14 && hour < 22) {
-          shiftType = 'afternoon';
-        }
-      }
+      // ✅ SOLO USAR EL COLOR DE LA BASE DE DATOS - SIN DEFAULTS
+      const color = shift.shift_type_color;
       
-      // Título que se mostrará en el calendario
-      const title = role ? `${shiftTypeName} - ${role}` : shiftTypeName;
-      const color = shift.shift_type_color || 
-                   (shiftType === 'morning' ? '#4CAF50' : 
-                    shiftType === 'afternoon' ? '#FF9800' : '#2196F3');
+      console.log(`✅ Turno ${shift.id} - Color desde BD:`, color);
       
       return {
         id: shift.id,
-        title,
-        start,
-        end,
+        title: role ? `${shiftTypeName} - ${role}` : shiftTypeName,
+        start: startDate,
+        end: endDate,
         role,
-        type: shiftType,
         location: shift.location || 'Sucursal Principal',
         department: shift.department || 'General',
         status: shift.status || 'confirmed',
-        backgroundColor: color,
-        borderColor: 'transparent',
+        backgroundColor: color,  // ✅ Solo color de BD
+        borderColor: color,      // ✅ Solo color de BD
         textColor: 'white',
         extendedProps: {
           employeeId: shift.employee,
           employeeName,
-          employeePosition: shift.employee_position, // ← AGREGAR ESTO
+          employeePosition: shift.employee_position,
           shiftTypeId: shift.shift_type,
           shiftTypeName,
           role,
           notes,
-          type: shiftType,
           location: shift.location || 'Sucursal Principal',
           department: shift.department || 'General',
-          status: shift.status || 'confirmed'
+          status: shift.status || 'confirmed',
+          color: color  // ✅ Guardar el color en extendedProps
         }
       };
     }).filter(Boolean);

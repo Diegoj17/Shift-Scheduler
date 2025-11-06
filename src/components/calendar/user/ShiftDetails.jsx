@@ -5,11 +5,43 @@ import '../../../styles/components/calendar/user/ShiftDetails.css';
 const ShiftDetails = ({ shift, isOpen, onClose, onExport }) => {
   if (!isOpen || !shift) return null;
 
+  // Función para determinar el tipo de turno basado en el nombre o color
+  const getShiftTypeFromData = (shift) => {
+    // Si tenemos el color de la BD, usarlo para determinar el tipo
+    const color = shift.extendedProps?.color || shift.backgroundColor;
+    
+    console.log('🎨 ShiftDetails - Color desde BD:', color);
+    
+    // Mapear colores de la BD a tipos
+    if (color === '#4caf50') return 'morning';     // Verde - Mañana
+    if (color === '#ffc107') return 'afternoon';   // Amarillo - Tarde
+    if (color === '#2196F3') return 'night';       // Azul - Noche
+    
+    // ✅ LÓGICA MEJORADA: determinar por hora de inicio
+    if (shift.start) {
+      const startHour = new Date(shift.start).getHours();
+      console.log('⏰ ShiftDetails - Hora de inicio:', startHour);
+      
+      if (startHour >= 6 && startHour < 12) return 'morning';
+      if (startHour >= 12 && startHour < 18) return 'afternoon';
+      return 'night';
+    }
+    
+    // Fallback: determinar por nombre
+    const shiftTypeName = shift.extendedProps?.shiftTypeName || '';
+    if (shiftTypeName.toLowerCase().includes('tarde')) return 'afternoon';
+    if (shiftTypeName.toLowerCase().includes('noche')) return 'night';
+    
+    return 'morning';
+  };
+
   const formatTime = (dateString) => {
-    return new Date(dateString).toLocaleTimeString('es-ES', {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('es-ES', {
       hour: '2-digit',
-      minute: '2-digit'
-    });
+      minute: '2-digit',
+      hour12: true
+    }).toLowerCase();
   };
 
   const formatDate = (dateString) => {
@@ -23,9 +55,9 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport }) => {
 
   const getShiftTypeColor = (type) => {
     const colors = {
-      morning: '#4CAF50',
-      afternoon: '#FF9800',
-      night: '#2196F3'
+      morning: '#4CAF50',    // Verde
+      afternoon: '#FFC107',  // Amarillo/naranja
+      night: '#2196F3'       // Azul
     };
     return colors[type] || '#757575';
   };
@@ -33,14 +65,31 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport }) => {
   const getThemeForType = (type) => {
     const themes = {
       morning: { primary: '#4CAF50', dark: '#388E3C', icon: <FiSun />, label: 'Mañana' },
-      afternoon: { primary: '#FF9800', dark: '#F57C00', icon: <FiClock />, label: 'Tarde' },
+      afternoon: { primary: '#FFC107', dark: '#FFA000', icon: <FiClock />, label: 'Tarde' },
       night: { primary: '#2196F3', dark: '#1976D2', icon: <FiMoon />, label: 'Noche' }
     };
     return themes[type] || themes['night'];
   };
 
-  const theme = getThemeForType(shift.type);
+  // Obtener el tipo basado en los datos reales de la BD
+  const correctShiftType = getShiftTypeFromData(shift);
+  const theme = getThemeForType(correctShiftType);
+  
+  // ✅ CORREGIDO: Declarar actualColor una sola vez
+  const actualColor = shift.extendedProps?.color || shift.backgroundColor || getShiftTypeColor(correctShiftType);
+  
   const duration = Math.round((new Date(shift.end) - new Date(shift.start)) / (1000 * 60 * 60));
+
+  // Debug para verificar
+  console.log('📊 ShiftDetails - Información del turno:', {
+    horaInicio: new Date(shift.start).getHours(),
+    tipo: correctShiftType,
+    colorBD: shift.extendedProps?.color,
+    backgroundColor: shift.backgroundColor,
+    colorUsado: actualColor,
+    nombreTipo: shift.extendedProps?.shiftTypeName,
+    extendedProps: shift.extendedProps // Ver todos los extendedProps
+  });
 
   return (
     <div className="shift-modal-overlay" onClick={onClose}>
@@ -59,13 +108,16 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport }) => {
         <div className="shift-details-header">
           <div
             className="shift-type-indicator"
-            style={{ backgroundColor: getShiftTypeColor(shift.type) }}
+            style={{ backgroundColor: actualColor }}  // ✅ Color real de la BD
           >
             {theme.icon}
           </div>
           <div className="shift-header-content">
             <h2>Detalles del Turno</h2>
             <p className="shift-header-subtitle">{shift.role} • {shift.department}</p>
+            <p style={{ fontSize: '12px', opacity: 0.8, margin: 0 }}>
+              {shift.extendedProps?.shiftTypeName}
+            </p>
           </div>
         </div>
         
@@ -141,7 +193,7 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport }) => {
                 <span 
                   className="shift-type-badge"
                   style={{ 
-                    backgroundColor: getShiftTypeColor(shift.type)
+                    backgroundColor: actualColor  // ✅ Color real de la BD
                   }}
                 >
                   {theme.icon}

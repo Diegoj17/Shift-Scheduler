@@ -24,155 +24,168 @@ import '../../styles/pages/user/ShiftCalendar.css';
 const ShiftCalendarPage = () => {
   const navigate = useNavigate();
   
-  // Estados para el layout
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeItem, setActiveItem] = useState("mi-calendario");
-
-  const filtersContainerRef = useRef(null);
-
-  // Estados para el calendario
   const calendarRef = useRef(null);
-  const [viewType, _setViewType] = useState('timeGridWeek');
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
-  const [_dateRange, setDateRange] = useState({
+  const [dateRange, setDateRange] = useState({
     start: new Date(),
     end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
   });
   const [loading, setLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(true);
   const [shifts, setShifts] = useState([]);
+  const [calendarKey, setCalendarKey] = useState(0);
 
-  // ✅ Cargar turnos reales al montar el componente
   useEffect(() => {
-  const checkAuth = () => {
-    // CORREGIDO: Buscar 'token' en lugar de 'access_token'
     const token = localStorage.getItem('token');
-    console.log('🔐 [ShiftCalendarPage] Verificando autenticación:', token ? 'Autenticado' : 'No autenticado');
-    
     if (!token) {
-      console.warn('⚠️ [ShiftCalendarPage] Usuario no autenticado, redirigiendo...');
       navigate('/login');
-      return false;
+      return;
     }
-    return true;
-  };
-
-  if (checkAuth()) {
     loadMyShifts();
-  }
-}, [navigate]);
+  }, [navigate]);
 
-  const loadMyShifts = async () => {
+  useEffect(() => {
+    if (calendarRef.current) {
+      setTimeout(() => {
+        calendarRef.current.getApi().updateSize();
+      }, 350);
+    }
+  }, [sidebarOpen]);
+
+  // Modifica tu loadMyShifts para procesar los datos
+// Agrega este debug en loadMyShifts
+const loadMyShifts = async () => {
   setLoading(true);
   try {
-    console.log('🔄 [ShiftCalendarPage] Cargando turnos del usuario...');
-    
-    // Verificar información del usuario actual
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        console.log('👤 [ShiftCalendarPage] Usuario del token:', payload);
-        console.log('👤 [ShiftCalendarPage] User ID:', payload.user_id);
-      } catch (e) {
-        console.error('Error decodificando token:', e);
-      }
-    }
-    
+    console.log('🔄 Cargando turnos iniciales...');
     const myShifts = await shiftService.getMyShiftsForCalendar();
-    console.log('✅ [ShiftCalendarPage] Turnos cargados:', myShifts);
-    setShifts(myShifts);
+    
+    // Debug detallado de los datos crudos
+    console.log('📦 Datos crudos recibidos:', myShifts);
+    myShifts.forEach((shift, index) => {
+      console.log(`📊 Turno ${index + 1}:`, {
+        id: shift.id,
+        title: shift.title,
+        start: shift.start,
+        end: shift.end,
+        isDate: shift.start instanceof Date,
+        startHour: shift.start instanceof Date ? shift.start.getHours() : 'N/A'
+      });
+    });
+    
+    // Procesar los turnos
+    const processedShifts = myShifts.map(shift => {
+      const shiftType = getShiftTypeFromData(shift);
+      
+      return {
+        ...shift,
+        extendedProps: {
+          ...shift.extendedProps,
+          type: shiftType,
+          role: shift.extendedProps?.role || shift.title?.split(' - ')[1] || 'Supervisor',
+          department: shift.extendedProps?.department || 'Turnos',
+          location: shift.extendedProps?.location || 'Principal'
+        }
+      };
+    });
+    
+    console.log('✅ Turnos procesados:', processedShifts);
+    setShifts(processedShifts);
+    setCalendarKey(prev => prev + 1);
   } catch (error) {
-    console.error('❌ [ShiftCalendarPage] Error cargando turnos:', error);
+    console.error('❌ Error cargando turnos:', error);
   } finally {
     setLoading(false);
   }
 };
 
-  useEffect(() => {
-  if (!calendarRef.current) return;
+  const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+  const handleItemClick = (itemId) => setActiveItem(itemId);
+  const toggleFilters = () => setShowFilters(prev => !prev);
 
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
-      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-        // Pequeño delay para asegurar que las transiciones CSS hayan terminado
-        setTimeout(() => {
-          try {
-            calendarRef.current?.getApi()?.updateSize();
-          } catch (error) {
-            // Ignorar errores silenciosamente
-          }
-        }, 50);
-      }
-    });
-  });
-
-  if (filtersContainerRef.current) {
-    observer.observe(filtersContainerRef.current, {
-      attributes: true,
-      attributeFilter: ['class']
-    });
-  }
-
-  return () => observer.disconnect();
-}, []);
-
-
-  // Funciones para el layout
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
-
-  const handleItemClick = (itemId) => {
-    setActiveItem(itemId);
-  };
-
-  const toggleFilters = () => {
-  // Usar requestAnimationFrame para sincronizar con el ciclo de pintado del navegador
-  requestAnimationFrame(() => {
-    setShowFilters(prev => !prev);
-  });
-};
-
-  // Funciones del calendario
   const handleDatesSet = (dateInfo) => {
     setDateRange({ start: dateInfo.start, end: dateInfo.end });
   };
-  
 
   const handleDateRangeChange = async (start, end) => {
-    setDateRange({ start, end });
-    setLoading(true);
-    try {
-      const params = {
-        start_date: start.toISOString().split('T')[0],
-        end_date: end.toISOString().split('T')[0]
+  console.log('📅 Filtrando turnos del', start.toLocaleDateString(), 'al', end.toLocaleDateString());
+  
+  setDateRange({ start, end });
+  setLoading(true);
+  
+  try {
+    const params = {
+      start_date: start.toISOString().split('T')[0],
+      end_date: end.toISOString().split('T')[0]
+    };
+    
+    const filteredShifts = await shiftService.getMyShiftsForCalendar(params);
+    
+    // Procesar los turnos filtrados también
+    const processedShifts = filteredShifts.map(shift => {
+      const shiftType = getShiftTypeFromData(shift);
+      
+      return {
+        ...shift,
+        extendedProps: {
+          ...shift.extendedProps,
+          type: shiftType
+        }
       };
-      const filteredShifts = await shiftService.getMyShiftsForCalendar(params);
-      setShifts(filteredShifts);
-    } catch (error) {
-      console.error('Error filtrando turnos:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    });
+    
+    console.log('✅ Turnos filtrados procesados:', processedShifts.length);
+    setShifts(processedShifts);
+    setCalendarKey(prev => prev + 1);
+    
+    // Resto del código...
+  } catch (error) {
+    console.error('❌ Error filtrando turnos:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleEventClick = (clickInfo) => {
-    const eventData = clickInfo.event.extendedProps;
-    setSelectedEvent({
-      ...eventData,
-      start: clickInfo.event.start,
-      end: clickInfo.event.end
-    });
-    setShowDetails(true);
-  };
+  const event = clickInfo.event;
+  const eventData = event.extendedProps;
+  
+  console.log('🖱️ Evento clickeado:', {
+    id: event.id,
+    title: event.title,
+    backgroundColor: event.backgroundColor,
+    extendedProps: eventData
+  });
+  
+  setSelectedEvent({
+    ...eventData,
+    id: event.id,
+    title: event.title,
+    start: event.start,
+    end: event.end,
+    backgroundColor: event.backgroundColor, // ✅ Pasar el color del evento
+    type: eventData.type || getShiftTypeFromData(event),
+    // ✅ Asegurar que todos los datos estén presentes
+    role: eventData.role || 'Supervisor',
+    department: eventData.department || 'Turnos', 
+    location: eventData.location || 'Principal',
+    shiftTypeName: eventData.shiftTypeName || 'Turno'
+  });
+  setShowDetails(true);
+};
 
   const handleResetFilters = async () => {
+    console.log('🔄 Restableciendo filtros...');
     const start = new Date();
     const end = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     setDateRange({ start, end });
     await loadMyShifts();
+    if (calendarRef.current) {
+      calendarRef.current.getApi().today();
+    }
   };
 
   const handleExportCalendar = () => {
@@ -342,6 +355,59 @@ const ShiftCalendarPage = () => {
   printWindow.document.close();
 };
 
+// Función corregida con lógica precisa para determinar el tipo de turno
+const getShiftTypeFromData = (shift) => {
+  console.log('🔍 Analizando turno para tipo:', {
+    title: shift.title,
+    start: shift.start,
+    startHour: shift.start instanceof Date ? shift.start.getHours() : 'N/A'
+  });
+
+  // Si ya existe un tipo definido, usarlo
+  if (shift.extendedProps?.type) {
+    return shift.extendedProps.type;
+  }
+
+  // Determinar por la hora de inicio (lógica corregida)
+  if (shift.start instanceof Date) {
+    const startHour = shift.start.getHours();
+    console.log('⏰ Hora de inicio:', startHour);
+    
+    // ✅ LÓGICA CORREGIDA:
+    // Mañana: 6:00 AM - 11:59 AM (6-11)
+    // Tarde: 12:00 PM - 5:59 PM (12-17)  
+    // Noche: 6:00 PM - 5:59 AM (18-23, 0-5)
+    
+    if (startHour >= 6 && startHour < 12) {
+      console.log('✅ Clasificado como: MAÑANA (6:00-11:59)');
+      return 'morning';
+    } else if (startHour >= 12 && startHour < 18) {
+      console.log('✅ Clasificado como: TARDE (12:00-17:59)');
+      return 'afternoon';
+    } else {
+      console.log('✅ Clasificado como: NOCHE (18:00-5:59)');
+      return 'night';
+    }
+  }
+
+  // Determinar por el título (fallback mejorado)
+  const title = shift.title || '';
+  const titleLower = title.toLowerCase();
+  
+  if (titleLower.includes('mañana') || titleLower.includes('morning') || titleLower.includes('aman')) {
+    return 'morning';
+  }
+  if (titleLower.includes('tarde') || titleLower.includes('afternoon') || titleLower.includes('tard')) {
+    return 'afternoon';
+  }
+  if (titleLower.includes('noche') || titleLower.includes('night') || titleLower.includes('noch')) {
+    return 'night';
+  }
+
+  console.log('⚠️ Usando default: morning');
+  return 'morning';
+};
+
   return (
     <div className="shift-page-container">
       <SidebarEmployee 
@@ -362,39 +428,38 @@ const ShiftCalendarPage = () => {
                 type="button"
                 className="shift-action-btn shift-btn-secondary" 
                 onClick={toggleFilters}
-                aria-label={showFilters ? 'Ocultar filtros' : 'Mostrar filtros'}
               >
-                {showFilters ? <FaEyeSlash className="shift-btn-icon" /> : <FaEye className="shift-btn-icon" />}
-                {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+                {showFilters ? <FaEyeSlash /> : <FaEye />}
+                <span>{showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}</span>
               </button>
               <button 
                 type="button"
                 className="shift-action-btn shift-btn-secondary" 
                 onClick={handleResetFilters}
-                aria-label="Restablecer vista"
               >
-                <FaSync className="shift-btn-icon" aria-hidden="true" />
-                Restablecer Vista
+                <FaSync />
+                <span>Restablecer Vista</span>
               </button>
               <button 
                 type="button"
                 className="shift-action-btn shift-btn-primary" 
                 onClick={() => calendarRef.current?.getApi().today()}
-                aria-label="Ir a hoy"
               >
-                <FaCalendarDay className="shift-btn-icon" aria-hidden="true" />
-                Hoy
+                <FaCalendarDay />
+                <span>Hoy</span>
               </button>
             </div>
           </div>
 
-          <div ref={filtersContainerRef} className="shift-calendar-content">
-            <div className={`shift-filters-container ${showFilters ? 'shift-filters-visible' : 'shift-filters-hidden'}`}>
-              <ShiftFilters 
-                onDateRangeChange={handleDateRangeChange}
-                loading={loading}
-              />
-            </div>
+          <div className="shift-calendar-content">
+            {showFilters && (
+              <div style={{ marginBottom: '1.5rem' }}>
+                <ShiftFilters 
+                  onDateRangeChange={handleDateRangeChange}
+                  loading={loading}
+                />
+              </div>
+            )}
             
             {loading ? (
               <div className="shift-loading-state">
@@ -404,72 +469,111 @@ const ShiftCalendarPage = () => {
             ) : shifts.length === 0 ? (
               <EmptyState onResetFilters={handleResetFilters} />
             ) : (
-              <div className="shift-calendar-wrapper">
-                <FullCalendar
-                  ref={calendarRef}
-                  plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                  initialView={viewType}
-                  locale={esLocale}
-                  headerToolbar={{
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                  }}
-                  events={shifts}
-                  datesSet={handleDatesSet}
-                  eventClick={handleEventClick}
-                  height="auto"
-                  slotMinTime="06:00:00"
-                  slotMaxTime="24:00:00"
-                  allDaySlot={false}
-                  nowIndicator={true}
-                  scrollTime="08:00:00"
-                  slotDuration="01:00:00"
-                  slotLabelInterval="01:00:00"
-                  eventTimeFormat={{
-                    hour: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                  }}
-                  dayHeaderFormat={{
-                    weekday: 'short',
-                    day: 'numeric',
-                    month: 'short'
-                  }}
-                  eventDisplay="block"
-                  eventContent={(eventInfo) => (
-                    <div className="shift-event-content">
-                      <div className="shift-event-time">
-                        <FaClock className="shift-event-time-icon" aria-hidden="true" />
-                        {eventInfo.timeText}
+              <>
+
+
+                <div className="shift-calendar-wrapper">
+                  <FullCalendar
+                    key={calendarKey}
+                    ref={calendarRef}
+                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+                    initialView="timeGridWeek"
+                    locale={esLocale}
+                    headerToolbar={{
+                      left: 'prev,next today',
+                      center: 'title',
+                      right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                    }}
+                    events={shifts.map(shift => {
+  // ✅ OBTENER EL COLOR CORRECTAMENTE
+  const actualColor = shift.backgroundColor || shift.extendedProps?.color;
+  
+  console.log('🎨 Calendario - Color del turno:', {
+    title: shift.title,
+    colorBD: shift.extendedProps?.color,
+    backgroundColor: shift.backgroundColor,
+    colorFinal: actualColor,
+    extendedProps: shift.extendedProps
+  });
+  
+  return {
+    ...shift,
+    backgroundColor: actualColor,
+    borderColor: actualColor,
+    textColor: 'white',
+    extendedProps: {
+      ...shift.extendedProps,
+      color: actualColor, // ✅ Asegurar que el color se pase
+      type: shift.extendedProps?.type || getShiftTypeFromData(shift)
+    }
+  };
+})}
+                    datesSet={handleDatesSet}
+                    eventClick={handleEventClick}
+                    height="auto"
+                    
+                    slotMinTime="06:00:00"
+                    slotMaxTime="24:00:00"
+                    allDaySlot={false}
+                    nowIndicator={true}
+                    scrollTime="08:00:00"
+                    slotDuration="01:00:00"
+                    slotLabelInterval="01:00:00"
+                    
+                    eventMinHeight={80}
+                    expandRows={true}
+                    
+                    eventTimeFormat={{
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: false
+                    }}
+                    dayHeaderFormat={{
+                      weekday: 'short',
+                      day: 'numeric',
+                      month: 'short'
+                    }}
+                    eventDisplay="block"
+                    
+                    eventDidMount={(info) => {
+                      console.log('✅ Evento montado:', {
+                        title: info.event.title,
+                        start: info.event.start,
+                        view: info.view.type
+                      });
+                    }}
+                    
+                    eventContent={(eventInfo) => (
+                      <div className="shift-event-content">
+                        <div className="shift-event-time">
+                          <FaClock />
+                          {eventInfo.timeText}
+                        </div>
+                        <div className="shift-event-title">
+                          {eventInfo.event.title}
+                        </div>
+                        <div className="shift-event-type">
+                          {eventInfo.event.extendedProps.type === 'morning' && (
+                            <>
+                              <FiSun /> Mañana
+                            </>
+                          )}
+                          {eventInfo.event.extendedProps.type === 'afternoon' && (
+                            <>
+                              <FiClock /> Tarde
+                            </>
+                          )}
+                          {eventInfo.event.extendedProps.type === 'night' && (
+                            <>
+                              <FiMoon /> Noche
+                            </>
+                          )}
+                        </div>
                       </div>
-                      <div className="shift-event-title">
-                        {eventInfo.event.title}
-                      </div>
-                      <div className="shift-event-type">
-                        {eventInfo.event.extendedProps.type === 'morning' && (
-                          <>
-                            <FiSun className="shift-event-type-icon" aria-hidden="true" />
-                            Mañana
-                          </>
-                        )}
-                        {eventInfo.event.extendedProps.type === 'afternoon' && (
-                          <>
-                            <FiClock className="shift-event-type-icon" aria-hidden="true" />
-                            Tarde
-                          </>
-                        )}
-                        {eventInfo.event.extendedProps.type === 'night' && (
-                          <>
-                            <FiMoon className="shift-event-type-icon" aria-hidden="true" />
-                            Noche
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  )}
-                />
-              </div>
+                    )}
+                  />
+                </div>
+              </>
             )}
           </div>
         </div>

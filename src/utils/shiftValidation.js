@@ -66,33 +66,79 @@ export const detectShiftConflicts = (newShift, existingShifts, unavailabilities,
 };
 
 /**
- * Valida el rango horario de un tipo de turno
+ * Detecta si un horario cruza medianoche (turno nocturno)
+ */
+export const isOvernightShift = (startTime, endTime) => {
+  if (!startTime || !endTime) return false;
+  
+  const start = new Date(`1970-01-01T${startTime}`);
+  const end = new Date(`1970-01-01T${endTime}`);
+  return end < start; // Si end es menor que start, cruza medianoche
+};
+
+/**
+ * Valida el rango horario de un tipo de turno (SOPORTA TURNOS NOCTURNOS)
  */
 export const validateShiftTypeRange = (startTime, endTime) => {
-  const start = new Date(`2000-01-01 ${startTime}`);
-  let end = new Date(`2000-01-01 ${endTime}`);
+  if (!startTime || !endTime) {
+    return { valid: false, message: 'Las horas de inicio y fin son requeridas' };
+  }
 
-  // Si end es menor o igual que start, considerar que cruza a la siguiente jornada
-  let crossesMidnight = false;
-  if (end <= start) {
-    const endNextDay = new Date(`2000-01-02 ${endTime}`);
-    if (endNextDay > start) {
-      end = endNextDay;
-      crossesMidnight = true;
-    } else {
-      return { valid: false, message: 'La hora de fin debe ser mayor a la hora de inicio' };
+  // ✅ CORREGIDO: Soporte para turnos nocturnos
+  const isOvernight = isOvernightShift(startTime, endTime);
+  
+  if (isOvernight) {
+    // Para turnos nocturnos: calcular duración considerando que termina al día siguiente
+    const start = new Date(`1970-01-01T${startTime}`);
+    const end = new Date(`1970-01-02T${endTime}`); // +1 día para el horario de fin
+    
+    const diffMs = end - start;
+    const durationHours = diffMs / (1000 * 60 * 60);
+    
+    // Exigir exactamente 8 horas (permitir pequeña tolerancia por coma flotante)
+    if (Math.abs(durationHours - 8) > 0.01) {
+      return { 
+        valid: false, 
+        message: 'La duración del tipo de turno nocturno debe ser exactamente 8 horas' 
+      };
     }
+    
+    return { 
+      valid: true, 
+      crossesMidnight: true,
+      duration: durationHours,
+      message: 'Turno nocturno válido'
+    };
+  } else {
+    // Para turnos diurnos (mismo día)
+    const start = new Date(`1970-01-01T${startTime}`);
+    const end = new Date(`1970-01-01T${endTime}`);
+    
+    if (start >= end) {
+      return { 
+        valid: false, 
+        message: 'La hora de fin debe ser mayor a la hora de inicio para turnos diurnos' 
+      };
+    }
+    
+    const diffMs = end - start;
+    const durationHours = diffMs / (1000 * 60 * 60);
+    
+    // Exigir exactamente 8 horas (permitir pequeña tolerancia por coma flotante)
+    if (Math.abs(durationHours - 8) > 0.01) {
+      return { 
+        valid: false, 
+        message: 'La duración del tipo de turno debe ser exactamente 8 horas' 
+      };
+    }
+    
+    return { 
+      valid: true, 
+      crossesMidnight: false,
+      duration: durationHours,
+      message: 'Turno diurno válido'
+    };
   }
-
-  const diffMs = end - start;
-  const durationHours = diffMs / (1000 * 60 * 60);
-
-  // Exigir exactamente 8 horas (permitir pequeña tolerancia por coma flotante)
-  if (Math.abs(durationHours - 8) > 0.01) {
-    return { valid: false, message: 'La duración del tipo de turno debe ser exactamente 8 horas' };
-  }
-
-  return { valid: true, crossesMidnight };
 };
 
 /**
@@ -156,17 +202,26 @@ const formatTime = (dateStr) => {
 };
 
 /**
- * Calcula duración del turno en horas
+ * Calcula duración del turno en horas (SOPORTA TURNOS NOCTURNOS)
  */
 export const calculateShiftDuration = (start, end) => {
   const startDate = new Date(start);
   const endDate = new Date(end);
+  
+  // Si el turno termina antes de empezar, asumimos que cruza medianoche
+  if (endDate < startDate) {
+    const endNextDay = new Date(endDate);
+    endNextDay.setDate(endNextDay.getDate() + 1);
+    const diffMs = endNextDay - startDate;
+    return Math.round((diffMs / (1000 * 60 * 60)) * 10) / 10;
+  }
+  
   const diffMs = endDate - startDate;
-  return Math.round((diffMs / (1000 * 60 * 60)) * 10) / 10; // Redondeado a 1 decimal
+  return Math.round((diffMs / (1000 * 60 * 60)) * 10) / 10;
 };
 
 /**
- * Valida que los datos del turno sean completos
+ * Valida que los datos del turno sean completos (SOPORTA TURNOS NOCTURNOS)
  */
 export const validateShiftData = (shiftData) => {
   const errors = [];
@@ -186,8 +241,18 @@ export const validateShiftData = (shiftData) => {
   if (shiftData.start && shiftData.end) {
     const start = new Date(shiftData.start);
     const end = new Date(shiftData.end);
-    if (end <= start) {
-      errors.push('La hora de fin debe ser posterior a la hora de inicio');
+    
+    // ✅ CORREGIDO: Permitir turnos nocturnos (end < start)
+    const isOvernight = end < start;
+    
+    if (!isOvernight && end <= start) {
+      errors.push('La hora de fin debe ser posterior a la hora de inicio para turnos diurnos');
+    }
+    
+    // Validar duración máxima (24 horas como límite razonable)
+    const duration = calculateShiftDuration(start, end);
+    if (duration > 24) {
+      errors.push('La duración del turno no puede exceder las 24 horas');
     }
   }
 
@@ -201,6 +266,21 @@ export const validateShiftData = (shiftData) => {
   };
 };
 
+/**
+ * Obtiene información sobre el tipo de turno (diurno/nocturno)
+ */
+export const getShiftTypeInfo = (startTime, endTime) => {
+  const isOvernight = isOvernightShift(startTime, endTime);
+  const validation = validateShiftTypeRange(startTime, endTime);
+  
+  return {
+    isOvernight,
+    duration: validation.duration || 0,
+    valid: validation.valid,
+    message: validation.message
+  };
+};
+
 export default {
   checkShiftOverlap,
   checkEmployeeAvailability,
@@ -209,5 +289,7 @@ export default {
   validateShiftTypeName,
   detectDuplicationConflicts,
   calculateShiftDuration,
-  validateShiftData
+  validateShiftData,
+  isOvernightShift,
+  getShiftTypeInfo
 };
