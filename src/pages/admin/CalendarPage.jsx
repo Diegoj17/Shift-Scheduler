@@ -364,20 +364,24 @@ const initializeData = async () => {
   try {
     console.log('💾 [CalendarPage] Guardando turno - Data recibida:', shiftData);
     
+    // ✅ CORRECCIÓN: Usar los nombres de campo correctos que espera el backend
+    const backendPayload = {
+      date: shiftData.date,
+      start_time: shiftData.start_time,
+      end_time: shiftData.end_time,
+      employee: parseInt(shiftData.employee),  // ✅ Usar 'employee' (no employeeId)
+      shift_type: parseInt(shiftData.shift_type),  // ✅ Usar 'shift_type' (no shiftTypeId)
+      notes: shiftData.notes || '',
+      role: shiftData.role || ''
+    };
+
+    console.log('📤 [CalendarPage] Payload para backend:', backendPayload);
+    
     if (editingShift) {
       // ✅ Actualizar turno existente
-      const updateData = {
-        date: shiftData.date,
-        start_time: shiftData.start_time,
-        end_time: shiftData.end_time,
-        employeeId: shiftData.employeeId,
-        shiftTypeId: shiftData.shiftTypeId,
-        notes: shiftData.notes || ''
-      };
+      console.log('🔄 [CalendarPage] Actualizando turno:', editingShift.id, backendPayload);
       
-      console.log('🔄 [CalendarPage] Actualizando turno:', editingShift.id, updateData);
-      
-      await shiftService.updateShift(editingShift.id, updateData);
+      await shiftService.updateShift(editingShift.id, backendPayload);
       
       // Actualizar en el estado local
       setShifts(prev => prev.map(shift => {
@@ -391,9 +395,9 @@ const initializeData = async () => {
             color: shiftData.backgroundColor,
             extendedProps: {
               ...shift.extendedProps,
-              employeeId: shiftData.employeeId,
+              employeeId: shiftData.employee,
               employeeName: shiftData.employeeName,
-              shiftTypeId: shiftData.shiftTypeId,
+              shiftTypeId: shiftData.shift_type,
               shiftTypeName: shiftData.shiftTypeName,
               role: shiftData.role,
               notes: shiftData.notes
@@ -406,27 +410,18 @@ const initializeData = async () => {
       showNotification('success', 'Turno actualizado exitosamente');
       
     } else {
-      // ✅ Crear nuevo turno - CORREGIDO
-      const createData = {
-        date: shiftData.date,
-        start_time: shiftData.start_time,
-        end_time: shiftData.end_time,
-        employee: parseInt(shiftData.employeeId),  // ✅ Usar employeeId
-        shift_type: parseInt(shiftData.shiftTypeId),  // ✅ Usar shiftTypeId
-        notes: shiftData.notes || ''
-      };
-      
-      console.log('➕ [CalendarPage] Creando turno:', createData);
+      // ✅ Crear nuevo turno
+      console.log('➕ [CalendarPage] Creando turno:', backendPayload);
       
       // Verificar que los datos sean válidos
-      if (!createData.employee || isNaN(createData.employee)) {
+      if (!backendPayload.employee || isNaN(backendPayload.employee)) {
         throw new Error('ID de empleado inválido');
       }
-      if (!createData.shift_type || isNaN(createData.shift_type)) {
+      if (!backendPayload.shift_type || isNaN(backendPayload.shift_type)) {
         throw new Error('ID de tipo de turno inválido');
       }
       
-      const newShift = await shiftService.createShift(createData);
+      const newShift = await shiftService.createShift(backendPayload);
       
       console.log('✅ [CalendarPage] Turno creado:', newShift);
       
