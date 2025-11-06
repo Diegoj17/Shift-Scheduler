@@ -159,24 +159,6 @@
   padding: 24px 32px;
 }
 
-/* Contenedor de filtros con animación */
-.shift-filters-container {
-  overflow: hidden;
-  transition: max-height 0.4s ease, opacity 0.4s ease, margin-bottom 0.4s ease;
-  opacity: 1;
-}
-
-.shift-filters-container.shift-filters-visible {
-  max-height: 500px;
-  margin-bottom: 24px;
-}
-
-.shift-filters-container.shift-filters-hidden {
-  max-height: 0;
-  opacity: 0;
-  margin-bottom: 0;
-}
-
 .shift-calendar-wrapper {
   background: white;
   border-radius: var(--shift-radius-xl);
@@ -190,6 +172,27 @@
   box-shadow: var(--shift-shadow-lg);
   transform: translateY(-2px);
 }
+
+/* Colores por tipo de turno */
+.shift-event.shift-morning {
+  background: linear-gradient(135deg, #4CAF50, #66BB6A) !important;
+  border-left-color: #2E7D32 !important;
+  color: white !important;
+}
+
+.shift-event.shift-afternoon {
+  background: linear-gradient(135deg, #ffc107, #ffc929) !important;
+  border-left-color: #ffc107 !important;
+  color: white !important;
+}
+
+.shift-event.shift-night {
+  background: linear-gradient(135deg, #008cff, #2196F3) !important;
+  border-left-color: #0075d4 !important;
+  color: white !important;
+}
+
+
 
 /* ============================================
    FULLCALENDAR PERSONALIZACIÓN
