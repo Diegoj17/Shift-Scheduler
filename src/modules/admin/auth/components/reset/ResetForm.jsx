@@ -52,19 +52,27 @@ const ResetForm = () => {
     setIsLoading(true);
 
     try {
-      // 🔽 CORRECCIÓN: El backend espera solo el email
       const result = await resetPassword(email);
 
-      // 🔽 CORRECCIÓN: El backend responde con { message: "..." }
-      setModalType('success');
-      setModalTitle('¡Enlace enviado!');
-      setModalMessage(result?.message || 'Se ha enviado un enlace de recuperación a tu correo electrónico.');
-      setModalOpen(true);
-      setEmail('');
+      // 🔽 CORRECCIÓN: Solo mostrar éxito si realmente se envió
+      if (result && result.success) {
+        setModalType('success');
+        setModalTitle('¡Enlace enviado!');
+        setModalMessage('Se ha enviado un enlace de recuperación a tu correo electrónico.');
+        setModalOpen(true);
+        setEmail('');
+      } else {
+        // Si hay un mensaje de error específico del backend
+        const errorMsg = result?.message || 'No se pudo enviar el enlace de recuperación.';
+        setModalType('error');
+        setModalTitle('Error');
+        setModalMessage(errorMsg);
+        setModalOpen(true);
+      }
       
     } catch (err) {
       console.error('Reset password failed:', err);
-      // El error ya es manejado por el hook useAuth
+      // El error general ya es manejado por el useEffect
     } finally {
       setIsLoading(false);
     }
@@ -72,7 +80,6 @@ const ResetForm = () => {
 
   return (
     <div className="reset-form-card-inner">
-
       <form onSubmit={handleSubmit} className="reset-form">
         <div className="reset-form-header">
           <h2 className="reset-form-title">Restablecer Contraseña</h2>
