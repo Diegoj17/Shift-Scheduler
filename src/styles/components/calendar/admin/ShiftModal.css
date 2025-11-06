@@ -18,12 +18,13 @@
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.65);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   animation: calendar-modal-fade-in 0.3s ease;
-  backdrop-filter: blur(4px);
 }
 
 @keyframes calendar-modal-fade-in {
@@ -515,16 +516,19 @@
 
 .calendar-delete-warning {
   text-align: center;
-  padding: 20px 0;
+  padding: 12px 20px 8px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
 }
 
-.calendar-warning-icon-large {
-  font-size: 5rem;
-  color: #ff9800;
-  margin-bottom: 24px;
-  display: flex;
-  justify-content: center;
-  animation: calendar-warning-pulse 2s ease-in-out infinite;
+.calendar-delete-accent {
+  width: 56px;
+  height: 6px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #ffa726, #f44336);
+  box-shadow: 0 6px 18px rgba(244, 67, 54, 0.12);
 }
 
 @keyframes calendar-warning-pulse {
@@ -546,10 +550,10 @@
 
 .calendar-shift-details {
   background: #f8fafc;
-  border: 2px solid #e2e8f0;
+  border: 1px solid #e6eef8;
   border-radius: 12px;
-  padding: 20px;
-  margin-bottom: 24px;
+  padding: 16px;
+  margin-bottom: 12px;
   text-align: left;
 }
 
@@ -571,6 +575,31 @@
   font-style: italic;
   margin: 0;
   line-height: 1.5;
+}
+
+/* Estilos específicos para el footer dentro del modal de confirmación de eliminación */
+.calendar-delete-confirm-modal .calendar-modal-footer {
+  padding-top: 18px;
+  border-top: none;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.calendar-delete-confirm-modal .calendar-btn-secondary {
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #e2e8f0;
+  box-shadow: none;
+}
+
+.calendar-delete-confirm-modal .calendar-btn-secondary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(31,41,55,0.06);
+}
+
+.calendar-delete-confirm-modal .calendar-btn-danger {
+  padding: 12px 22px;
 }
 
 /* ============================================

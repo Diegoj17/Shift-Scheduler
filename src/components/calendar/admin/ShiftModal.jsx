@@ -15,6 +15,21 @@ const ShiftModal = ({
   existingShifts,
   unavailabilities = []
 }) => {
+  // Helper: formatea una fecha de forma segura para mostrarla (evita el salto de zona horaria
+  // al crear new Date('YYYY-MM-DD') que interpreta la cadena en UTC). Acepta 'YYYY-MM-DD' o Date.
+  const formatDateDisplay = (dateInput) => {
+    if (!dateInput) return '';
+    if (typeof dateInput === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+      const [y, m, d] = dateInput.split('-');
+      return `${d}/${m}/${y}`;
+    }
+    try {
+      const d = dateInput instanceof Date ? dateInput : new Date(dateInput);
+      return d.toLocaleDateString('es-ES');
+    } catch {
+      return String(dateInput);
+    }
+  };
   // Log para depuración: ver qué prop llega aquí
   useEffect(() => {
     if (import.meta?.env?.DEV) {
@@ -530,6 +545,10 @@ const ShiftModal = ({
                   </span>
                 </div>
                 <div className="calendar-summary-item">
+                  <span className="calendar-summary-label">Fecha:</span>
+                  <span className="calendar-summary-value">{formatDateDisplay(formData.date)}</span>
+                </div>
+                <div className="calendar-summary-item">
                   <span className="calendar-summary-label">Horario:</span>
                   <span className="calendar-summary-value">{formData.startTime} - {formData.endTime}</span>
                 </div>
@@ -576,13 +595,14 @@ const ShiftModal = ({
               </div>
               <div className="calendar-modal-body">
                 <div className="calendar-delete-warning">
-                  <FaExclamationTriangle className="calendar-warning-icon-large" />
+                  {/* Accent bar en lugar del icono grande para un look más sobrio y profesional */}
+                  <div className="calendar-delete-accent" aria-hidden="true" />
                   <p className="calendar-delete-message">
                     ¿Estás seguro de que deseas eliminar este turno?
                   </p>
                   <div className="calendar-shift-details">
                     <p><strong>Empleado:</strong> {selectedEmployee?.name || 'Desconocido'}</p>
-                    <p><strong>Fecha:</strong> {new Date(formData.date).toLocaleDateString('es-ES')}</p>
+                    <p><strong>Fecha:</strong> {formatDateDisplay(formData.date)}</p>
                     <p><strong>Horario:</strong> {formData.startTime} - {formData.endTime}</p>
                     <p><strong>Tipo:</strong> {selectedShiftType?.name || 'No especificado'}</p>
                   </div>
