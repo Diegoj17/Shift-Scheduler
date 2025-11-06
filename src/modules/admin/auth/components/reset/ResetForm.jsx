@@ -16,7 +16,7 @@ const ResetForm = () => {
   const [modalTitle, setModalTitle] = useState('');
   const [modalMessage, setModalMessage] = useState('');
 
-  // Efecto para manejar errores del hook useAuth
+  // Efecto SOLO para errores del hook useAuth
   useEffect(() => {
     if (error) {
       setModalType('error');
@@ -54,25 +54,30 @@ const ResetForm = () => {
     try {
       const result = await resetPassword(email);
 
-      // 🔽 CORRECCIÓN: Solo mostrar éxito si realmente se envió
-      if (result && result.success) {
+      // Verificar resultado explícitamente
+      if (result && result.success === true) {
+        // ÉXITO: El correo existe y se envió el enlace
         setModalType('success');
         setModalTitle('¡Enlace enviado!');
-        setModalMessage('Se ha enviado un enlace de recuperación a tu correo electrónico.');
+        setModalMessage(result.message || 'Se ha enviado un enlace de recuperación a tu correo electrónico.');
         setModalOpen(true);
         setEmail('');
       } else {
-        // Si hay un mensaje de error específico del backend
-        const errorMsg = result?.message || 'No se pudo enviar el enlace de recuperación.';
+        // ERROR: El correo no existe u otro problema
+        const msg = result?.message || 'No se pudo enviar el enlace. Verifica el correo electrónico.';
         setModalType('error');
         setModalTitle('Error');
-        setModalMessage(errorMsg);
+        setModalMessage(msg);
         setModalOpen(true);
       }
-      
     } catch (err) {
+      // Captura cualquier error no manejado
       console.error('Reset password failed:', err);
-      // El error general ya es manejado por el useEffect
+      const msg = err?.message || 'Error al solicitar el enlace de recuperación.';
+      setModalType('error');
+      setModalTitle('Error');
+      setModalMessage(msg);
+      setModalOpen(true);
     } finally {
       setIsLoading(false);
     }

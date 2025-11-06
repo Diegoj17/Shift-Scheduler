@@ -65,46 +65,46 @@ export const useAuth = () => {
   };
 
   const resetPassword = async (email) => {
-  setLoading(true);
-  setError(null);
-  
-  try {
-    const response = await authService.resetPassword(email);
-    setLoading(false);
+    setLoading(true);
+    setError(null);
     
-    // 🔽 CORRECCIÓN: Verificar si la respuesta indica éxito real
-    // Django puede responder con status 200 pero con mensaje de error
-    if (response.message && (
-        response.message.toLowerCase().includes('enviado') ||
-        response.message.toLowerCase().includes('enlace') ||
-        response.message.toLowerCase().includes('correo')
-    )) {
-      return { success: true, data: response };
-    } else {
-      // Si no es un mensaje de éxito, tratarlo como error
-      return { success: false, message: response.message || 'No se pudo enviar el enlace' };
+    try {
+      // authService.resetPassword lanza error si el correo no existe
+      // o devuelve { success: true, message, data } si fue exitoso
+      const response = await authService.resetPassword(email);
+      setLoading(false);
+
+      // Si llegamos aquí, el servicio devolvió éxito
+      if (response && response.success) {
+        return { success: true, message: response.message, data: response.data };
+      }
+
+      // Caso inesperado: no hay success pero tampoco error
+      return { success: false, message: 'Respuesta inesperada del servidor' };
+      
+    } catch (err) {
+      // Aquí llegan todos los errores (correo no existe, rate limit, etc.)
+      console.error('Reset password error:', err);
+      
+      let errorMessage = 'Error al restablecer contraseña';
+      
+      if (err.message === 'No existe usuario con ese correo') {
+        errorMessage = 'No existe usuario con ese correo';
+      } else if (err.response?.status === 400) {
+        errorMessage = err.response.data.email?.[0] || err.response.data.message || 'Correo inválido';
+      } else if (err.response?.status === 404) {
+        errorMessage = 'No existe usuario con ese correo';
+      } else if (err.response?.status === 429) {
+        errorMessage = 'Ya solicitaste un restablecimiento recientemente. Intenta más tarde.';
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
+      setLoading(false);
+      return { success: false, message: errorMessage };
     }
-    
-  } catch (err) {
-    console.error('Reset password error:', err);
-    
-    let errorMessage = 'Error al restablecer contraseña';
-    
-    if (err.message === 'No existe usuario con ese correo') {
-      errorMessage = 'No existe usuario con ese correo';
-    } else if (err.response?.status === 400) {
-      errorMessage = err.response.data.email?.[0] || err.response.data.message;
-    } else if (err.response?.status === 429) {
-      errorMessage = 'Ya solicitaste un restablecimiento recientemente. Intenta más tarde.';
-    } else if (err.message) {
-      errorMessage = err.message;
-    }
-    
-    setError(errorMessage);
-    setLoading(false);
-    return { success: false, message: errorMessage };
-  }
-};
+  };
 
   // confirmPasswordReset: acepta dos formas de entrada:
   //  - un objeto { uid, token, new_password } (lo que usa ResetConfirmForm actualmente)
@@ -130,7 +130,7 @@ export const useAuth = () => {
         const response = await authService.confirmPasswordReset(uid, token, newPassword);
         setLoading(false);
         return { success: true, data: response };
-  }
+      }
     } catch (err) {
       let errorMessage = 'Error al confirmar el restablecimiento de contraseña';
 
