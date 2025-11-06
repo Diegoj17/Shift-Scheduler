@@ -476,82 +476,82 @@ export const shiftService = {
   // En shiftService.js - getMyShiftsForCalendar
 // En shiftService.js - getMyShiftsForCalendar
 getMyShiftsForCalendar: async (params = {}) => {
-  try {
-    console.log('🔄 [shiftService] Obteniendo mis turnos para calendario con params:', params);
-    const shiftsData = await shiftService.getMyShifts(params);
-    
-    if (!Array.isArray(shiftsData) || shiftsData.length === 0) {
-      console.log('📭 [shiftService] No hay turnos para mostrar');
-      return [];
-    }
-    
-    console.log('📊 Turnos raw recibidos:', shiftsData.length);
-    
-    const shifts = shiftsData.map(shift => {
-      // Construir fechas ISO
-      const startISO = shift.start || (shift.date && shift.start_time ? `${shift.date}T${shift.start_time}` : null);
-      const endISO = shift.end || (shift.date && shift.end_time ? `${shift.date}T${shift.end_time}` : null);
+    try {
+      console.log('🔄 [shiftService] Obteniendo mis turnos para calendario con params:', params);
+      const shiftsData = await shiftService.getMyShifts(params);
       
-      if (!startISO || !endISO) {
-        console.warn('⚠️ Turno sin start/end:', shift);
-        return null;
+      if (!Array.isArray(shiftsData) || shiftsData.length === 0) {
+        console.log('📭 [shiftService] No hay turnos para mostrar');
+        return [];
       }
       
-      // Convertir a objetos Date para FullCalendar
-      const startDate = new Date(startISO);
-      const endDate = new Date(endISO);
+      console.log('📊 Turnos raw recibidos:', shiftsData.length);
       
-      // Validar que las fechas sean válidas
-      if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
-        console.warn('⚠️ Fechas inválidas:', { startISO, endISO });
-        return null;
-      }
-      
-      const employeeName = shift.employee_name || '';
-      const shiftTypeName = shift.shift_type_name || 'Turno';
-      const role = shift.employee_position || shift.role || '';
-      const notes = shift.notes || '';
-      
-      // ✅ SOLO USAR EL COLOR DE LA BASE DE DATOS - SIN DEFAULTS
-      const color = shift.shift_type_color;
-      
-      console.log(`✅ Turno ${shift.id} - Color desde BD:`, color);
-      
-      return {
-        id: shift.id,
-        title: role ? `${shiftTypeName} - ${role}` : shiftTypeName,
-        start: startDate,
-        end: endDate,
-        role,
-        location: shift.location || 'Sucursal Principal',
-        department: shift.department || 'General',
-        status: shift.status || 'confirmed',
-        backgroundColor: color,  // ✅ Solo color de BD
-        borderColor: color,      // ✅ Solo color de BD
-        textColor: 'white',
-        extendedProps: {
-          employeeId: shift.employee,
-          employeeName,
-          employeePosition: shift.employee_position,
-          shiftTypeId: shift.shift_type,
-          shiftTypeName,
+      const shifts = shiftsData.map(shift => {
+        // Construir fechas ISO
+        const startISO = shift.start || (shift.date && shift.start_time ? `${shift.date}T${shift.start_time}` : null);
+        const endISO = shift.end || (shift.date && shift.end_time ? `${shift.date}T${shift.end_time}` : null);
+        
+        if (!startISO || !endISO) {
+          console.warn('⚠️ Turno sin start/end:', shift);
+          return null;
+        }
+        
+        // Convertir a objetos Date para FullCalendar
+        const startDate = new Date(startISO);
+        const endDate = new Date(endISO);
+        
+        // Validar que las fechas sean válidas
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+          console.warn('⚠️ Fechas inválidas:', { startISO, endISO });
+          return null;
+        }
+        
+        const employeeName = shift.employee_name || '';
+        const shiftTypeName = shift.shift_type_name || 'Turno';
+        const role = shift.employee_position || shift.role || '';
+        const notes = shift.notes || '';
+        
+        // ✅ USAR EL COLOR DE LA BASE DE DATOS
+        const color = shift.shift_type_color;
+        
+        console.log(`✅ Turno ${shift.id} - Color desde BD:`, color);
+        
+        return {
+          id: shift.id,
+          title: role ? `${shiftTypeName} - ${role}` : shiftTypeName,
+          start: startDate,
+          end: endDate,
           role,
-          notes,
           location: shift.location || 'Sucursal Principal',
           department: shift.department || 'General',
           status: shift.status || 'confirmed',
-          color: color  // ✅ Guardar el color en extendedProps
-        }
-      };
-    }).filter(Boolean);
-    
-    console.log('✅ Turnos formateados para calendario:', shifts.length);
-    return shifts;
-  } catch (error) {
-    console.error('❌ [shiftService] Error fetching my shifts for calendar:', error);
-    throw error;
-  }
-},
+          backgroundColor: color,
+          borderColor: color,
+          textColor: 'white',
+          extendedProps: {
+            employeeId: shift.employee,
+            employeeName,
+            employeePosition: shift.employee_position,
+            shiftTypeId: shift.shift_type,
+            shiftTypeName,
+            role,
+            notes,
+            location: shift.location || 'Sucursal Principal',
+            department: shift.department || 'General',
+            status: shift.status || 'confirmed',
+            color: color
+          }
+        };
+      }).filter(Boolean);
+      
+      console.log('✅ Turnos formateados para calendario:', shifts.length);
+      return shifts;
+    } catch (error) {
+      console.error('❌ [shiftService] Error fetching my shifts for calendar:', error);
+      throw error;
+    }
+  },
 };
 
 export default shiftService;

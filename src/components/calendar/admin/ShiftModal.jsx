@@ -51,19 +51,20 @@ const ShiftModal = ({
   });
 
   useEffect(() => {
-  if (isOpen) {
-    console.log('🔍 [ShiftModal] Empleados recibidos:', {
-      employees,
-      count: employees?.length,
-      sample: employees?.[0]
-    });
-    
-    console.log('🔍 [ShiftModal] Tipos de turno recibidos:', {
-      shiftTypes,
-      count: shiftTypes?.length
-    });
-  }
-}, [isOpen, employees, shiftTypes]);
+    if (isOpen) {
+      console.log('🔍 [ShiftModal] DEBUG - Empleados disponibles:', {
+        total: employees?.length,
+        lista: employees?.map(emp => ({
+          employee_id: emp.id,        // ✅ ID del EMPLEADO (debe usarse)
+          user_id: emp.user_id,       // ✅ ID del USUARIO (solo referencia)
+          name: emp.name,
+          position: emp.position
+        }))
+      });
+      
+      console.log('🔍 [ShiftModal] Shift recibido para edición:', shift);
+    }
+  }, [isOpen, employees, shift]);
 
   const [errors, setErrors] = useState({});
   const [conflicts, setConflicts] = useState([]);
@@ -72,49 +73,48 @@ const ShiftModal = ({
   const [autoDetectedType, setAutoDetectedType] = useState(false);
 
   useEffect(() => {
-  if (shift) {
-    console.log('📝 [ShiftModal] Cargando datos del shift:', shift);
-    console.log('📝 [ShiftModal] Notas del shift:', shift.notes);
+    if (shift) {
+      console.log('📝 [ShiftModal] Cargando datos del shift:', shift);
+      
+      const startDate = new Date(shift.start);
+      const endDate = new Date(shift.end);
+      
+      // ✅ CRÍTICO: Usar employeeId del shift (que debe ser EMPLOYEE_ID)
+      const employeeIdStr = shift.employeeId ? String(shift.employeeId) : '';
+      
+      console.log('✅ [ShiftModal] Employee ID del shift:', employeeIdStr);
+      
+      const newFormData = {
+        employeeId: employeeIdStr,
+        shiftTypeId: shift.shiftTypeId ? String(shift.shiftTypeId) : '',
+        date: formatDateForInput(startDate),
+        startTime: formatTimeForInput(startDate),
+        endTime: formatTimeForInput(endDate),
+        role: shift.role || '',
+        notes: shift.notes || ''
+      };
+      
+      console.log('✅ [ShiftModal] FormData configurado:', newFormData);
+      
+      setFormData(newFormData);
+    } else if (isOpen) {
+      // Resetear form para nuevo turno
+      setFormData({
+        employeeId: '',
+        shiftTypeId: '',
+        date: formatDateForInput(new Date()),
+        startTime: '09:00',
+        endTime: '17:00',
+        role: '',
+        notes: ''
+      });
+    }
     
-    const startDate = new Date(shift.start);
-    const endDate = new Date(shift.end);
-    
-    // ✅ Convertir IDs a strings para comparación consistente
-    const employeeIdStr = shift.employeeId ? String(shift.employeeId) : '';
-    const shiftTypeIdStr = shift.shiftTypeId ? String(shift.shiftTypeId) : '';
-    
-    const newFormData = {
-      employeeId: employeeIdStr,
-      shiftTypeId: shiftTypeIdStr,
-      date: formatDateForInput(startDate),
-      startTime: formatTimeForInput(startDate),
-      endTime: formatTimeForInput(endDate),
-      role: shift.role || '',
-      notes: shift.notes || ''  // ✅ Cargar las notas
-    };
-    
-    console.log('✅ [ShiftModal] FormData configurado con notas:', newFormData);
-    console.log('✅ [ShiftModal] Valor de notes en formData:', newFormData.notes);
-    
-    setFormData(newFormData);
-  } else if (isOpen) {
-    // Resetear form para nuevo turno
-    setFormData({
-      employeeId: '',
-      shiftTypeId: '',
-      date: formatDateForInput(new Date()),
-      startTime: '09:00',
-      endTime: '17:00',
-      role: '',
-      notes: ''
-    });
-  }
-  
-  setErrors({});
-  setConflicts([]);
-  setShowDeleteConfirm(false);
-  setAutoDetectedType(false);
-}, [shift, isOpen]);
+    setErrors({});
+    setConflicts([]);
+    setShowDeleteConfirm(false);
+    setAutoDetectedType(false);
+  }, [shift, isOpen]);
 
   // Función para detectar tipos de turno (memoizada)
   const detectShiftTypeByTime = useCallback((startTimeStr, endTimeStr) => {
@@ -315,53 +315,63 @@ const ShiftModal = ({
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
+  if (!validateForm()) {
+    return;
+  }
 
-    // CORRECCIÓN: Aquí estaba el error - debe ser conflicts.length > 0
-    if (conflicts.length > 0) {
-      return;
-    }
+  if (conflicts.length > 0) {
+    return;
+  }
 
-    const selectedEmployee = Array.isArray(employees) ? employees.find(emp => String(emp.id) === String(formData.employeeId)) : undefined;
-    const selectedType = shiftTypes.find(type => type.id === formData.shiftTypeId);
+  const selectedEmployee = Array.isArray(employees) ? 
+    employees.find(emp => String(emp.id) === String(formData.employeeId)) : undefined;
+  const selectedType = shiftTypes.find(type => type.id === formData.shiftTypeId);
 
-    // Derivar rol del empleado seleccionado y garantizar un valor por defecto
-    const derivedRole = (selectedEmployee?.position || selectedEmployee?.puesto || selectedEmployee?.role || '').toString().trim();
-    const roleToSend = derivedRole.length > 0 ? derivedRole : 'Sin especificar';
+  // ✅ DEBUG CRÍTICO MEJORADO
+  console.log('🔍 [ShiftModal] Empleado seleccionado:', {
+    employeeId_formData: formData.employeeId,
+    selectedEmployee: selectedEmployee,
+    employee_id: selectedEmployee?.id,
+    user_id: selectedEmployee?.user_id,
+    name: selectedEmployee?.name
+  });
 
-    const shiftData = {
-      id: shift?.id || undefined, // Dejar undefined para nuevos turnos
-      employeeId: formData.employeeId,
-      employeeName: selectedEmployee?.name || '',
-      shiftTypeId: formData.shiftTypeId,
-      shiftTypeName: selectedType?.name || '',
-      // Datos para el backend Django
-      date: formData.date,
-      start_time: formData.startTime,
-      end_time: formData.endTime,
-      employee: formData.employeeId, // Para el backend
-      shift_type: formData.shiftTypeId, // Para el backend
-      // Enviar siempre un role no vacío (proviene del empleado o fallback)
-      role: roleToSend,
-      notes: formData.notes.trim(), // CORRECCIÓN: .trim() no .trial()
-      backgroundColor: selectedType?.color || '#667eea' // CORRECCIÓN: Color hexadecimal correcto
-    };
+  // Derivar rol del empleado seleccionado
+  const derivedRole = (selectedEmployee?.position || selectedEmployee?.puesto || selectedEmployee?.role || '').toString().trim();
+  const roleToSend = derivedRole.length > 0 ? derivedRole : 'Sin especificar';
 
-    // Log para verificar exactamente qué enviamos antes de pasar al servicio
-    if (import.meta?.env?.DEV) {
-      try {
-        console.debug('[ShiftModal] Enviando shiftData:', shiftData);
-      } catch {
-        // ignore
-      }
-    }
-
-    onSave(shiftData);
+  // ✅ CORRECCIÓN: Payload simplificado y directo
+  const shiftData = {
+    id: shift?.id || undefined,
+    // Datos para el backend Django - FORMATO CORRECTO
+    date: formData.date,
+    start_time: formData.startTime,
+    end_time: formData.endTime,
+    employee: formData.employeeId, // ✅ Debe ser el ID del empleado (employee_id)
+    shift_type: formData.shiftTypeId,
+    role: roleToSend,
+    notes: formData.notes.trim(),
+    // Campos adicionales para el frontend
+    employeeId: formData.employeeId,
+    employeeName: selectedEmployee?.name || '',
+    shiftTypeId: formData.shiftTypeId,
+    shiftTypeName: selectedType?.name || '',
+    backgroundColor: selectedType?.color || '#667eea'
   };
+
+  // ✅ LOG DETALLADO PARA DEBUG
+  console.log('🚀 [ShiftModal] Enviando datos al backend:', {
+    shiftData: shiftData,
+    employee_id_enviado: shiftData.employee,
+    employee_name: shiftData.employeeName,
+    employee_seleccionado: selectedEmployee,
+    tipo_turno_id: shiftData.shift_type
+  });
+
+  onSave(shiftData);
+};
 
   const handleDelete = () => {
     if (shift) {
@@ -408,7 +418,7 @@ const ShiftModal = ({
     </option>
     {Array.isArray(employees) && employees.map(emp => {
       // Asegurar que el empleado tenga los campos necesarios
-      const employeeId = String(emp.id || emp.pk || emp.user_id || '');
+      const employeeId = String(emp.id || '');
       const employeeName = emp.name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim() || 'Sin nombre';
       const employeePosition = emp.position || emp.puesto || emp.jobTitle || 'Sin puesto';
       
