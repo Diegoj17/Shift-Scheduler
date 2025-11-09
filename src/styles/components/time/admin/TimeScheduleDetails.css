@@ -1,0 +1,328 @@
+/* ============================================
+   SCHEDULE DETAILS OVERLAY
+   ============================================ */
+
+.time-schedule-details-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 1.5rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   SCHEDULE DETAILS MODAL
+   ============================================ */
+
+.time-schedule-details-modal {
+  background: white;
+  border-radius: 20px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease-out;
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* ============================================
+   MODAL HEADER
+   ============================================ */
+
+.time-schedule-details-header {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  padding: 32px;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  position: relative;
+}
+
+.time-schedule-details-header-content {
+  flex: 1;
+}
+
+.time-schedule-details-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.time-schedule-details-status.available {
+  background: var(--success-color);
+  color: white;
+  box-shadow: 0 6px 18px rgba(34,197,94,0.12);
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.time-schedule-details-status.unavailable {
+  background: var(--error-color);
+  color: white;
+  box-shadow: 0 6px 18px rgba(239,68,68,0.12);
+  border: 1px solid rgba(0,0,0,0.04);
+}
+
+.time-schedule-details-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 6px;
+}
+
+.time-schedule-details-subtitle {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+}
+
+.time-schedule-details-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.time-schedule-details-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.05);
+}
+
+/* ============================================
+   MODAL BODY
+   ============================================ */
+
+.time-schedule-details-body {
+  padding: 32px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.time-schedule-details-section {
+  margin-bottom: 32px;
+}
+
+.time-schedule-details-section:last-child {
+  margin-bottom: 0;
+}
+
+.time-schedule-details-section-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #4f8cff;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.time-schedule-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.time-schedule-details-field {
+  background: #f8fafc;
+  padding: 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+}
+
+.time-schedule-details-label {
+  font-size: 12px;
+  color: #000000;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.time-schedule-details-value {
+  font-size: 15px;
+  color: #000000;
+  font-weight: 450;
+}
+
+/* ============================================
+   AVAILABILITY CARD
+   ============================================ */
+
+.time-schedule-details-availability-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid;
+}
+
+.time-schedule-details-availability-card.available {
+  background: rgba(56, 161, 105, 0.1);
+  border-color: var(--success-color);
+}
+
+.time-schedule-details-availability-card.unavailable {
+  background: rgba(229, 62, 62, 0.1);
+  border-color: var(--error-color);
+}
+
+.time-schedule-details-availability-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.time-schedule-details-availability-card.available .time-schedule-details-availability-icon {
+  background: var(--success-color);
+  color: white;
+}
+
+.time-schedule-details-availability-card.unavailable .time-schedule-details-availability-icon {
+  background: var(--error-color);
+  color: white;
+}
+
+.time-schedule-details-availability-status {
+  font-size: 16px;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 4px;
+}
+
+.time-schedule-details-availability-description {
+  font-size: 14px;
+  color: #000000;
+  line-height: 1.5;
+}
+
+/* ============================================
+   MODAL FOOTER
+   ============================================ */
+
+.time-schedule-details-footer {
+  padding: 24px 32px;
+  border-top: 2px solid var(--border-color);
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.time-schedule-details-button {
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+}
+
+.time-schedule-details-button.secondary {
+  background: #f8fafc;
+  color: var(--text-dark);
+  border: 2px solid var(--border-color);
+}
+
+.time-schedule-details-button.secondary:hover {
+  background: #e2e8f0;
+}
+
+.time-schedule-details-button.primary {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: white;
+  box-shadow: 0 4px 16px rgba(79, 140, 255, 0.3);
+}
+
+.time-schedule-details-button.primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79, 140, 255, 0.4);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .time-schedule-details-modal {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .time-schedule-details-header {
+    padding: 24px;
+  }
+
+  .time-schedule-details-title {
+    font-size: 22px;
+  }
+
+  .time-schedule-details-body {
+    padding: 24px;
+  }
+
+  .time-schedule-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .time-schedule-details-footer {
+    padding: 20px 24px;
+    flex-direction: column-reverse;
+  }
+
+  .time-schedule-details-button {
+    width: 100%;
+  }
+}

@@ -1,0 +1,40 @@
+/* ============================================
+   DIGITAL CLOCK
+   ============================================ */
+
+.time-digital-clock {
+  background: linear-gradient(135deg, #f8fafc 0%, #e8f0fe 100%);
+  border-radius: 16px;
+  padding: 0 1rem 1rem 1rem;
+  margin-bottom: 24px;
+  text-align: center;
+  border: 2px solid var(--border-color);
+}
+
+.time-current-time {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #000000;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.time-current-seconds {
+  font-size: 0.875rem;
+  color: #000000;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .time-current-time {
+    font-size: 40px;
+  }
+}

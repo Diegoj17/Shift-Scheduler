@@ -1,0 +1,96 @@
+/* ============================================
+   AVAILABILITY STATS
+   ============================================ */
+
+.time-availability-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.time-availability-stats-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 2px solid var(--border-color);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  transition: var(--transition);
+  
+}
+
+.time-availability-stats-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-color: var(--primary-color);
+}
+
+.time-availability-stats-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.time-availability-stats-icon.available {
+  background: #d4f4dd;
+  color: var(--success-color);
+}
+
+.time-availability-stats-icon.unavailable {
+  background: #fed7d7;
+  color: var(--error-color);
+}
+
+.time-availability-stats-icon.total {
+  background: #dbeafe;
+  color: var(--primary-color);
+}
+
+.time-availability-stats-icon.hours {
+  background: #fef3c7;
+  color: #f59e0b;
+}
+
+.time-availability-stats-content {
+  flex: 1;
+}
+
+.time-availability-stats-label {
+  font-size: 1rem;
+  color: #4f8cff;
+  font-weight: 700;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.time-availability-stats-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-dark);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .time-availability-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .time-availability-stats-grid {
+    grid-template-columns: 1fr;
+  }
+}

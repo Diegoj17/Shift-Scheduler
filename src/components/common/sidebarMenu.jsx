@@ -5,8 +5,9 @@ import { FaThLarge, FaCalendarAlt, FaClock, FaExchangeAlt, FaClipboardCheck, FaF
 const menuItems = [
   { id: 'dashboard', label: 'Inicio', icon: FaThLarge, path: '/employee/main' },
   { id: 'mi-calendario', label: 'Mi Calendario', icon: FaCalendarAlt, path: '/employee/calendar' },
+  { id: 'registrar-horas', label: 'Registrar Horas', icon: FaClipboardCheck, path: '/employee/time' },
+  { id: 'registrar-disponibilidad', label: 'Registrar Disponibilidad', icon: FaClock, path: '/employee/availability' },
   { id: 'solicitudes', label: 'Solicitudes', icon: FaExchangeAlt, path: '/employee/requests' },
-  { id: 'registrar-horas', label: 'Registrar Horas', icon: FaClipboardCheck, path: '/employee/time-tracking' },
   { id: 'incidencias', label: 'Incidencias', icon: FaExclamationTriangle, path: '/employee/incidents' },
 ];
 

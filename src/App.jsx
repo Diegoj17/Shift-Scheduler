@@ -14,8 +14,9 @@ import MainPage from './pages/user/MainPage.jsx';
 import ManagementPage from './pages/admin/ManagementPage.jsx';
 import CalendarPage from './pages/admin/CalendarPage.jsx';
 import ShiftCalendarPage from './pages/user/ShiftCalendarPage.jsx';
-
-
+import TimeClockPage from './pages/user/TimeClockPage.jsx';
+import TimeAvailabilityPage from './pages/user/TimeAvailabilityPage.jsx';
+import TimeSchedulePage from './pages/admin/TimeSchedulePage.jsx';
 
 
 
@@ -41,6 +42,11 @@ function App() {
               <CalendarPage />
             </ProtectedRoute>
           } />
+          <Route path="/admin/availability" element={
+            <ProtectedRoute>
+              <TimeSchedulePage />
+            </ProtectedRoute>
+          } />
           <Route path="/admin/management" element={
             <ProtectedRoute>
               <ManagementPage />
@@ -54,6 +60,16 @@ function App() {
           <Route path="/employee/calendar" element={
             <ProtectedRoute>
               <ShiftCalendarPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/employee/time" element={
+            <ProtectedRoute>
+              <TimeClockPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/employee/availability" element={
+            <ProtectedRoute>
+              <TimeAvailabilityPage />
             </ProtectedRoute>
           } />
           

@@ -1,0 +1,40 @@
+.time-card-exit::before {
+  background: linear-gradient(90deg, #ff6b6b, #e63946);
+}
+
+.time-card-exit .time-card-icon {
+  background: linear-gradient(135deg, #ff6b6b, #e63946);
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
+}
+
+.time-card-exit,
+.time-card-exit * {
+  box-sizing: border-box;
+}
+
+.time-register-button-exit {
+  background: linear-gradient(135deg, #ff6b6b, #e63946);
+  color: white;
+  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.3);
+  padding: 14px 20px;
+}
+
+.time-register-button-exit:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 107, 107, 0.4);
+}
+
+.time-register-button-exit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.time-status-badge.time-status-pending {
+  background: #fef3c7;
+  color: #78350f;
+}
+
+@media (max-width: 768px) {
+  .time-register-button-exit {
+    padding: 12px 14px;
+  }
+}

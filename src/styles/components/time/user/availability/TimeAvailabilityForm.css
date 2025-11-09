@@ -1,0 +1,310 @@
+/* ============================================
+   AVAILABILITY FORM CARD
+   ============================================ */
+
+.time-availability-form-card {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-lg);
+  transition: var(--transition);
+}
+
+.time-availability-form-card:hover {
+  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* ============================================
+   FORM HEADER
+   ============================================ */
+
+.time-availability-form-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 32px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.time-availability-form-icon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: #ffffff;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.3);
+}
+
+.time-availability-form-title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #4f8cff;
+  margin-bottom: 4px;
+}
+
+.time-availability-form-subtitle {
+  font-size: 14px;
+  color: #000000;
+}
+
+/* ============================================
+   FORM ELEMENTS
+   ============================================ */
+
+.time-availability-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.time-availability-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.time-availability-form-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.time-availability-form-required {
+  color: var(--error-color);
+  font-weight: 700;
+}
+
+.time-availability-form-input {
+  padding: 14px 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  font-size: 15px;
+  color: var(--text-dark);
+  transition: var(--transition);
+  background: #f8fafc;
+}
+
+.time-availability-form-input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.1);
+}
+
+.time-availability-form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+/* ============================================
+   TYPE SELECTOR
+   ============================================ */
+
+.time-availability-type-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.time-availability-type-option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  border: 2px solid var(--border-color);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: var(--transition);
+  background: #f8fafc;
+}
+
+.time-availability-type-option input[type="radio"] {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.time-availability-type-option:hover {
+  border-color: var(--primary-color);
+  background: white;
+}
+
+/* Hover overrides for available / unavailable so the border matches the type */
+.time-availability-type-option.available-option:hover {
+  border-color: var(--success-color);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(34,197,94,0.04);
+}
+
+.time-availability-type-option.unavailable-option:hover {
+  border-color: var(--error-color);
+  background: white;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.04);
+}
+
+.time-availability-type-option.active {
+  box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.06);
+}
+
+/* Available / Unavailable specific active styles */
+.time-availability-type-option.available-option.active {
+  border-color: var(--success-color);
+  background: linear-gradient(135deg, rgba(34,197,94,0.08), rgba(34,197,94,0.03));
+  box-shadow: 0 0 0 3px rgba(34,197,94,0.06);
+}
+
+.time-availability-type-option.unavailable-option.active {
+  border-color: var(--error-color);
+  background: linear-gradient(135deg, rgba(239,68,68,0.06), rgba(239,68,68,0.02));
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.06);
+}
+
+.time-availability-type-option.available-option .time-availability-type-icon,
+.time-availability-type-option.available-option .time-availability-type-text {
+  color: var(--success-color);
+}
+
+.time-availability-type-option.unavailable-option .time-availability-type-icon,
+.time-availability-type-option.unavailable-option .time-availability-type-text {
+  color: var(--error-color);
+}
+
+.time-availability-type-icon {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.time-availability-type-text {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text-dark);
+}
+
+/* ============================================
+   SUBMIT BUTTON
+   ============================================ */
+
+.time-availability-form-submit {
+  width: 100%;
+  padding: 16px 24px;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: var(--transition);
+  box-shadow: 0 4px 16px rgba(79, 140, 255, 0.3);
+  margin-top: 8px;
+}
+
+.time-availability-form-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79, 140, 255, 0.4);
+}
+
+.time-availability-form-submit:active {
+  transform: translateY(0);
+}
+
+.time-availability-form-submit-icon {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+/* Edit mode badge */
+.time-availability-edit-badge {
+  margin-left: auto;
+  background: rgba(59,130,246,0.08);
+  color: var(--primary-color);
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* Delete button in edit mode */
+.time-availability-form-delete {
+  background: var(--error-color);
+  color: white;
+  border: none;
+  padding: 10px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.time-availability-form-delete:hover {
+  opacity: 0.95;
+  transform: translateY(-2px);
+}
+
+/* Actions layout and improved button styles */
+.time-availability-form-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.time-availability-form-actions-right {
+  display: flex;
+  gap: 12px;
+  margin-left: auto;
+  align-items: center;
+}
+
+.time-availability-form-cancel {
+  padding: 14px 20px;
+  background: white;
+  color: var(--text-dark);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.time-availability-form-cancel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.06);
+}
+
+.time-availability-form-delete {
+  padding: 14px 20px;
+  border-radius: 12px;
+  font-weight: 700;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .time-availability-form-card {
+    padding: 24px;
+  }
+
+  .time-availability-form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .time-availability-type-selector {
+    grid-template-columns: 1fr;
+  }
+}

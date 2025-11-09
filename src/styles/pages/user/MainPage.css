@@ -65,7 +65,7 @@
 .content-area {
   flex: 1;
   width: 100%;
-  padding: 1rem 1.5rem;
+  padding: 0rem 1rem;
   animation: fadeIn 0.4s ease-out;
 }
 

@@ -1,7 +1,9 @@
+// components/calendar/admin/ShiftModal.jsx
+
 import { useState, useEffect, useCallback } from 'react';
 import { FaTimes, FaCheck, FaExclamationTriangle, FaUser, FaClock, FaBriefcase, FaTrash } from 'react-icons/fa';
 import { detectShiftConflicts, calculateShiftDuration } from '../../../utils/shiftValidation';
-import { formatDateForInput, formatTimeForInput, combineDateAndTime, timeStringToMinutes  } from '../../../utils/dateUtils';
+import { formatDateForInput, formatTimeForInput, combineDateAndTime, timeStringToMinutes } from '../../../utils/dateUtils';
 import '../../../styles/components/calendar/admin/ShiftModal.css';
 
 const ShiftModal = ({ 
@@ -15,8 +17,6 @@ const ShiftModal = ({
   existingShifts,
   unavailabilities = []
 }) => {
-  // Helper: formatea una fecha de forma segura para mostrarla (evita el salto de zona horaria
-  // al crear new Date('YYYY-MM-DD') que interpreta la cadena en UTC). Acepta 'YYYY-MM-DD' o Date.
   const formatDateDisplay = (dateInput) => {
     if (!dateInput) return '';
     if (typeof dateInput === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
@@ -30,41 +30,15 @@ const ShiftModal = ({
       return String(dateInput);
     }
   };
-  // Log para depuración: ver qué prop llega aquí
-  useEffect(() => {
-    if (import.meta?.env?.DEV) {
-      try {
-        console.debug('[ShiftModal] employees prop:', employees);
-      } catch {
-        // ignore
-      }
-    }
-  }, [employees]);
+
   const [formData, setFormData] = useState({
     employeeId: '',
     shiftTypeId: '',
     date: formatDateForInput(new Date()),
     startTime: '09:00',
     endTime: '17:00',
-    role: '',
     notes: ''
   });
-
-  useEffect(() => {
-    if (isOpen) {
-      console.log('🔍 [ShiftModal] DEBUG - Empleados disponibles:', {
-        total: employees?.length,
-        lista: employees?.map(emp => ({
-          employee_id: emp.id,        // ✅ ID del EMPLEADO (debe usarse)
-          user_id: emp.user_id,       // ✅ ID del USUARIO (solo referencia)
-          name: emp.name,
-          position: emp.position
-        }))
-      });
-      
-      console.log('🔍 [ShiftModal] Shift recibido para edición:', shift);
-    }
-  }, [isOpen, employees, shift]);
 
   const [errors, setErrors] = useState({});
   const [conflicts, setConflicts] = useState([]);
@@ -72,49 +46,118 @@ const ShiftModal = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [autoDetectedType, setAutoDetectedType] = useState(false);
 
-  useEffect(() => {
-    if (shift) {
-      console.log('📝 [ShiftModal] Cargando datos del shift:', shift);
+  // ✅ ACTUALIZADO: useEffect para cargar datos del shift
+  // ShiftModal.jsx - useEffect completo
+
+// ✅ CORREGIDO: useEffect para cargar datos del shift
+// ✅ CORREGIDO: useEffect para manejar correctamente employee_id vs user_id
+useEffect(() => {
+  if (shift) {
+    console.log('🔍 [ShiftModal] SHIFT COMPLETO:', shift);
+    console.log('🔍 [ShiftModal] shift.extendedProps:', shift.extendedProps);
+    
+    // ✅ CRÍTICO: Buscar el USER_ID correcto en los empleados disponibles
+    const employeeNameFromShift = shift.employeeName || shift.extendedProps?.employeeName;
+    console.log('🔍 [ShiftModal] Nombre del empleado en shift:', employeeNameFromShift);
+    
+    let employeeUserIdToUse = '';
+    
+    // ✅ ESTRATEGIA: Buscar por nombre en la lista de empleados
+    if (employeeNameFromShift && Array.isArray(employees)) {
+      const matchingEmployee = employees.find(emp => 
+        emp.name === employeeNameFromShift || 
+        emp.name?.includes(employeeNameFromShift) ||
+        employeeNameFromShift?.includes(emp.name)
+      );
       
-      const startDate = new Date(shift.start);
-      const endDate = new Date(shift.end);
-      
-      // ✅ CRÍTICO: Usar employeeId del shift (que debe ser EMPLOYEE_ID)
-      const employeeIdStr = shift.employeeId ? String(shift.employeeId) : '';
-      
-      console.log('✅ [ShiftModal] Employee ID del shift:', employeeIdStr);
-      
-      const newFormData = {
-        employeeId: employeeIdStr,
-        shiftTypeId: shift.shiftTypeId ? String(shift.shiftTypeId) : '',
-        date: formatDateForInput(startDate),
-        startTime: formatTimeForInput(startDate),
-        endTime: formatTimeForInput(endDate),
-        role: shift.role || '',
-        notes: shift.notes || ''
-      };
-      
-      console.log('✅ [ShiftModal] FormData configurado:', newFormData);
-      
-      setFormData(newFormData);
-    } else if (isOpen) {
-      // Resetear form para nuevo turno
-      setFormData({
-        employeeId: '',
-        shiftTypeId: '',
-        date: formatDateForInput(new Date()),
-        startTime: '09:00',
-        endTime: '17:00',
-        role: '',
-        notes: ''
-      });
+      if (matchingEmployee) {
+        employeeUserIdToUse = String(matchingEmployee.id);
+        console.log('✅ [ShiftModal] Empleado encontrado por nombre:', {
+          nombreBuscado: employeeNameFromShift,
+          empleadoEncontrado: matchingEmployee,
+          user_id: employeeUserIdToUse
+        });
+      }
     }
     
-    setErrors({});
-    setConflicts([]);
-    setShowDeleteConfirm(false);
-    setAutoDetectedType(false);
-  }, [shift, isOpen]);
+    // ✅ ESTRATEGIA ALTERNATIVA: Si no se encuentra por nombre, usar employeeUserId
+    if (!employeeUserIdToUse) {
+      employeeUserIdToUse = shift.employeeUserId || 
+                           shift.extendedProps?.employeeUserId || 
+                           shift.employee_user_id;
+      console.log('🔍 [ShiftModal] Usando employeeUserId:', employeeUserIdToUse);
+    }
+    
+    console.log('🔍 [ShiftModal] IDs encontrados:', {
+      employeeNameFromShift,
+      employeeUserIdToUse,
+      employeeId: shift.employeeId,
+      extendedProps_employeeUserId: shift.extendedProps?.employeeUserId
+    });
+    
+    const startDate = shift.start ? new Date(shift.start) : new Date();
+    const endDate = shift.end ? new Date(shift.end) : new Date();
+    
+    console.log('✅ [ShiftModal] User ID final seleccionado:', employeeUserIdToUse);
+    console.log('📋 [ShiftModal] Total empleados disponibles:', employees?.length);
+    
+    // Verificar que el employee existe en la lista
+    const employeeExists = employees?.find(emp => String(emp.id) === employeeUserIdToUse);
+    console.log('🔍 [ShiftModal] ¿Usuario existe en lista?:', employeeExists ? 'SÍ' : 'NO');
+    
+    if (employeeExists) {
+      console.log('✅ [ShiftModal] Employee encontrado:', {
+        id: employeeExists.id,
+        name: employeeExists.name,
+        position: employeeExists.position
+      });
+    } else {
+      console.error('❌ [ShiftModal] ERROR: Usuario no encontrado en la lista de empleados!');
+      console.log('📋 [ShiftModal] IDs disponibles en employees:', 
+        employees?.map(e => ({ id: e.id, name: e.name }))
+      );
+      
+      // ✅ ESTRATEGIA DE FALLBACK: Usar el primer empleado disponible
+      if (employees && employees.length > 0) {
+        employeeUserIdToUse = String(employees[0].id);
+        console.log('🔄 [ShiftModal] Usando primer empleado disponible:', employees[0]);
+      }
+    }
+    
+    const newFormData = {
+      employeeId: employeeUserIdToUse,  // ✅ USER_ID correcto
+      shiftTypeId: shift.extendedProps?.shiftTypeId ? 
+                  String(shift.extendedProps.shiftTypeId) : 
+                  shift.shiftTypeId ? 
+                  String(shift.shiftTypeId) : '',
+      date: shift.extendedProps?.date || shift.date || formatDateForInput(startDate),
+      startTime: shift.extendedProps?.start_time || shift.startTime || formatTimeForInput(startDate),
+      endTime: shift.extendedProps?.end_time || shift.endTime || formatTimeForInput(endDate),
+      notes: shift.extendedProps?.notes || shift.notes || ''
+    };
+    
+    console.log('✅ [ShiftModal] FormData configurado:', newFormData);
+    console.log('✅ [ShiftModal] employeeId en formData (debe ser user_id):', newFormData.employeeId);
+    
+    setFormData(newFormData);
+  } else if (isOpen) {
+    console.log('📝 [ShiftModal] Modo creación - reseteando formulario');
+    // Resetear form para nuevo turno
+    setFormData({
+      employeeId: '',
+      shiftTypeId: '',
+      date: formatDateForInput(new Date()),
+      startTime: '09:00',
+      endTime: '17:00',
+      notes: ''
+    });
+  }
+  
+  setErrors({});
+  setConflicts([]);
+  setShowDeleteConfirm(false);
+  setAutoDetectedType(false);
+}, [shift, isOpen, employees]);
 
   // Función para detectar tipos de turno (memoizada)
   const detectShiftTypeByTime = useCallback((startTimeStr, endTimeStr) => {
@@ -123,7 +166,8 @@ const ShiftModal = ({
     const startTotalMinutes = timeStringToMinutes(startTimeStr);
     let endTotalMinutes = timeStringToMinutes(endTimeStr);
 
-    // Ajustar para turnos que terminan después de medianoche
+    if (isNaN(startTotalMinutes) || isNaN(endTotalMinutes)) return null;
+
     if (endTotalMinutes < startTotalMinutes) {
       endTotalMinutes += 1440;
     }
@@ -135,28 +179,22 @@ const ShiftModal = ({
       let typeStartTotalMinutes = timeStringToMinutes(type.startTime);
       let typeEndTotalMinutes = timeStringToMinutes(type.endTime);
 
-      // Ajustar para turnos que cruzan medianoche
+      if (isNaN(typeStartTotalMinutes) || isNaN(typeEndTotalMinutes)) return;
+
       if (typeEndTotalMinutes < typeStartTotalMinutes) {
         typeEndTotalMinutes += 1440;
       }
 
       let score = 0;
 
-      // Coincidencia exacta
       if (startTotalMinutes === typeStartTotalMinutes && endTotalMinutes === typeEndTotalMinutes) {
         score = 100;
-      }
-      // Coincidencia cercana (±30 minutos)
-      else if (Math.abs(startTotalMinutes - typeStartTotalMinutes) <= 30 && 
-               Math.abs(endTotalMinutes - typeEndTotalMinutes) <= 30) {
+      } else if (Math.abs(startTotalMinutes - typeStartTotalMinutes) <= 30 && 
+                 Math.abs(endTotalMinutes - typeEndTotalMinutes) <= 30) {
         score = 80;
-      }
-      // Dentro del rango
-      else if (startTotalMinutes >= typeStartTotalMinutes && endTotalMinutes <= typeEndTotalMinutes) {
+      } else if (startTotalMinutes >= typeStartTotalMinutes && endTotalMinutes <= typeEndTotalMinutes) {
         score = 60;
-      }
-      // Solapamiento
-      else if (startTotalMinutes < typeEndTotalMinutes && endTotalMinutes > typeStartTotalMinutes) {
+      } else if (startTotalMinutes < typeEndTotalMinutes && endTotalMinutes > typeStartTotalMinutes) {
         score = 40;
       }
 
@@ -176,7 +214,6 @@ const ShiftModal = ({
       const dur = calculateShiftDuration(start, end);
       setDuration(dur);
       
-      // Detectar automáticamente el tipo de turno cuando cambian las horas
       const detectedType = detectShiftTypeByTime(formData.startTime, formData.endTime);
       if (detectedType && detectedType.id !== formData.shiftTypeId) {
         setFormData(prev => ({ ...prev, shiftTypeId: detectedType.id }));
@@ -185,7 +222,6 @@ const ShiftModal = ({
     }
   }, [formData.startTime, formData.endTime, formData.date, autoDetectedType, detectShiftTypeByTime, formData.shiftTypeId]);
 
-  // Reset autoDetectedType cuando el usuario selecciona manualmente un tipo
   useEffect(() => {
     setAutoDetectedType(false);
   }, [formData.shiftTypeId]);
@@ -196,7 +232,6 @@ const ShiftModal = ({
       setErrors(prev => ({ ...prev, [field]: undefined }));
     }
 
-    // Si se cambian las horas manualmente, permitir nueva detección automática
     if (field === 'startTime' || field === 'endTime') {
       setAutoDetectedType(false);
     }
@@ -205,7 +240,6 @@ const ShiftModal = ({
   const handleTimeChange = (field, value) => {
     handleChange(field, value);
     
-    // Detectar tipo de turno inmediatamente después del cambio de hora
     setTimeout(() => {
       if (formData.startTime && formData.endTime && !autoDetectedType) {
         const detectedType = detectShiftTypeByTime(
@@ -228,7 +262,6 @@ const ShiftModal = ({
   const validateForm = () => {
     const newErrors = {};
     
-    // Validaciones básicas
     if (!formData.employeeId) {
       newErrors.employeeId = 'Selecciona un empleado';
     }
@@ -249,9 +282,6 @@ const ShiftModal = ({
       newErrors.time = 'Selecciona hora de fin';
     }
     
-    // El rol ahora se obtiene del empleado seleccionado (no es ingresado manualmente)
-
-    // Validación simple de horas para turnos nocturnos
     if (formData.startTime && formData.endTime) {
       const [startHours, startMinutes] = formData.startTime.split(':').map(Number);
       const [endHours, endMinutes] = formData.endTime.split(':').map(Number);
@@ -259,7 +289,6 @@ const ShiftModal = ({
       const startTotalMinutes = startHours * 60 + startMinutes;
       let endTotalMinutes = endHours * 60 + endMinutes;
       
-      // Para turnos nocturnos, ajustar la hora de fin
       if (endTotalMinutes < startTotalMinutes) {
         endTotalMinutes += 24 * 60;
       }
@@ -329,45 +358,43 @@ const ShiftModal = ({
     employees.find(emp => String(emp.id) === String(formData.employeeId)) : undefined;
   const selectedType = shiftTypes.find(type => type.id === formData.shiftTypeId);
 
-  // ✅ DEBUG CRÍTICO MEJORADO
-  console.log('🔍 [ShiftModal] Empleado seleccionado:', {
-    employeeId_formData: formData.employeeId,
+  console.log('🔍 [ShiftModal] handleSubmit - Datos:', {
+    formData_employeeId: formData.employeeId,
     selectedEmployee: selectedEmployee,
-    employee_id: selectedEmployee?.id,
-    user_id: selectedEmployee?.user_id,
-    name: selectedEmployee?.name
+    employee_id: selectedEmployee?.employee_id, // ✅ Este es el importante
+    user_id: selectedEmployee?.id
   });
 
-  // Derivar rol del empleado seleccionado
-  const derivedRole = (selectedEmployee?.position || selectedEmployee?.puesto || selectedEmployee?.role || '').toString().trim();
-  const roleToSend = derivedRole.length > 0 ? derivedRole : 'Sin especificar';
-
-  // ✅ CORRECCIÓN: Payload simplificado y directo
+  // ✅ CORRECCIÓN: Enviar employee_id (no user_id)
   const shiftData = {
-    id: shift?.id || undefined,
-    // Datos para el backend Django - FORMATO CORRECTO
+    // Para el backend (formato Django esperado)
     date: formData.date,
     start_time: formData.startTime,
     end_time: formData.endTime,
-    employee: formData.employeeId, // ✅ Debe ser el ID del empleado (employee_id)
-    shift_type: formData.shiftTypeId,
-    role: roleToSend,
+    employee: parseInt(selectedEmployee?.employee_id),  // ✅ EMPLOYEE_ID (de shifts_employee)
+    shift_type: parseInt(formData.shiftTypeId),
     notes: formData.notes.trim(),
+    
+    // Para actualización (si es edición) - campos adicionales
+    ...(shift?.id && { 
+      id: shift.id,
+      employeeId: shift.employeeId, // mantener el employee_id original
+    }),
+    
     // Campos adicionales para el frontend
-    employeeId: formData.employeeId,
+    employeeId: shift?.employeeId || parseInt(selectedEmployee?.employee_id), // ✅ EMPLOYEE_ID
+    employeeUserId: parseInt(formData.employeeId),  // user_id para referencia
     employeeName: selectedEmployee?.name || '',
-    shiftTypeId: formData.shiftTypeId,
+    shiftTypeId: parseInt(formData.shiftTypeId),
     shiftTypeName: selectedType?.name || '',
     backgroundColor: selectedType?.color || '#667eea'
   };
 
-  // ✅ LOG DETALLADO PARA DEBUG
-  console.log('🚀 [ShiftModal] Enviando datos al backend:', {
-    shiftData: shiftData,
+  console.log('🚀 [ShiftModal] Enviando datos:', {
+    shiftData,
     employee_id_enviado: shiftData.employee,
-    employee_name: shiftData.employeeName,
-    employee_seleccionado: selectedEmployee,
-    tipo_turno_id: shiftData.shift_type
+    user_id_seleccionado: formData.employeeId,
+    es_edicion: !!shift?.id
   });
 
   onSave(shiftData);
@@ -383,7 +410,8 @@ const ShiftModal = ({
 
   if (!isOpen) return null;
 
-  const selectedEmployee = Array.isArray(employees) ? employees.find(emp => String(emp.id) === String(formData.employeeId)) : undefined;
+  const selectedEmployee = Array.isArray(employees) ? 
+    employees.find(emp => String(emp.id) === String(formData.employeeId)) : undefined;
   const selectedShiftType = shiftTypes.find(type => type.id === formData.shiftTypeId);
 
   return (
@@ -399,44 +427,45 @@ const ShiftModal = ({
         </div>
 
         <form onSubmit={handleSubmit} className="calendar-shift-form">
+          {/* ✅ DROPDOWN DE EMPLEADOS */}
           <div className="calendar-form-group">
-  <label htmlFor="employeeId">
-    <FaUser className="calendar-label-icon" /> Empleado *
-  </label>
-  <select
-    id="employeeId"
-    value={formData.employeeId}
-    onChange={(e) => handleChange('employeeId', e.target.value)}
-    className={errors.employeeId ? 'calendar-input-error' : ''}
-    disabled={!employees || employees.length === 0}
-  >
-    <option value="">
-      {!employees || employees.length === 0 
-        ? 'Cargando empleados...' 
-        : 'Seleccionar empleado...'
-      }
-    </option>
-    {Array.isArray(employees) && employees.map(emp => {
-      // Asegurar que el empleado tenga los campos necesarios
-      const employeeId = String(emp.id || '');
-      const employeeName = emp.name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim() || 'Sin nombre';
-      const employeePosition = emp.position || emp.puesto || emp.jobTitle || 'Sin puesto';
-      
-      return (
-        <option key={employeeId} value={employeeId}>
-          {employeeName} - {employeePosition}
-        </option>
-      );
-    })}
-  </select>
-  {!employees || employees.length === 0 ? (
-    <div className="calendar-warning-message">
-      No hay empleados disponibles. Verifica que estén cargados en el sistema.
-    </div>
-  ) : null}
-  {errors.employeeId && <span className="calendar-error-message">{errors.employeeId}</span>}
-</div>
+            <label htmlFor="employeeId">
+              <FaUser className="calendar-label-icon" /> Empleado *
+            </label>
+            <select
+              id="employeeId"
+              value={formData.employeeId}
+              onChange={(e) => handleChange('employeeId', e.target.value)}
+              className={errors.employeeId ? 'calendar-input-error' : ''}
+              disabled={!employees || employees.length === 0}
+            >
+              <option value="">
+                {!employees || employees.length === 0 
+                  ? 'Cargando empleados...' 
+                  : 'Seleccionar empleado...'
+                }
+              </option>
+              {Array.isArray(employees) && employees.map(emp => {
+                const employeeId = String(emp.id || '');  // ✅ USER_ID
+                const employeeName = emp.name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim() || 'Sin nombre';
+                const employeePosition = emp.position || emp.puesto || emp.jobTitle || 'Sin puesto';
+                
+                return (
+                  <option key={employeeId} value={employeeId}>
+                    {employeeName} - {employeePosition}
+                  </option>
+                );
+              })}
+            </select>
+            {!employees || employees.length === 0 ? (
+              <div className="calendar-warning-message">
+                No hay empleados disponibles. Verifica que estén cargados en el sistema.
+              </div>
+            ) : null}
+            {errors.employeeId && <span className="calendar-error-message">{errors.employeeId}</span>}
+          </div>
 
+          {/* TIPO DE TURNO */}
           <div className="calendar-form-group">
             <label htmlFor="shiftTypeId">
               <FaClock className="calendar-label-icon" /> Tipo de Turno *
@@ -460,6 +489,7 @@ const ShiftModal = ({
             {errors.shiftTypeId && <span className="calendar-error-message">{errors.shiftTypeId}</span>}
           </div>
 
+          {/* FECHA Y HORAS */}
           <div className="calendar-form-row">
             <div className="calendar-form-group">
               <label htmlFor="date">Fecha *</label>
@@ -495,6 +525,7 @@ const ShiftModal = ({
             </div>
           </div>
 
+          {/* DURACIÓN */}
           {duration > 0 && (
             <div className="calendar-duration-info">
               <FaClock className="calendar-duration-icon" aria-hidden="true" />
@@ -509,8 +540,7 @@ const ShiftModal = ({
 
           {errors.time && <span className="calendar-error-message">{errors.time}</span>}
 
-                  {/* El campo de rol se removió: ahora usamos el rol/puesto del empleado seleccionado */}
-
+          {/* NOTAS */}
           <div className="calendar-form-group">
             <label htmlFor="notes">Notas (Opcional)</label>
             <textarea
@@ -522,6 +552,7 @@ const ShiftModal = ({
             />
           </div>
 
+          {/* CONFLICTOS */}
           {conflicts.length > 0 && (
             <div className="calendar-conflict-alert">
               <div className="calendar-alert-header">
@@ -539,6 +570,7 @@ const ShiftModal = ({
             </div>
           )}
 
+          {/* RESUMEN */}
           {selectedEmployee && selectedShiftType && (
             <div className="calendar-shift-summary">
               <h4>Resumen del Turno</h4>
@@ -563,13 +595,14 @@ const ShiftModal = ({
                   <span className="calendar-summary-value">{formData.startTime} - {formData.endTime}</span>
                 </div>
                 <div className="calendar-summary-item">
-                  <span className="calendar-summary-label">Rol:</span>
-                  <span className="calendar-summary-value">{selectedEmployee?.position || selectedEmployee?.puesto || selectedEmployee?.role || formData.role || '-'}</span>
+                  <span className="calendar-summary-label">Puesto:</span>
+                  <span className="calendar-summary-value">{selectedEmployee?.position || selectedEmployee?.puesto || 'Sin especificar'}</span>
                 </div>
               </div>
             </div>
           )}
 
+          {/* FOOTER */}
           <div className="calendar-modal-footer">
             {shift && (
               <button 
@@ -591,7 +624,7 @@ const ShiftModal = ({
           </div>
         </form>
 
-        {/* Modal de confirmación de eliminación */}
+        {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
         {showDeleteConfirm && (
           <div className="calendar-modal-overlay calendar-delete-confirm-overlay">
             <div className="calendar-modal-content calendar-delete-confirm-modal" onClick={(e) => e.stopPropagation()}>
@@ -605,7 +638,6 @@ const ShiftModal = ({
               </div>
               <div className="calendar-modal-body">
                 <div className="calendar-delete-warning">
-                  {/* Accent bar en lugar del icono grande para un look más sobrio y profesional */}
                   <div className="calendar-delete-accent" aria-hidden="true" />
                   <p className="calendar-delete-message">
                     ¿Estás seguro de que deseas eliminar este turno?

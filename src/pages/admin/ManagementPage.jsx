@@ -155,6 +155,7 @@ const ManagementPage = () => {
   const menuItems = [
     { id: 'dashboard', label: 'Inicio', icon: 'dashboard' },
     { id: 'calendario', label: 'Calendario', icon: 'calendar' },
+    { id: 'disponibilidad', label: 'Disponibilidad', icon: 'availability' },
     { id: 'solicitudes', label: 'Solicitudes', icon: 'requests' },
     { id: 'presencia', label: 'Presencia', icon: 'presence' },
     { id: 'documentos', label: 'Documentos', icon: 'documents' },

@@ -1,0 +1,56 @@
+/* ============================================
+   CONTENEDOR PRINCIPAL
+   ============================================ */
+
+.time-page-container {
+  min-height: 100vh;
+  display: flex;
+  width: 100vw;
+}
+
+.time-main-content {
+  flex: 1;
+  margin-left: 280px;
+  transition: margin-left 0.3s ease;
+  width: 100%;
+}
+
+.time-main-content.sidebar-collapsed {
+  margin-left: 80px;
+}
+
+.time-content-area {
+  padding: 1rem 2rem 1rem 1rem;
+  min-height: calc(100vh - 80px);
+}
+
+/* ============================================
+   GRID LAYOUT
+   ============================================ */
+
+.time-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 1024px) {
+  .time-grid-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .time-clock-container {
+    padding: 20px;
+    margin-left: 0;
+  }
+
+  .time-grid-layout {
+    gap: 20px;
+  }
+}
