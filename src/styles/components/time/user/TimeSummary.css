@@ -1,0 +1,94 @@
+/* ============================================
+   SUMMARY CARDS
+   Ajustes para ocupar ancho disponible y evitar overflow
+   ============================================ */
+
+/* evitar que padding/border aumenten el ancho real */
+.time-summary-grid,
+.time-summary-card {
+  box-sizing: border-box;
+}
+
+.time-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.time-summary-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-color);
+  transition: var(--transition);
+  width: 100%;
+}
+
+.time-summary-card:hover {
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.time-summary-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  font-size: 24px;
+}
+
+.time-summary-card-hours .time-summary-icon-wrapper {
+  background: #dbeafe;
+}
+
+.time-summary-card-days .time-summary-icon-wrapper {
+  background: #d4f4dd;
+}
+
+.time-summary-card-overtime .time-summary-icon-wrapper {
+  background: #fef3c7;
+}
+
+.time-summary-label {
+  font-size: 1rem;
+  color: #4f8cff;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.time-summary-value {
+  font-size: 28px;
+  font-weight: 500;
+  color: #000000;
+  margin-bottom: 4px;
+}
+
+.time-summary-description {
+  font-size: 13px;
+  color: #000000;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1024px) {
+  .time-summary-grid {
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .time-summary-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+}

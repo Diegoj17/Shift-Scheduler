@@ -1,0 +1,142 @@
+/* ============================================
+   HISTORY SECTION
+   Ajustes para ancho/alto responsivo y evitar overflow
+   ============================================ */
+
+.time-history-section {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+  width: 100%;
+  overflow: hidden;
+}
+
+.time-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid var(--border-color);
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.time-history-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #4f8cff;
+}
+
+.time-history-filter {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.time-filter-button {
+  padding: 8px 16px;
+  border: 1px solid var(--border-color);
+  background: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.time-filter-button:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.time-filter-button.active {
+  background: var(--primary-color);
+  color: white;
+  border-color: var(--primary-color);
+}
+
+/* ============================================
+   HISTORY TABLE
+   ============================================ */
+
+.time-history-table-wrapper {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.time-history-table {
+  width: 100%;
+  min-width: 600px; /* evita que columnas se aprieten en pantallas muy pequeñas */
+  border-collapse: separate;
+  border-spacing: 0 8px;
+}
+
+.time-history-table thead th {
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  color: #4f8cff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 12px 16px;
+  background: #f8fafc;
+}
+
+.time-history-table tbody tr {
+  background: white;
+  transition: var(--transition);
+}
+
+.time-history-table tbody tr:hover {
+  box-shadow: var(--shadow-sm);
+  transform: translateX(4px);
+}
+
+.time-history-table tbody td {
+  padding: 12px 10px;
+  font-size: 14px;
+  color: #000000;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.time-history-table tbody td:first-child {
+  border-left: 1px solid var(--border-color);
+  border-radius: 8px 0 0 8px;
+}
+
+.time-history-table tbody td:last-child {
+  border-right: 1px solid var(--border-color);
+  border-radius: 0 8px 8px 0;
+}
+
+.time-status-badge.time-status-completed {
+  background: #dbeafe;
+  color: #1e3a8a;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .time-history-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .time-history-table {
+    font-size: 12px;
+  }
+
+  .time-history-table tbody td {
+    padding: 12px 8px;
+  }
+}

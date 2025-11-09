@@ -1,0 +1,269 @@
+/* ============================================
+   AVAILABILITY MAIN CONTAINER
+   ============================================ */
+
+.time-availability-page-container {
+  min-height: 100vh;
+  display: flex;
+  width: 100vw;
+}
+
+.time-availability-main-content {
+  flex: 1;
+  margin-left: 280px;
+  transition: margin-left 0.3s ease;
+  width: 100%;
+}
+
+.time-availability-main-content.sidebar-collapsed {
+  margin-left: 80px;
+}
+
+.time-availability-content-area {
+  padding: 1rem 2rem 1rem 1rem;
+  min-height: calc(100vh - 80px);
+}
+
+/* ============================================
+   GRID LAYOUT
+   ============================================ */
+
+.time-availability-grid {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* ============================================
+   FULLCALENDAR WRAPPER
+   ============================================ */
+
+.time-availability-fullcalendar-wrapper {
+  margin-bottom: 20px;
+}
+
+.time-availability-fullcalendar-wrapper .fc {
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.time-availability-fullcalendar-wrapper .fc-theme-standard td,
+.time-availability-fullcalendar-wrapper .fc-theme-standard th {
+  border-color: var(--border-color);
+}
+
+.time-availability-fullcalendar-wrapper .fc .fc-toolbar {
+  padding: 16px 0;
+  margin-bottom: 16px;
+}
+
+.time-availability-fullcalendar-wrapper .fc .fc-toolbar-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  text-transform: capitalize;
+}
+
+.time-availability-fullcalendar-wrapper .fc .fc-button {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.time-availability-fullcalendar-wrapper .fc .fc-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.time-availability-fullcalendar-wrapper .fc-col-header-cell {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  padding: 12px 8px;
+  font-weight: 700;
+  color: var(--text-dark);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.time-availability-fullcalendar-wrapper .fc-daygrid-day-number {
+  padding: 6px;
+  color: var(--text-dark);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.time-availability-fullcalendar-wrapper .fc-day-today {
+  background: rgba(79, 140, 255, 0.08) !important;
+}
+
+.time-availability-fullcalendar-wrapper .fc-day-today .fc-daygrid-day-number {
+  background: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.time-availability-fullcalendar-wrapper .fc-event {
+  border: none;
+  border-left: 4px solid;
+  border-radius: 8px;
+  padding: 6px 10px;
+  margin: 2px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.time-availability-fullcalendar-wrapper .fc-event:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.time-availability-event-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.time-availability-event-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.time-availability-event-time {
+  font-size: 0.7rem;
+  opacity: 0.9;
+}
+
+/* ============================================
+   CALENDAR CARD
+   ============================================ */
+
+.time-availability-calendar-card {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-lg);
+  transition: var(--transition);
+}
+
+.time-availability-calendar-card:hover {
+  box-shadow: 0 20px 30px rgba(0, 0, 0, 0.12);
+}
+
+.time-availability-calendar-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+  padding-bottom: 24px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.time-availability-calendar-icon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #38a169, #2f855a);
+  color: #ffffff;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  box-shadow: 0 4px 12px rgba(56, 161, 105, 0.3);
+}
+
+.time-availability-calendar-title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #4f8cff;
+  margin-bottom: 4px;
+}
+
+.time-availability-calendar-subtitle {
+  font-size: 14px;
+  color: #000000;
+}
+
+/* ============================================
+   LEGEND
+   ============================================ */
+
+.time-availability-calendar-legend {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  padding-top: 16px;
+  border-top: 2px solid var(--border-color);
+}
+
+.time-availability-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--text-dark);
+  font-weight: 500;
+}
+
+.time-availability-legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.time-availability-legend-dot.available {
+  background: var(--success-color);
+}
+
+.time-availability-legend-dot.unavailable {
+  background: var(--error-color);
+}
+
+
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1200px) {
+  .time-availability-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .time-availability-container {
+    padding: 20px;
+    margin-left: 0;
+  }
+
+  .time-availability-header {
+    padding: 24px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .time-availability-title {
+    font-size: 24px;
+  }
+
+  .time-availability-calendar-card {
+    padding: 20px;
+  }
+
+  .time-availability-fullcalendar-wrapper .fc .fc-toolbar {
+    flex-direction: column;
+    gap: 12px;
+  }
+}

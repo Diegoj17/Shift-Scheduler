@@ -302,6 +302,37 @@ export const shiftAPI = {
       throw new Error(message);
     }
   },
+
+  // DISPONIBILIDADES
+
+  createAvailability: async (availabilityData) => {
+    const response = await shiftsApi.post('/availability/new/', availabilityData);
+    return response.data;
+  },
+
+
+  getAvailabilities: async (params = {}) => {
+    const response = await shiftsApi.get('/availability/', { params });
+    return response.data;
+  },
+
+  // Actualizar disponibilidad (solo el dueño)
+  updateAvailability: async (availabilityId, availabilityData) => {
+    const response = await shiftsApi.put(`/availability/${availabilityId}/edit/`, availabilityData);
+    return response.data;
+  },
+
+  // Eliminar disponibilidad (solo el dueño)
+  deleteAvailability: async (availabilityId) => {
+    const response = await shiftsApi.delete(`/availability/${availabilityId}/delete/`);
+    return response.data;
+  },
+
+  // Verificar disponibilidad de un empleado en un horario específico
+  checkEmployeeAvailability: async (checkData) => {
+    const response = await shiftsApi.post('/availability/check/', checkData);
+    return response.data;
+  }
 };
 
 export { authApi, shiftsApi };

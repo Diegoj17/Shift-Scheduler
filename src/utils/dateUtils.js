@@ -218,7 +218,17 @@ export const validateShiftData = (shiftData) => {
 };
 
 export const timeStringToMinutes = (timeStr) => {
-  const [hours, minutes] = timeStr.split(':').map(Number);
+  // Acepta formatos: 'HH:MM', 'H:MM', 'HH:MM:SS', número en minutos o undefined
+  if (timeStr === null || timeStr === undefined) return NaN;
+  if (typeof timeStr === 'number' && !isNaN(timeStr)) return Math.floor(timeStr);
+
+  const s = String(timeStr).trim();
+  if (s === '') return NaN;
+
+  const parts = s.split(':').map(p => p === '' ? NaN : Number(p));
+  if (parts.length === 0 || isNaN(parts[0])) return NaN;
+  const hours = parts[0];
+  const minutes = (parts.length > 1 && !isNaN(parts[1])) ? parts[1] : 0;
   return hours * 60 + minutes;
 };
 

@@ -1,0 +1,353 @@
+/* ============================================
+   SCHEDULE MAIN CONTAINER
+   ============================================ */
+
+.time-schedule-page-container {
+  min-height: 100vh;
+  display: flex;
+  width: 100vw;
+}
+
+.time-schedule-main-content {
+  flex: 1;
+  margin-left: 280px;
+  transition: margin-left 0.3s ease;
+  width: 100%;
+}
+
+.time-schedule-main-content.sidebar-collapsed {
+  margin-left: 80px;
+}
+
+.time-schedule-content-area {
+  padding: 1rem 2rem 1rem 1rem;
+  min-height: calc(100vh - 80px);
+}
+
+
+/* ============================================
+   CONTENT GRID
+   ============================================ */
+
+.time-schedule-content-grid {
+  display: grid;
+  grid-template-columns: 2.5fr 1fr;
+  gap: 1rem;
+}
+
+/* ============================================
+   CALENDAR SECTION
+   ============================================ */
+
+.time-schedule-calendar-section {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.time-schedule-section-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--border-color);
+}
+
+.time-schedule-section-icon {
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: #ffffff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.3);
+}
+
+.time-schedule-section-title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #4f8cff;
+  margin-bottom: 4px;
+}
+
+.time-schedule-section-subtitle {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+/* ============================================
+   FULLCALENDAR WRAPPER
+   ============================================ */
+
+.time-schedule-fullcalendar-wrapper .fc {
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.time-schedule-fullcalendar-wrapper .fc-theme-standard td,
+.time-schedule-fullcalendar-wrapper .fc-theme-standard th {
+  border-color: var(--border-color);
+}
+
+.time-schedule-fullcalendar-wrapper .fc .fc-toolbar {
+  padding: 16px 0;
+  margin-bottom: 16px;
+}
+
+.time-schedule-fullcalendar-wrapper .fc .fc-toolbar-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  text-transform: capitalize;
+}
+
+.time-schedule-fullcalendar-wrapper .fc .fc-button {
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: var(--transition);
+  box-shadow: var(--shadow-sm);
+}
+
+.time-schedule-fullcalendar-wrapper .fc .fc-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.time-schedule-fullcalendar-wrapper .fc-col-header-cell {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  padding: 12px 8px;
+  font-weight: 700;
+  color: var(--text-dark);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.time-schedule-fullcalendar-wrapper .fc-daygrid-day-number {
+  padding: 6px;
+  color: var(--text-dark);
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.time-schedule-fullcalendar-wrapper .fc-day-today {
+  background: rgba(79, 140, 255, 0.08) !important;
+}
+
+.time-schedule-fullcalendar-wrapper .fc-day-today .fc-daygrid-day-number {
+  background: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.time-schedule-fullcalendar-wrapper .fc-event {
+  border: none;
+  border-left: 4px solid;
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.time-schedule-fullcalendar-wrapper .fc-event:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  z-index: 10;
+}
+
+.time-schedule-fullcalendar-wrapper .fc-timegrid-event {
+  border-radius: 10px;
+  border-left-width: 5px;
+  padding: 12px 16px;
+}
+
+.time-schedule-fullcalendar-wrapper .fc-timegrid-slot {
+  height: 52px;
+}
+
+.time-schedule-fullcalendar-wrapper .fc-timegrid-slot-label {
+  font-size: 0.85rem;
+  color: var(--text-light);
+  font-weight: 600;
+}
+
+.time-schedule-event-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.time-schedule-event-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.time-schedule-event-time,
+.time-schedule-event-area {
+  font-size: 0.75rem;
+  opacity: 0.95;
+  font-weight: 500;
+}
+
+/* Force time and area text to black to ensure visibility over colored event backgrounds */
+.time-schedule-event-time {
+  color: #ffffff !important;
+  font-size: 0.75rem;
+}
+.time-schedule-event-area {
+  color: #ffffff !important;
+  font-size: 0.75rem;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+
+.time-schedule-empty-state {
+  background: white;
+  border-radius: 20px;
+  padding: 80px 40px;
+  text-align: center;
+  box-shadow: var(--shadow-md);
+}
+
+.time-schedule-empty-icon {
+  font-size: 80px;
+  margin-bottom: 24px;
+  opacity: 0.5;
+}
+
+.time-schedule-empty-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 12px;
+}
+
+.time-schedule-empty-description {
+  font-size: 16px;
+  color: var(--text-light);
+  margin-bottom: 32px;
+  max-width: 500px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.time-schedule-empty-button {
+  padding: 14px 32px;
+  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: 0 4px 16px rgba(79, 140, 255, 0.3);
+}
+
+.time-schedule-empty-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(79, 140, 255, 0.4);
+}
+
+/* En TimeAvailabilityPage.css y TimeSchedulePage.css */
+
+.time-availability-loading,
+.time-schedule-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid #e2e8f0;
+  border-top-color: #4f8cff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.time-availability-form-error-alert {
+  background: #fed7d7;
+  border: 2px solid #fc8181;
+  color: #742a2a;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.time-availability-form-input.error {
+  border-color: #fc8181;
+}
+
+.time-availability-form-error {
+  color: #e53e3e;
+  font-size: 13px;
+  margin-top: 4px;
+  display: block;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 1400px) {
+  .time-schedule-content-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .time-schedule-container {
+    padding: 20px;
+    margin-left: 0;
+  }
+
+  .time-schedule-header {
+    padding: 24px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .time-schedule-title {
+    font-size: 24px;
+  }
+
+  .time-schedule-calendar-section {
+    padding: 20px;
+  }
+
+  .time-schedule-fullcalendar-wrapper .fc .fc-toolbar {
+    flex-direction: column;
+    gap: 12px;
+  }
+}

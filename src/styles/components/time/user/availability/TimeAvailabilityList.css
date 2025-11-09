@@ -1,0 +1,220 @@
+/* ============================================
+   AVAILABILITY LIST
+   ============================================ */
+
+.time-availability-list-section {
+  background: white;
+  border-radius: 20px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow-md);
+}
+
+.time-availability-list-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--border-color);
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.time-availability-list-title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #4f8cff;
+  margin-bottom: 4px;
+}
+
+.time-availability-list-subtitle {
+  font-size: 14px;
+  color: #000000;
+}
+
+/* ============================================
+   FILTERS
+   ============================================ */
+
+.time-availability-list-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.time-availability-filter-btn {
+  padding: 8px 16px;
+  border: 2px solid var(--border-color);
+  background: white;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-dark);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.time-availability-filter-btn:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.time-availability-filter-btn.active {
+  background: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+/* ============================================
+   LIST GRID
+   ============================================ */
+
+.time-availability-list-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.time-availability-list-item {
+  border: 2px solid var(--border-color);
+  border-radius: 14px;
+  padding: 20px;
+  transition: var(--transition);
+  background: #f8fafc;
+}
+
+.time-availability-list-item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+  background: white;
+}
+
+.time-availability-list-item.available {
+  border-left: 4px solid var(--success-color);
+}
+
+.time-availability-list-item.unavailable {
+  border-left: 4px solid var(--error-color);
+}
+
+/* ============================================
+   LIST ITEM CONTENT
+   ============================================ */
+
+.time-availability-list-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.time-availability-list-badge {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.time-availability-list-badge.available {
+  background: #d4f4dd;
+  color: #22543d;
+}
+
+.time-availability-list-badge.unavailable {
+  background: #fed7d7;
+  color: #742a2a;
+}
+
+.time-availability-list-delete {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: var(--transition);
+  padding: 4px;
+}
+
+.time-availability-list-delete:hover {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+/* Ensure react-icon svgs inside the delete button are visible */
+.time-availability-list-delete svg {
+  display: block;
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+  stroke: none;
+  color: var(--text-dark);
+  line-height: 0;
+}
+
+.time-availability-list-delete:hover svg {
+  color: var(--error-color);
+}
+
+.time-availability-list-date,
+.time-availability-list-time {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--text-dark);
+  font-weight: 500;
+  padding: 10px 0;
+}
+
+.time-availability-list-date-icon,
+.time-availability-list-time-icon {
+  font-size: 18px;
+}
+
+/* ============================================
+   EMPTY STATE
+   ============================================ */
+
+.time-availability-empty-state {
+  text-align: center;
+  padding: 1.5rem;
+}
+
+.time-availability-empty-icon {
+  font-size: 64px;
+  margin-bottom: -1rem;
+  opacity: 0.5;
+}
+
+.time-availability-empty-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-dark);
+  margin-bottom: 8px;
+}
+
+.time-availability-empty-description {
+  font-size: 14px;
+  color: var(--text-light);
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+  .time-availability-list-section {
+    padding: 24px;
+  }
+
+  .time-availability-list-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .time-availability-list-grid {
+    grid-template-columns: 1fr;
+  }
+}

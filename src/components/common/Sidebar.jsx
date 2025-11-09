@@ -10,7 +10,8 @@ import {
   FaSignOutAlt,
   FaChevronLeft,
   FaChevronRight,
-  FaCog
+  FaCog,
+  FaListAlt
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import '../../styles/components/common/Sidebar.css';
@@ -20,6 +21,7 @@ const Sidebar = ({ isOpen, onToggle, activeItem, onItemClick, darkMode, menuItem
   const defaultMenuItems = [
     { id: 'dashboard', label: 'Inicio', icon: <FaThLarge />, path: '/admin/dashboard' },
     { id: 'calendario', label: 'Calendario', icon: <FaCalendarAlt />, path: '/admin/calendar' },
+    { id: 'disponibilidad', label: 'Disponibilidad', icon: <FaListAlt  />, path: '/admin/availability' },
     { id: 'solicitudes', label: 'Solicitudes', icon: <FaClipboardList />, path: '/admin/requests' },
     { id: 'presencia', label: 'Presencia', icon: <FaUserCheck />, path: '/admin/attendance' },
     { id: 'documentos', label: 'Documentos', icon: <FaFileAlt />, path: '/admin/documents' },
@@ -36,6 +38,7 @@ const Sidebar = ({ isOpen, onToggle, activeItem, onItemClick, darkMode, menuItem
     dashboard: <FaThLarge />,
     calendar: <FaCalendarAlt />,
     calendarPage: <FaCalendarAlt />,
+    availability: <FaClipboardList />,
     shiftTypeManager: <FaUsers />,
     requests: <FaClipboardList />,
     presence: <FaUserCheck />,
@@ -49,6 +52,7 @@ const Sidebar = ({ isOpen, onToggle, activeItem, onItemClick, darkMode, menuItem
   const defaultPathMap = {
     dashboard: '/admin/dashboard',
     calendario: '/admin/calendar',
+    disponibilidad: '/admin/availability',
     solicitudes: '/admin/requests',
     presencia: '/admin/attendance',
     documentos: '/admin/documents',

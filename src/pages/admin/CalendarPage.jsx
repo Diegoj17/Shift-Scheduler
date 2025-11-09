@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { FaPlus, FaCopy, FaClock, FaCheck, FaTimes, FaExclamationTriangle } from 'react-icons/fa';
 import Header from '../../components/common/Header';
 import Sidebar from '../../components/common/Sidebar';
@@ -6,7 +7,7 @@ import CalendarView from '../../components/calendar/admin/CalendarView';
 import ShiftTypeManager from '../../components/calendar/admin/ShiftTypeManager';
 import ShiftModal from '../../components/calendar/admin/ShiftModal';
 import ShiftDuplicateModal from '../../components/calendar/admin/ShiftDuplicateModal';
-import { timeStringToMinutes } from '../../utils/dateUtils';
+// timeStringToMinutes removed (not needed here)
 import { userService } from '../../services/userService';
 import { shiftService } from '../../services/shiftService'; // Importar el servicio actualizado
 import '/src/styles/pages/admin/DashboardPage.css';
@@ -25,10 +26,52 @@ const CalendarPage = () => {
   const [editingShift, setEditingShift] = useState(null);
   const [notification, setNotification] = useState(null);
   const [loading, setLoading] = useState(true);
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  // Si venimos navegando con state para prefill (desde TimeScheduleDetails), abrir modal
+  useEffect(() => {
+    if (loading) return; // esperar a que los datos iniciales carguen
+    try {
+      const state = location?.state || {};
+      if (state.openShiftModal) {
+        const s = state.prefillShift || {};
+
+        const editing = {
+          id: s.id || null,
+          employeeId: s.employeeId || s.employee || '',
+          employeeName: s.employeeName || '',
+          shiftTypeId: s.shiftTypeId || null,
+          shiftTypeName: s.shiftTypeName || '',
+          start: s.start || (s.date && s.start_time ? `${s.date}T${s.start_time}` : null),
+          end: s.end || (s.date && s.end_time ? `${s.date}T${s.end_time}` : null),
+          date: s.date || (s.start ? String(s.start).split('T')[0] : ''),
+          start_time: s.start_time || (s.start ? String(s.start).split('T')[1]?.slice(0,5) : ''),
+          end_time: s.end_time || (s.end ? String(s.end).split('T')[1]?.slice(0,5) : ''),
+          role: s.role || '',
+          notes: s.notes || '',
+          backgroundColor: s.backgroundColor || '#667eea'
+        };
+
+        setEditingShift(editing);
+        setIsShiftModalOpen(true);
+
+        // limpiar el state de la ubicación para evitar re-trigger
+        try {
+          navigate(location.pathname, { replace: true, state: {} });
+        } catch {
+          // noop
+        }
+      }
+    } catch (err) {
+      console.error('Error handling prefill state for calendar:', err);
+    }
+  }, [loading, location, navigate]);
 
   const menuItems = [
     { id: "dashboard", label: "Inicio", icon: "dashboard" },
     { id: "calendario", label: "Calendario", icon: "calendar" },
+    { id: "disponibilidad", label: "Disponibilidad", icon: "availability" },
     { id: "solicitudes", label: "Solicitudes", icon: "requests" },
     { id: "presencia", label: "Presencia", icon: "presence" },
     { id: "documentos", label: "Documentos", icon: "documents" },
@@ -364,6 +407,10 @@ const initializeData = async () => {
   try {
     console.log('💾 [CalendarPage] Guardando turno - Data recibida:', shiftData);
     
+    // ✅ CORRECCIÓN: Usar shiftData.id directamente (viene de ShiftModal)
+    const shiftId = shiftData.id;
+    console.log('🔍 [CalendarPage] ID del turno a guardar:', shiftId);
+    
     // ✅ CORRECCIÓN: Usar los nombres de campo correctos que espera el backend
     const backendPayload = {
       date: shiftData.date,
@@ -377,15 +424,15 @@ const initializeData = async () => {
 
     console.log('📤 [CalendarPage] Payload para backend:', backendPayload);
     
-    if (editingShift) {
-      // ✅ Actualizar turno existente
-      console.log('🔄 [CalendarPage] Actualizando turno:', editingShift.id, backendPayload);
+    // ✅ CORRECCIÓN: Verificar explícitamente si hay ID para determinar si es edición
+    if (shiftId) {
+      console.log('🔄 [CalendarPage] Actualizando turno:', shiftId, backendPayload);
       
-      await shiftService.updateShift(editingShift.id, backendPayload);
+      await shiftService.updateShift(shiftId, backendPayload);
       
       // Actualizar en el estado local
       setShifts(prev => prev.map(shift => {
-        if (shift.id === editingShift.id) {
+        if (shift.id === shiftId) {
           return {
             ...shift,
             title: `${shiftData.employeeName} - ${shiftData.shiftTypeName}`,
@@ -527,9 +574,9 @@ const initializeData = async () => {
     }
   }
 
-  // ✅ Transformar al formato que espera ShiftModal
+  // ✅ CRÍTICO: Asegurar que el ID del turno se pase correctamente
   const shiftForModal = {
-    id: shift.id,
+    id: shift.id, // ✅ Esto es lo más importante
     employeeId: finalEmployeeId,
     employeeName: shift.extendedProps?.employeeName || shift.title?.split(' - ')[0] || '',
     shiftTypeId: finalShiftTypeId,
@@ -537,21 +584,18 @@ const initializeData = async () => {
     start: shift.start || event.start,
     end: shift.end || event.end,
     role: role,
-    notes: notes,  // ✅ Asegurar que las notas se pasen
+    notes: notes,
     backgroundColor: shift.backgroundColor || shift.color || event.backgroundColor
   };
 
   console.log('📤 Datos completos para modal:', shiftForModal);
+  console.log('🔑 ID del turno que se va a editar:', shiftForModal.id); // ✅ Verificar que no sea null
 
-  // Verificar que tenemos los datos necesarios
-  if (!shiftForModal.employeeId) {
-    console.warn('⚠️ No se pudo determinar el employeeId');
-  }
-  if (!shiftForModal.shiftTypeId) {
-    console.warn('⚠️ No se pudo determinar el shiftTypeId');
-  }
-  if (!shiftForModal.notes) {
-    console.warn('⚠️ No hay notas en este turno');
+  // ✅ CRÍTICO: Verificar que tenemos el ID antes de abrir el modal
+  if (!shiftForModal.id) {
+    console.error('❌ ERROR: No se pudo determinar el ID del turno');
+    showNotification('error', 'No se pudo cargar el turno para editar');
+    return;
   }
 
   setEditingShift(shiftForModal);
@@ -653,17 +697,6 @@ const initializeData = async () => {
   };
 
   const currentPageTitle = menuItems.find((item) => item.id === activeItem)?.label || "Calendario";
-
-  if (loading) {
-    return (
-      <div className="dashboard-container">
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Cargando calendario...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="dashboard-container">
