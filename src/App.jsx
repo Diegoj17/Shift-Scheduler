@@ -17,7 +17,8 @@ import ShiftCalendarPage from './pages/user/ShiftCalendarPage.jsx';
 import TimeClockPage from './pages/user/TimeClockPage.jsx';
 import TimeAvailabilityPage from './pages/user/TimeAvailabilityPage.jsx';
 import TimeSchedulePage from './pages/admin/TimeSchedulePage.jsx';
-
+import ShiftChangeRequestPage from './pages/user/ShiftChangeRequestPage.jsx';
+import ShiftChangeReviewPage from './pages/admin/ShiftChangeReviewPage.jsx';
 
 
 function App() {
@@ -52,6 +53,12 @@ function App() {
               <ManagementPage />
             </ProtectedRoute>
           } />
+          <Route path="/admin/shift-change-review" element={
+            <ProtectedRoute>
+              <ShiftChangeReviewPage />
+            </ProtectedRoute>
+          } />
+
           <Route path="/employee/main" element={
             <ProtectedRoute>
               <MainPage />
@@ -70,6 +77,11 @@ function App() {
           <Route path="/employee/availability" element={
             <ProtectedRoute>
               <TimeAvailabilityPage />
+            </ProtectedRoute>
+          } />
+          <Route path="/employee/shift-change-request" element={
+            <ProtectedRoute>
+              <ShiftChangeRequestPage />
             </ProtectedRoute>
           } />
           

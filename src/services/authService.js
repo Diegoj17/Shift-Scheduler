@@ -122,7 +122,7 @@ const authService = {
 
   changePassword: async (currentPassword, newPassword) => {
     try {
-      const response = await authApi.post('/change-password/', {
+      const response = await authApi.post('/password/change/', {
         current_password: currentPassword,
         new_password: newPassword
       });

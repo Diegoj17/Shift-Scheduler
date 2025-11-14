@@ -131,11 +131,31 @@ export const detectDuplicationConflicts = (shiftsToClone, targetDate, existingSh
 };
 
 /**
- * Formatea tiempo para mostrar
+ * Formatea tiempo para mostrar en 12h con AM/PM
+ * Acepta strings como 'HH:MM', 'HH:MM:SS', timestamps ISO o Date
  */
-const formatTime = (dateStr) => {
-  const date = new Date(dateStr);
-  return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+export const formatTime = (dateStr) => {
+  if (!dateStr && dateStr !== 0) return '-';
+  try {
+    let date;
+    const s = String(dateStr);
+    if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(s)) {
+      // hora local sin fecha -> usar fecha actual para formatear
+      const now = new Date();
+      const parts = s.split(':');
+      const hours = Number(parts[0]);
+      const minutes = Number(parts[1] || 0);
+      const seconds = Number(parts[2] || 0);
+      date = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, minutes, seconds);
+    } else {
+      date = new Date(dateStr);
+    }
+    if (isNaN(date.getTime())) return s.slice(0,5);
+    // Usar formato AM/PM (ej. 1:00 PM)
+    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  } catch {
+    return String(dateStr).slice(0,5);
+  }
 };
 
 /**
@@ -246,5 +266,6 @@ export default {
   validateShiftTypeName,
   detectDuplicationConflicts,
   calculateShiftDuration,
+  formatTime,
   validateShiftData
 };

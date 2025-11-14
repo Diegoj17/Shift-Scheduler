@@ -1,0 +1,230 @@
+.shift-change-history-container {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.shift-change-history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.shift-change-history-title {
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: #4f8cff;
+}
+
+.shift-change-history-filters {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.shift-change-filter-btn {
+  padding: 0.5rem 1rem;
+  background: white;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  color: #000000;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.shift-change-filter-btn:hover {
+  background: #f8f9fa;
+  border-color: #4f8cff;
+  transform: translateY(-2px);
+}
+
+.shift-change-filter-btn.active {
+  background: #4f8cff;
+  color: white;
+  border-color: #4f8cff;
+}
+
+.shift-change-history-loading,
+.shift-change-history-empty {
+  text-align: center;
+  padding: 3rem;
+  color: #000000;
+}
+
+.shift-change-history-list {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.shift-change-request-card {
+  background: #f8f9fa;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.shift-change-request-card:hover {
+  border-color: #4a90e2;
+  box-shadow: 0 4px 12px rgba(74, 144, 226, 0.1);
+}
+
+.shift-change-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.shift-change-card-title {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.shift-change-card-id {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #4f8cff;
+}
+
+.shift-change-card-date {
+  font-size: 0.9rem;
+  color: #000000;
+}
+
+.shift-change-card-body {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.shift-change-card-section {
+  background: white;
+  padding: 1rem;
+  border-radius: 8px;
+  border-left: 3px solid #4f8cff;
+}
+
+.shift-change-card-section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #4f8cff;
+  margin: 0 0 0.75rem 0;
+}
+
+.shift-change-card-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.shift-change-card-info:last-child {
+  border-bottom: none;
+}
+
+.shift-change-card-label {
+  font-size: 0.95rem;
+  color: #000000;
+  font-weight: 500;
+}
+
+.shift-change-card-value {
+  font-size: 0.9rem;
+  color: #000000;
+  font-weight: 500;
+}
+
+.shift-change-card-reason {
+  font-size: 0.95rem;
+  color: #000000;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 6px;
+}
+
+.shift-change-card-comment {
+  font-size: 0.95rem;
+  color: #000000;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0.75rem;
+  background: #fff3cd;
+  border-radius: 6px;
+  border-left: 3px solid #f39c12;
+}
+
+.shift-change-card-reviewer {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.85rem;
+  color: #000000;
+}
+
+.shift-change-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.shift-change-status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.shift-change-status-approved {
+  background: #d4edda;
+  color: #155724;
+}
+
+.shift-change-status-rejected {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+@media (max-width: 768px) {
+  .shift-change-history-container {
+    padding: 1rem;
+  }
+
+  .shift-change-history-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .shift-change-history-filters {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .shift-change-filter-btn {
+    white-space: nowrap;
+  }
+
+  .shift-change-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .shift-change-card-info {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.25rem;
+  }
+}

@@ -1,3 +1,5 @@
+import { formatTime } from './dateUtils';
+
 /**
  * Valida si un turno se solapa con otro
  */
@@ -193,13 +195,7 @@ export const detectDuplicationConflicts = (shiftsToClone, targetDate, existingSh
   return { conflicts, validShifts };
 };
 
-/**
- * Formatea tiempo para mostrar
- */
-const formatTime = (dateStr) => {
-  const date = new Date(dateStr);
-  return date.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
-};
+// Usamos formatTime exportado desde dateUtils (12h AM/PM)
 
 /**
  * Calcula duración del turno en horas (SOPORTA TURNOS NOCTURNOS)

@@ -114,10 +114,6 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport }) => {
           </div>
           <div className="shift-header-content">
             <h2>Detalles del Turno</h2>
-            <p className="shift-header-subtitle">{shift.role} • {shift.department}</p>
-            <p style={{ fontSize: '12px', opacity: 0.8, margin: 0 }}>
-              {shift.extendedProps?.shiftTypeName}
-            </p>
           </div>
         </div>
         

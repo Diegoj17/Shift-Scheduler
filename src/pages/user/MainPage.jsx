@@ -177,9 +177,19 @@ const MainPage = () => {
   const handleActionClick = (actionId) => {
     const action = quickActions.find(a => a.id === actionId);
     if (!action) return;
+    // Navegar a la página de solicitud de cambio si se pulsa "Solicitar Cambio"
+    if (action.id === 1) {
+      navigate('/employee/shift-change-request');
+      return;
+    }
     // Navegar a la página de calendario si se pulsa "Ver Calendario"
     if (action.id === 3) {
       navigate('/employee/calendar');
+      return;
+    }
+    // Navegar a Registrar Horas si se pulsa "Registrar Horas"
+    if (action.id === 2) {
+      navigate('/employee/time');
       return;
     }
     // por defecto, mantener comportamiento de alerta
@@ -191,7 +201,8 @@ const MainPage = () => {
   };
 
   const handleClockAction = () => {
-    alert('Registrando entrada/salida...');
+    // Ir a la página de registrar horas para manejar entrada/salida
+    navigate('/employee/time');
   };
 
   const handleItemClick = (itemId) => {

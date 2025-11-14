@@ -1,0 +1,31 @@
+.shift-review-page-container {
+  min-height: 100vh;
+  display: flex;
+  width: 100vw;
+}
+
+.shift-review-main-content {
+  flex: 1;
+  margin-left: 280px;
+  transition: margin-left 0.3s ease;
+  width: 100%;
+}
+
+.shift-review-main-content.sidebar-collapsed {
+  margin-left: 80px;
+}
+
+.shift-review-content-area {
+  padding: 1rem 2rem 1rem 1rem;
+  min-height: calc(100vh - 80px);
+}
+
+@media (max-width: 768px) {
+  .shift-review-main-content {
+    margin-left: 0;
+  }
+
+  .shift-review-content-area {
+    padding: 1rem;
+  }
+}
