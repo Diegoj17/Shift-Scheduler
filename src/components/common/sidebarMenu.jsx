@@ -7,7 +7,7 @@ const menuItems = [
   { id: 'mi-calendario', label: 'Mi Calendario', icon: FaCalendarAlt, path: '/employee/calendar' },
   { id: 'registrar-horas', label: 'Registrar Horas', icon: FaClipboardCheck, path: '/employee/time' },
   { id: 'registrar-disponibilidad', label: 'Registrar Disponibilidad', icon: FaClock, path: '/employee/availability' },
-  { id: 'solicitudes', label: 'Solicitudes', icon: FaExchangeAlt, path: '/employee/requests' },
+  { id: 'solicitudes', label: 'Solicitudes', icon: FaExchangeAlt, path: '/employee/shift-change-request' },
   { id: 'incidencias', label: 'Incidencias', icon: FaExclamationTriangle, path: '/employee/incidents' },
 ];
 

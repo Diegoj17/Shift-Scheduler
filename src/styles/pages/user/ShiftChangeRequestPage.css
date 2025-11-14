@@ -1,0 +1,85 @@
+.shift-change-page-container {
+  min-height: 100vh;
+  display: flex;
+  width: 100vw;
+}
+
+.shift-change-main-content {
+  flex: 1;
+  margin-left: 280px;
+  transition: margin-left 0.3s ease;
+  width: 100%;
+}
+
+.shift-change-main-content.sidebar-collapsed {
+  margin-left: 80px;
+}
+
+.shift-change-content-area {
+  padding: 1rem 2rem 1rem 1rem;
+  min-height: calc(100vh - 80px);
+}
+
+.shift-change-tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  border-bottom: 2px solid #e9ecef;
+}
+
+.shift-change-tab {
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: #000000;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.shift-change-tab:hover {
+  color: #000000;
+  background-color: #f8f9fa;
+}
+
+.shift-change-tab.active {
+  color: #4f8cff;
+  border-bottom-color: #4f8cff;
+}
+
+.shift-change-tab-content {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 768px) {
+  .shift-change-main-content {
+    margin-left: 0;
+  }
+
+  .shift-change-content-area {
+    padding: 1rem;
+  }
+
+  .shift-change-tabs {
+    overflow-x: auto;
+  }
+
+  .shift-change-tab {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+}

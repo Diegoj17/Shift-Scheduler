@@ -228,6 +228,28 @@
   transform: translateX(4px);
 }
 
+.calendar-shift-type-option.calendar-shift-type-unavailable {
+  background: #fff6f6;
+  border-color: #f8d7da;
+  color: #6b7280;
+  opacity: 0.95;
+  cursor: not-allowed;
+}
+
+.calendar-type-unavailable-badge {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  background: #f87171; /* rojo suave */
+  color: white;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 .calendar-type-color-dot {
   width: 18px;
   height: 18px;
@@ -351,6 +373,16 @@
   color: #e65100;
   font-style: italic;
   font-weight: 600;
+}
+
+.calendar-availability-message {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: #fff3f2;
+  border: 1px solid #ffd1d0;
+  color: #742a2a;
+  border-radius: 8px;
+  font-weight: 700;
 }
 
 /* ============================================
@@ -621,6 +653,360 @@
 
 .calendar-modal-content::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(135deg, #a0aec0, #718096);
+}
+
+
+/* ===================================
+   ESTILOS MEJORADOS PARA SHIFTMODAL
+   Tipos de turno con disponibilidad
+   =================================== */
+
+/* Contenedor de tipos de turno */
+.calendar-shift-type-selector {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* Opción de tipo de turno base */
+.calendar-shift-type-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  background: white;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Hover para tipos disponibles */
+.calendar-shift-type-option:not(.calendar-shift-type-unavailable):hover {
+  border-color: #667eea;
+  background: #f8f9ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+/* Tipo seleccionado */
+.calendar-shift-type-selected {
+  border-color: #667eea !important;
+  background: linear-gradient(135deg, #f8f9ff 0%, #eef2ff 100%) !important;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* Tipo NO disponible */
+.calendar-shift-type-unavailable {
+  cursor: not-allowed !important;
+  opacity: 0.6;
+  background: linear-gradient(135deg, #fafafa 0%, #f5f5f5 100%) !important;
+  border-color: #e0e0e0 !important;
+  position: relative;
+}
+
+.calendar-shift-type-unavailable::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 10px,
+    rgba(0, 0, 0, 0.03) 10px,
+    rgba(0, 0, 0, 0.03) 20px
+  );
+  pointer-events: none;
+}
+
+/* Efecto de "bloqueado" visual */
+.calendar-shift-type-unavailable .calendar-type-color-dot {
+  opacity: 0.4;
+  filter: grayscale(50%);
+}
+
+.calendar-shift-type-unavailable .calendar-type-option-info {
+  opacity: 0.7;
+}
+
+/* Punto de color del tipo */
+.calendar-type-color-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+.calendar-shift-type-selected .calendar-type-color-dot {
+  transform: scale(1.2);
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+}
+
+/* Información del tipo */
+.calendar-type-option-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.calendar-type-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
+.calendar-type-hours {
+  font-size: 12px;
+  color: #6b7280;
+  font-family: 'Monaco', 'Courier New', monospace;
+  letter-spacing: 0.5px;
+}
+
+/* Badge "No disponible" */
+.calendar-type-unavailable-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%);
+  color: #991b1b;
+  white-space: nowrap;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
+  animation: pulse-unavailable 2s ease-in-out infinite;
+}
+
+.calendar-locked-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.5rem;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  margin: 0 auto;
+  width: 91%;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  border: 2px solid #fbbf24;
+  border-radius: 8px;
+  margin-bottom: 0rem;
+  margin-top: 1rem;
+}
+
+.calendar-lock-icon {
+  color: #d97706;
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.calendar-lock-message {
+  flex: 1;
+}
+
+.calendar-lock-message strong {
+  display: block;
+  color: #92400e;
+  font-size: 1rem;
+}
+
+.calendar-lock-message p {
+  color: #78350f;
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* Deshabilitar botón cuando está bloqueado */
+.calendar-btn-primary:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.calendar-btn-primary:disabled:hover {
+  background: #9ca3af;
+  transform: none;
+}
+
+@keyframes pulse-unavailable {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+/* Icono de check para seleccionado */
+.calendar-check-icon {
+  color: #667eea;
+  font-size: 18px;
+  animation: check-appear 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes check-appear {
+  0% {
+    transform: scale(0) rotate(-180deg);
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+/* Mensaje de disponibilidad (tooltip) */
+.calendar-availability-message {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%);
+  border-left: 4px solid #f59e0b;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #92400e;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: slide-in 0.3s ease-out;
+}
+
+.calendar-availability-message::before {
+  content: '⚠️';
+  font-size: 16px;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Tooltip hover para tipos no disponibles */
+.calendar-shift-type-unavailable[data-reason]:hover::after {
+  content: attr(data-reason);
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  animation: tooltip-appear 0.2s ease-out;
+}
+
+.calendar-shift-type-unavailable[data-reason]:hover::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: #1f2937;
+  z-index: 1001;
+}
+
+@keyframes tooltip-appear {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+/* Mensaje de información (cuando no hay disponibilidades) */
+.calendar-no-availability-info {
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+  border-left: 4px solid #3b82f6;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #1e40af;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.calendar-no-availability-info::before {
+  content: 'ℹ️';
+  font-size: 16px;
+}
+
+/* Indicador de carga */
+.calendar-availability-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.calendar-availability-loading::before {
+  content: '';
+  width: 16px;
+  height: 16px;
+  border: 2px solid #e5e7eb;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .calendar-shift-type-selector {
+    grid-template-columns: 1fr;
+  }
+  
+  .calendar-shift-type-unavailable[data-reason]:hover::after {
+    white-space: normal;
+    max-width: 250px;
+  }
+}
+
+/* Accesibilidad */
+.calendar-shift-type-option:focus {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+.calendar-shift-type-unavailable:focus {
+  outline: 2px solid #9ca3af;
+}
+
+/* Estados adicionales */
+.calendar-shift-type-option:active:not(.calendar-shift-type-unavailable) {
+  transform: scale(0.98);
 }
 
 /* ============================================

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MdListAlt, MdAdd, MdCheck, MdClose } from 'react-icons/md';
 import availabilityService from '../../../../services/availabilityService';
+import ConfirmModal from '../../../common/ConfirmModal';
 import '../../../../styles/components/time/user/availability/TimeAvailabilityForm.css';
 
 const TimeAvailabilityForm = ({ onSubmit, initialData = null, onUpdate, onCancel, onDelete }) => {
@@ -14,6 +15,7 @@ const TimeAvailabilityForm = ({ onSubmit, initialData = null, onUpdate, onCancel
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errors, setErrors] = useState({});
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const isEditing = Boolean(initialData && initialData.id);
 
@@ -146,25 +148,19 @@ const TimeAvailabilityForm = ({ onSubmit, initialData = null, onUpdate, onCancel
 
   const handleDelete = async () => {
     if (!initialData || !initialData.id) return;
+    // Abrir modal de confirmación en lugar de usar window.confirm
+    setConfirmOpen(true);
+  };
 
-    const confirmDelete = window.confirm('¿Estás seguro de que deseas eliminar esta disponibilidad?');
-    
-    if (!confirmDelete) return;
-
+  const handleConfirmDelete = async () => {
+    if (!initialData || !initialData.id) return;
+    setConfirmOpen(false);
     setIsSubmitting(true);
-
     try {
       await availabilityService.deleteAvailability(initialData.id);
-      
       console.log('✅ Disponibilidad eliminada:', initialData.id);
-      
-      if (onDelete) {
-        onDelete(initialData.id);
-      }
-
-      if (onCancel) {
-        onCancel();
-      }
+      if (onDelete) onDelete(initialData.id);
+      if (onCancel) onCancel();
     } catch (error) {
       console.error('❌ Error al eliminar disponibilidad:', error);
       setErrors({ submit: error.message || 'Error al eliminar disponibilidad' });
@@ -346,6 +342,15 @@ const TimeAvailabilityForm = ({ onSubmit, initialData = null, onUpdate, onCancel
           )}
         </div>
       </form>
+      <ConfirmModal
+        isOpen={confirmOpen}
+        title="Confirmar eliminación"
+        message="¿Estás seguro de que deseas eliminar esta disponibilidad?"
+        confirmLabel="Eliminar"
+        cancelLabel="Cancelar"
+        onCancel={() => setConfirmOpen(false)}
+        onConfirm={handleConfirmDelete}
+      />
     </div>
   );
 };

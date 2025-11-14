@@ -1,0 +1,302 @@
+.shift-review-list-container {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
+
+.shift-review-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #e9ecef;
+  gap: 1rem;
+}
+
+.shift-review-list-info {
+  flex: 1;
+}
+
+.shift-review-list-title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: #4f8cff;
+  margin-bottom: 4px;
+}
+
+.shift-review-list-subtitle {
+  font-size: 14px;
+  color: #000000;
+}
+
+.shift-review-filters {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.shift-review-filter-btn {
+  padding: 0.625rem 1.25rem;
+  background: white;
+  border: 2px solid #dee2e6;
+  border-radius: 8px;
+  color: #000000;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.shift-review-filter-btn:hover {
+  background: #f8f9fa;
+  border-color: #4f8cff;
+  transform: translateY(-2px);
+}
+
+.shift-review-filter-btn.active {
+  background: #4f8cff;
+  color: white;
+  border-color: #4f8cff;
+  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.3);
+}
+
+.shift-review-loading,
+.shift-review-empty {
+  text-align: center;
+  padding: 4rem 2rem;
+  color: #000000;
+}
+
+.shift-review-empty svg {
+  margin-bottom: 1rem;
+  color: #4f8cff;
+}
+
+.shift-review-empty p {
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.shift-review-table-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.shift-review-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.shift-review-table thead {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.shift-review-table th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 700;
+  color: #000000;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.shift-review-table tbody tr {
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.shift-review-table tbody tr:hover {
+  background-color: #f8f9fa;
+}
+
+.shift-review-table td {
+  padding: 1rem;
+  color: #000000;
+  vertical-align: middle;
+}
+
+.shift-review-cell-id {
+  font-weight: 600;
+  color: #4a90e2;
+  font-size: 0.95rem;
+}
+
+.shift-review-employee-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.shift-review-employee-name {
+  font-weight: 600;
+  color: #000000;
+  font-size: 0.95rem;
+}
+
+.shift-review-employee-position {
+  font-size: 0.85rem;
+  color: #000000;
+}
+
+.shift-review-shift-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.shift-review-shift-date {
+  font-weight: 600;
+  color: #000000;
+  font-size: 0.9rem;
+}
+
+.shift-review-shift-time {
+  font-size: 0.85rem;
+  color: #000000;
+  font-family: 'Courier New', monospace;
+}
+
+.shift-review-shift-type {
+  font-size: 0.85rem;
+  color: #000000;
+  font-style: italic;
+}
+
+.shift-review-proposed-employee {
+  font-weight: 500;
+  color: #000000;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background: #e3f2fd;
+  border-radius: 6px;
+}
+
+.shift-review-no-proposal {
+  color: #000000;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.shift-review-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.shift-review-status-pending {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeaa7;
+}
+
+.shift-review-status-approved {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.shift-review-status-rejected {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+.shift-review-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #4f8cff;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.shift-review-action-btn:hover {
+  background: #4f8cff;
+  transform: translateY(-2px);
+}
+
+/* Asegurar que los svg dentro del botón de acción usen color de texto/fill blanco */
+.shift-review-action-btn svg {
+  color: #fff;
+  fill: #fff;
+}
+
+@media (max-width: 1200px) {
+  .shift-review-list-header {
+    flex-direction: column;
+  }
+
+  .shift-review-filters {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .shift-review-list-container {
+    padding: 1rem;
+  }
+
+  .shift-review-table-wrapper {
+    border: none;
+  }
+
+  .shift-review-table {
+    font-size: 0.85rem;
+  }
+
+  .shift-review-table th,
+  .shift-review-table td {
+    padding: 0.75rem 0.5rem;
+  }
+
+  /* Hacer responsive la tabla en móviles */
+  .shift-review-table thead {
+    display: none;
+  }
+
+  .shift-review-table tbody tr {
+    display: block;
+    margin-bottom: 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 1rem;
+  }
+
+  .shift-review-table td {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f1f3f5;
+  }
+
+  .shift-review-table td:last-child {
+    border-bottom: none;
+  }
+
+  .shift-review-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: #6c757d;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+  }
+}
