@@ -4,10 +4,12 @@ import { FaClock, FaClipboardList, FaUsers, FaUserCheck } from 'react-icons/fa';
 import '../../../styles/components/dashboard/admin/StatsGrid.css';
 import { userService } from '../../../services/userService';
 import { shiftService } from '../../../services/shiftService';
+import shiftChangeService from '../../../services/shiftChangeService';
 
 const StatsGrid = () => {
   const [usersCount, setUsersCount] = useState('...');
   const [shiftsCount, setShiftsCount] = useState('...');
+  const [pendingRequestsCount, setPendingRequestsCount] = useState('...');
 
   useEffect(() => {
     let mounted = true;
@@ -40,6 +42,21 @@ const StatsGrid = () => {
 
     fetchUsersCount();
     fetchShiftsCount();
+    const fetchPendingRequests = async () => {
+      try {
+        setPendingRequestsCount('...');
+        const data = await shiftChangeService.getChangeRequests({ status: 'pending' });
+        const list = Array.isArray(data) ? data : (data?.results || data?.data || []);
+        const count = Array.isArray(list) ? list.length : 0;
+        if (!mounted) return;
+        setPendingRequestsCount(count);
+      } catch (error) {
+        console.error('Error cargando solicitudes pendientes:', error);
+        if (mounted) setPendingRequestsCount(0);
+      }
+    };
+
+    fetchPendingRequests();
     return () => { mounted = false; };
   }, []);
 
@@ -53,7 +70,7 @@ const StatsGrid = () => {
     },
     { 
       title: "Solicitudes Pendientes", 
-      value: "8", 
+      value: pendingRequestsCount, 
       change: "-3", 
       icon: <FaClipboardList />, 
       color: "orange" 

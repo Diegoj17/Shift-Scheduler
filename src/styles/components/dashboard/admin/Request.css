@@ -1,9 +1,56 @@
-/* Request.css - Versión Mejorada y Profesional */
+/* Request.css - Versión Mejorada con Información Completa */
 
 .solicitudes-widget {
   padding: 1.75rem;
   background: var(--bg-card, #ffffff);
   height: 100%;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.widget-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #f1f5f9;
+  position: relative;
+}
+
+.widget-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+.title-icon {
+  color: #4f8cff;
+  font-size: 1.5rem;
+}
+
+.pendientes-badge {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 0.375rem 0.75rem;
+  border-radius: 20px;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
 }
 
 .solicitudes-list {
@@ -16,7 +63,7 @@
   background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
   border: 1px solid #e2e8f0;
   border-radius: 14px;
-  padding: 1.25rem;
+  padding: 1.5rem;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
@@ -39,86 +86,59 @@
   background: #ffffff;
   border-color: #cbd5e1;
   transform: translateX(6px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
 }
 
 .solicitud-item:hover::before {
   opacity: 1;
 }
 
+/* Header de la solicitud */
 .solicitud-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.875rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
   gap: 1rem;
 }
 
-.solicitud-empleado {
-  font-weight: 700;
-  color: #1e293b;
-  font-size: 0.9375rem;
-  letter-spacing: -0.01em;
-  transition: all 0.3s ease;
+.solicitud-info {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.solicitud-item:hover .solicitud-empleado {
-  color: #4f8cff;
+.solicitud-empleado {
+  font-weight: 800;
+  color: #000000;
+  font-size: 1.125rem;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.5rem;
+  line-height: 1.3;
 }
 
 .solicitud-estado {
-  padding: 0.375rem 0.875rem;
+  padding: 0.5rem 1rem;
   border-radius: 20px;
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  transition: all 0.3s ease;
   white-space: nowrap;
   position: relative;
   overflow: hidden;
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-}
-
-.estado-icon {
-  font-size: 0.75rem;
-}
-
-.solicitud-estado::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: inherit;
-  filter: blur(8px);
-  opacity: 0.5;
-  z-index: -1;
-  transition: all 0.3s ease;
-}
-
-.solicitud-item:hover .solicitud-estado::before {
-  filter: blur(12px);
-  opacity: 0.7;
 }
 
 .estado-pendiente {
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.25));
   color: #d97706;
   border: 1px solid rgba(245, 158, 11, 0.3);
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2);
 }
 
 .estado-pendiente::after {
   content: '';
   position: absolute;
   top: 50%;
-  left: 0.5rem;
+  left: 0.75rem;
   transform: translateY(-50%);
   width: 6px;
   height: 6px;
@@ -127,83 +147,147 @@
   animation: pulse-badge 2s ease-in-out infinite;
 }
 
-@keyframes pulse-badge {
-  0%, 100% {
-    opacity: 1;
-    transform: translateY(-50%) scale(1);
-  }
-  50% {
-    opacity: 0.5;
-    transform: translateY(-50%) scale(1.3);
-  }
+/* Información detallada */
+.solicitud-detalles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
-.estado-aprobado {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.25));
+.detalle-fila {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+}
+
+.detalle-fila:not(:last-child) {
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.detalle-icono {
+  color: #4f8cff;
+  font-size: 1rem;
+  margin-top: 0.125rem;
+  flex-shrink: 0;
+  width: 16px;
+  text-align: center;
+}
+
+.detalle-contenido {
+  flex: 1;
+  min-width: 0;
+}
+
+.detalle-etiqueta {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #000000;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+.detalle-valor {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: #000000;
+  line-height: 1.4;
+  word-wrap: break-word;
+}
+
+/* Tipos de turno específicos */
+.tipo-cambio {
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.2));
+  color: #7c3aed;
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+.tipo-dia-libre {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.2));
   color: #059669;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-block;
+  margin-right: 0.5rem;
 }
 
-.estado-rechazado {
-  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.25));
-  color: #dc2626;
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.2);
+.tipo-modificacion {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.2));
+  color: #2563eb;
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: inline-block;
+  margin-right: 0.5rem;
 }
 
-.solicitud-item:hover .solicitud-estado {
-  transform: translateY(-2px);
-}
-
-.solicitud-tipo {
-  font-size: 0.8125rem;
-  color: #475569;
+/* Estados de turno */
+.turno-original {
+  background: linear-gradient(135deg, rgba(107, 114, 128, 0.1), rgba(107, 114, 128, 0.2));
+  color: #000000;
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+.turno-solicitado {
+  background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(34, 197, 94, 0.2));
+  color: #16a34a;
+  padding: 0.25rem 0.75rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+/* Descripción */
+.descripcion-texto {
+  background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0.75rem;
+  font-size: 0.875rem;
+  color: #000000;
+  line-height: 1.5;
+  margin-top: 0.25rem;
+}
+
+/* Fecha y hora */
+.info-horario {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.horario-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  transition: all 0.3s ease;
+  font-size: 0.875rem;
+  color: #000000;
+  font-weight: 600;
 }
 
-.tipo-icon {
+.horario-icono {
   color: #4f8cff;
   font-size: 0.875rem;
 }
 
-.solicitud-fecha {
-  font-size: 0.75rem;
-  color: #64748b;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.375rem;
-  transition: all 0.3s ease;
-}
-
-.fecha-icon {
-  color: #64748b;
-  font-size: 0.75rem;
-}
-
-.solicitud-item:hover .solicitud-tipo,
-.solicitud-item:hover .solicitud-fecha {
-  color: #1e293b;
-}
-
-/* Línea divisoria entre solicitudes */
-.solicitud-item:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  bottom: -0.5rem;
-  left: 1.25rem;
-  right: 1.25rem;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
-}
-
-/* Animación de entrada */
+/* Animaciones */
 @keyframes slideInLeft {
   from {
     opacity: 0;
@@ -222,105 +306,24 @@
 .solicitud-item:nth-child(1) { animation-delay: 0.1s; }
 .solicitud-item:nth-child(2) { animation-delay: 0.2s; }
 .solicitud-item:nth-child(3) { animation-delay: 0.3s; }
-.solicitud-item:nth-child(4) { animation-delay: 0.4s; }
-.solicitud-item:nth-child(5) { animation-delay: 0.5s; }
 
 /* Estado vacío */
-.solicitudes-list:empty::after {
-  content: '✅ No hay solicitudes pendientes';
-  display: block;
+.solicitudes-vacio {
   text-align: center;
   padding: 3rem 1rem;
-  color: #10b981;
-  font-weight: 700;
-  font-size: 0.9375rem;
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.05), rgba(16, 185, 129, 0.1));
-  border: 2px dashed rgba(16, 185, 129, 0.2);
-  border-radius: 12px;
+  color: #000000;
 }
 
-/* Contador de solicitudes pendientes */
-.widget-header {
-  position: relative;
+.solicitudes-vacio-icono {
+  font-size: 3rem;
+  color: #cbd5e1;
+  margin-bottom: 1rem;
 }
 
-.widget-header::after {
-  content: attr(data-count);
-  position: absolute;
-  top: -0.5rem;
-  right: -0.5rem;
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  color: white;
-  font-size: 0.6875rem;
-  font-weight: 800;
-  padding: 0.25rem 0.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
-  animation: bounce 2s ease-in-out infinite;
-}
-
-@keyframes bounce {
-  0%, 100% {
-    transform: translateY(0);
-  }
-  50% {
-    transform: translateY(-4px);
-  }
-}
-
-/* Acciones rápidas en hover */
-.solicitud-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 0.875rem;
-  padding-top: 0.875rem;
-  border-top: 1px solid #f1f5f9;
-  opacity: 0;
-  transform: translateY(-10px);
-  transition: all 0.3s ease;
-}
-
-.solicitud-item:hover .solicitud-actions {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.solicitud-btn {
-  flex: 1;
-  padding: 0.5rem 1rem;
-  border: none;
-  border-radius: 8px;
-  font-size: 0.8125rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.375rem;
-}
-
-.solicitud-btn.aprobar {
-  background: linear-gradient(135deg, #10b981, #059669);
-  color: white;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-}
-
-.solicitud-btn.rechazar {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  color: white;
-  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
-}
-
-.solicitud-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.solicitud-btn:active {
-  transform: translateY(0);
+.solicitudes-vacio-texto {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #000000;
 }
 
 /* Responsive */
@@ -330,7 +333,7 @@
   }
   
   .solicitud-item {
-    padding: 1rem;
+    padding: 1.25rem;
   }
   
   .solicitud-header {
@@ -339,50 +342,22 @@
     gap: 0.75rem;
   }
   
-  .solicitud-empleado {
-    white-space: normal;
-  }
-  
-  .solicitud-actions {
-    opacity: 1;
-    transform: translateY(0);
+  .info-horario {
+    flex-direction: column;
+    gap: 0.5rem;
   }
 }
 
 @media (max-width: 480px) {
-  .solicitud-estado {
-    font-size: 0.625rem;
-    padding: 0.3125rem 0.75rem;
+  .widget-title {
+    font-size: 1.125rem;
   }
   
-  .solicitud-tipo,
-  .solicitud-fecha {
-    font-size: 0.75rem;
+  .solicitud-empleado {
+    font-size: 1rem;
   }
   
-  .solicitud-btn {
-    padding: 0.5rem 0.75rem;
-    font-size: 0.75rem;
-  }
-}
-
-/* Accesibilidad */
-@media (prefers-reduced-motion: reduce) {
-  .solicitud-item,
-  .solicitud-estado,
-  .solicitud-actions {
-    animation: none;
-    transition: none;
-  }
-}
-
-/* Modo de alto contraste */
-@media (prefers-contrast: high) {
-  .solicitud-item {
-    border-width: 2px;
-  }
-  
-  .solicitud-estado {
-    border-width: 2px;
+  .detalle-valor {
+    font-size: 0.875rem;
   }
 }
