@@ -1,12 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Header from '../../components/common/Header';
 import SidebarEmployee from '../../components/common/SidebarEmployee';
-import FullCalendar from '@fullcalendar/react';
-import dayGridPlugin from '@fullcalendar/daygrid';
-import timeGridPlugin from '@fullcalendar/timegrid';
-import interactionPlugin from '@fullcalendar/interaction';
-import esLocale from '@fullcalendar/core/locales/es';
+// FullCalendar will be loaded dynamically to reduce initial bundle size
 import ShiftFilters from '../../components/calendar/user/ShiftFilters';
 import ShiftDetails from '../../components/calendar/user/ShiftDetails';
 import EmptyState from '../../components/calendar/user/EmptyState';
@@ -21,6 +17,30 @@ import {
 import { FiSun, FiClock, FiMoon } from 'react-icons/fi';
 import '../../styles/pages/user/ShiftCalendar.css';
 
+// Utility para determinar tipo de turno (moved fuera del componente para estabilidad de hooks)
+const getShiftTypeFromData = (shift) => {
+  try {
+    // Si ya existe un tipo definido, usarlo
+    if (shift.extendedProps?.type) return shift.extendedProps.type;
+
+    if (shift.start instanceof Date) {
+      const startHour = shift.start.getHours();
+      if (startHour >= 6 && startHour < 12) return 'morning';
+      if (startHour >= 12 && startHour < 18) return 'afternoon';
+      return 'night';
+    }
+
+    const title = shift.title || '';
+    const titleLower = title.toLowerCase();
+    if (titleLower.includes('mañana') || titleLower.includes('morning') || titleLower.includes('aman')) return 'morning';
+    if (titleLower.includes('tarde') || titleLower.includes('afternoon') || titleLower.includes('tard')) return 'afternoon';
+    if (titleLower.includes('noche') || titleLower.includes('night') || titleLower.includes('noch')) return 'night';
+  } catch (err) {
+    void err;
+  }
+  return 'morning';
+};
+
 const ShiftCalendarPage = () => {
   const navigate = useNavigate();
   
@@ -29,7 +49,7 @@ const ShiftCalendarPage = () => {
   const calendarRef = useRef(null);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showDetails, setShowDetails] = useState(false);
-  const [dateRange, setDateRange] = useState({
+  const [_dateRange, setDateRange] = useState({
     start: new Date(),
     end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
   });
@@ -37,6 +57,56 @@ const ShiftCalendarPage = () => {
   const [showFilters, setShowFilters] = useState(true);
   const [shifts, setShifts] = useState([]);
   const [calendarKey, setCalendarKey] = useState(0);
+  const [FC, setFC] = useState(null); // { FullCalendar, dayGridPlugin, timeGridPlugin, interactionPlugin, esLocale }
+  const [fcLoaded, setFcLoaded] = useState(false);
+  const [fcLoading, setFcLoading] = useState(false);
+  const fcPrefetchRef = useRef(null);
+
+  // Modifica tu loadMyShifts para procesar los datos (useCallback para estabilidad)
+  const loadMyShifts = useCallback(async () => {
+    setLoading(true);
+    try {
+      console.log('🔄 Cargando turnos iniciales...');
+      const myShifts = await shiftService.getMyShiftsForCalendar();
+      
+      // Debug detallado de los datos crudos
+      console.log('📦 Datos crudos recibidos:', myShifts);
+      myShifts.forEach((shift, index) => {
+        console.log(`📊 Turno ${index + 1}:`, {
+          id: shift.id,
+          title: shift.title,
+          start: shift.start,
+          end: shift.end,
+          isDate: shift.start instanceof Date,
+          startHour: shift.start instanceof Date ? shift.start.getHours() : 'N/A'
+        });
+      });
+      
+      // Procesar los turnos
+      const processedShifts = myShifts.map(shift => {
+        const shiftType = getShiftTypeFromData(shift);
+        
+        return {
+          ...shift,
+          extendedProps: {
+            ...shift.extendedProps,
+            type: shiftType,
+            role: shift.extendedProps?.role || shift.title?.split(' - ')[1] || 'Supervisor',
+            department: shift.extendedProps?.department || 'Turnos',
+            location: shift.extendedProps?.location || 'Principal'
+          }
+        };
+      });
+      
+      console.log('✅ Turnos procesados:', processedShifts);
+      setShifts(processedShifts);
+      setCalendarKey(prev => prev + 1);
+    } catch (error) {
+      console.error('❌ Error cargando turnos:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -45,7 +115,7 @@ const ShiftCalendarPage = () => {
       return;
     }
     loadMyShifts();
-  }, [navigate]);
+  }, [navigate, loadMyShifts]);
 
   useEffect(() => {
     if (calendarRef.current) {
@@ -69,52 +139,80 @@ const ShiftCalendarPage = () => {
     }
   }, [showFilters]);
 
-  // Modifica tu loadMyShifts para procesar los datos
-// Agrega este debug en loadMyShifts
-const loadMyShifts = async () => {
-  setLoading(true);
-  try {
-    console.log('🔄 Cargando turnos iniciales...');
-    const myShifts = await shiftService.getMyShiftsForCalendar();
-    
-    // Debug detallado de los datos crudos
-    console.log('📦 Datos crudos recibidos:', myShifts);
-    myShifts.forEach((shift, index) => {
-      console.log(`📊 Turno ${index + 1}:`, {
-        id: shift.id,
-        title: shift.title,
-        start: shift.start,
-        end: shift.end,
-        isDate: shift.start instanceof Date,
-        startHour: shift.start instanceof Date ? shift.start.getHours() : 'N/A'
-      });
-    });
-    
-    // Procesar los turnos
-    const processedShifts = myShifts.map(shift => {
-      const shiftType = getShiftTypeFromData(shift);
-      
-      return {
-        ...shift,
-        extendedProps: {
-          ...shift.extendedProps,
-          type: shiftType,
-          role: shift.extendedProps?.role || shift.title?.split(' - ')[1] || 'Supervisor',
-          department: shift.extendedProps?.department || 'Turnos',
-          location: shift.extendedProps?.location || 'Principal'
+  // Lazy-load FullCalendar only when we have shifts to render
+  useEffect(() => {
+    let mounted = true;
+    const loadFC = async () => {
+      if (fcLoaded || fcLoading) return;
+      try {
+        setFcLoading(true);
+        // If we prefetched modules earlier, reuse that promise
+        let modules;
+        if (fcPrefetchRef.current) {
+          try {
+            modules = await fcPrefetchRef.current;
+          } catch (e) {
+            void e;
+            // Prefetch failed; fallback to direct import
+            modules = await Promise.all([
+              import('@fullcalendar/react'),
+              import('@fullcalendar/daygrid'),
+              import('@fullcalendar/timegrid'),
+              import('@fullcalendar/interaction'),
+              import('@fullcalendar/core/locales/es')
+            ]);
+          }
+        } else {
+          modules = await Promise.all([
+            import('@fullcalendar/react'),
+            import('@fullcalendar/daygrid'),
+            import('@fullcalendar/timegrid'),
+            import('@fullcalendar/interaction'),
+            import('@fullcalendar/core/locales/es')
+          ]);
         }
-      };
-    });
-    
-    console.log('✅ Turnos procesados:', processedShifts);
-    setShifts(processedShifts);
-    setCalendarKey(prev => prev + 1);
-  } catch (error) {
-    console.error('❌ Error cargando turnos:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+
+        if (!mounted) return;
+
+        const [FullCalendarModule, dayGrid, timeGrid, interaction, localeES] = modules;
+        setFC({
+          FullCalendar: FullCalendarModule.default || FullCalendarModule,
+          dayGridPlugin: dayGrid.default || dayGrid,
+          timeGridPlugin: timeGrid.default || timeGrid,
+          interactionPlugin: interaction.default || interaction,
+          esLocale: (localeES && (localeES.default || localeES)) || null
+        });
+        setFcLoaded(true);
+      } catch (err) {
+        console.error('Error cargando FullCalendar dinámicamente:', err);
+      } finally {
+        setFcLoading(false);
+      }
+    };
+
+    if (shifts && shifts.length > 0 && !fcLoaded) {
+      void loadFC();
+    }
+
+    return () => { mounted = false; };
+  }, [shifts, fcLoaded, fcLoading]);
+
+  // Prefetch FullCalendar in background (reduces perceived load time)
+  useEffect(() => {
+    if (!fcPrefetchRef.current) {
+      // Kick off prefetch but don't set FC; we reuse this promise later
+      fcPrefetchRef.current = Promise.all([
+        import('@fullcalendar/react'),
+        import('@fullcalendar/daygrid'),
+        import('@fullcalendar/timegrid'),
+        import('@fullcalendar/interaction'),
+        import('@fullcalendar/core/locales/es')
+      ]).catch(err => {
+        console.warn('Prefetch FullCalendar falló (no crítico):', err);
+        throw err;
+      });
+    }
+  }, []);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   const handleItemClick = (itemId) => setActiveItem(itemId);
@@ -369,58 +467,7 @@ const loadMyShifts = async () => {
   printWindow.document.close();
 };
 
-// Función corregida con lógica precisa para determinar el tipo de turno
-const getShiftTypeFromData = (shift) => {
-  console.log('🔍 Analizando turno para tipo:', {
-    title: shift.title,
-    start: shift.start,
-    startHour: shift.start instanceof Date ? shift.start.getHours() : 'N/A'
-  });
-
-  // Si ya existe un tipo definido, usarlo
-  if (shift.extendedProps?.type) {
-    return shift.extendedProps.type;
-  }
-
-  // Determinar por la hora de inicio (lógica corregida)
-  if (shift.start instanceof Date) {
-    const startHour = shift.start.getHours();
-    console.log('⏰ Hora de inicio:', startHour);
-    
-    // ✅ LÓGICA CORREGIDA:
-    // Mañana: 6:00 AM - 11:59 AM (6-11)
-    // Tarde: 12:00 PM - 5:59 PM (12-17)  
-    // Noche: 6:00 PM - 5:59 AM (18-23, 0-5)
-    
-    if (startHour >= 6 && startHour < 12) {
-      console.log('✅ Clasificado como: MAÑANA (6:00-11:59)');
-      return 'morning';
-    } else if (startHour >= 12 && startHour < 18) {
-      console.log('✅ Clasificado como: TARDE (12:00-17:59)');
-      return 'afternoon';
-    } else {
-      console.log('✅ Clasificado como: NOCHE (18:00-5:59)');
-      return 'night';
-    }
-  }
-
-  // Determinar por el título (fallback mejorado)
-  const title = shift.title || '';
-  const titleLower = title.toLowerCase();
-  
-  if (titleLower.includes('mañana') || titleLower.includes('morning') || titleLower.includes('aman')) {
-    return 'morning';
-  }
-  if (titleLower.includes('tarde') || titleLower.includes('afternoon') || titleLower.includes('tard')) {
-    return 'afternoon';
-  }
-  if (titleLower.includes('noche') || titleLower.includes('night') || titleLower.includes('noch')) {
-    return 'night';
-  }
-
-  console.log('⚠️ Usando default: morning');
-  return 'morning';
-};
+// getShiftTypeFromData removed from here (now declared at module scope)
 
   return (
     <div className="shift-page-container">
@@ -488,103 +535,97 @@ const getShiftTypeFromData = (shift) => {
               </div>
             ) : (
               <>
-                <div className="shift-calendar-wrapper">
-                  <FullCalendar
-                    key={calendarKey}
-                    ref={calendarRef}
-                    plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                    initialView="timeGridWeek"
-                    locale={esLocale}
-                    headerToolbar={{
-                      left: 'prev,next today',
-                      center: 'title',
-                      right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                    }}
-                    events={shifts.map(shift => {
-  // ✅ OBTENER EL COLOR CORRECTAMENTE
-  const actualColor = shift.backgroundColor || shift.extendedProps?.color;
-  
-  console.log('🎨 Calendario - Color del turno:', {
-    title: shift.title,
-    colorBD: shift.extendedProps?.color,
-    backgroundColor: shift.backgroundColor,
-    colorFinal: actualColor,
-    extendedProps: shift.extendedProps
-  });
-  
-  return {
-    ...shift,
-    backgroundColor: actualColor,
-    borderColor: actualColor,
-    textColor: 'white',
-    extendedProps: {
-      ...shift.extendedProps,
-      color: actualColor, // ✅ Asegurar que el color se pase
-      type: shift.extendedProps?.type || getShiftTypeFromData(shift)
-    }
-  };
-})}
-                    datesSet={handleDatesSet}
-                    eventClick={handleEventClick}
-                    height="auto"
-                    
-                    slotMinTime="06:00:00"
-                    slotMaxTime="24:00:00"
-                    allDaySlot={false}
-                    nowIndicator={true}
-                    scrollTime="08:00:00"
-                    slotDuration="01:00:00"
-                    slotLabelInterval="01:00:00"
-                    
-                    eventMinHeight={80}
-                    expandRows={true}
-                    
-                    eventTimeFormat={{
-                      hour: '2-digit',
-                      minute: '2-digit',
-                      hour12: false
-                    }}
-                    dayHeaderFormat={{ weekday: 'short' }}
-                    eventDisplay="block"
-                    
-                    eventDidMount={(info) => {
-                      console.log('✅ Evento montado:', {
-                        title: info.event.title,
-                        start: info.event.start,
-                        view: info.view.type
-                      });
-                    }}
-                    
-                    eventContent={(eventInfo) => (
-                      <div className="shift-event-content">
-                        <div className="shift-event-time">
-                          <FaClock />
-                          {eventInfo.timeText}
+                {!fcLoaded ? (
+                  <div className="shift-calendar-wrapper">
+                    <div className="shift-loading-state">
+                      <div className="shift-loading-spinner"></div>
+                      <p>{fcLoading ? 'Cargando calendario...' : 'Preparando calendario...'}</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="shift-calendar-wrapper">
+                    <FC.FullCalendar
+                      key={calendarKey}
+                      ref={calendarRef}
+                      plugins={[FC.dayGridPlugin, FC.timeGridPlugin, FC.interactionPlugin]}
+                      initialView="timeGridWeek"
+                      locale={FC.esLocale}
+                      headerToolbar={{
+                        left: 'prev,next today',
+                        center: 'title',
+                        right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                      }}
+                      events={shifts.map(shift => {
+                        const actualColor = shift.backgroundColor || shift.extendedProps?.color;
+                        return {
+                          ...shift,
+                          backgroundColor: actualColor,
+                          borderColor: actualColor,
+                          textColor: 'white',
+                          extendedProps: {
+                            ...shift.extendedProps,
+                            color: actualColor,
+                            type: shift.extendedProps?.type || getShiftTypeFromData(shift)
+                          }
+                        };
+                      })}
+                      datesSet={handleDatesSet}
+                      eventClick={handleEventClick}
+                      height="auto"
+                      slotMinTime="06:00:00"
+                      slotMaxTime="24:00:00"
+                      allDaySlot={false}
+                      nowIndicator={true}
+                      scrollTime="08:00:00"
+                      slotDuration="01:00:00"
+                      slotLabelInterval="01:00:00"
+                      eventMinHeight={80}
+                      expandRows={true}
+                      eventTimeFormat={{
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false
+                      }}
+                      dayHeaderFormat={{ weekday: 'short' }}
+                      eventDisplay="block"
+                      eventDidMount={(info) => {
+                        console.log('✅ Evento montado:', {
+                          title: info.event.title,
+                          start: info.event.start,
+                          view: info.view.type
+                        });
+                      }}
+                      eventContent={(eventInfo) => (
+                        <div className="shift-event-content">
+                          <div className="shift-event-time">
+                            <FaClock />
+                            {eventInfo.timeText}
+                          </div>
+                          <div className="shift-event-title">
+                            {eventInfo.event.title}
+                          </div>
+                          <div className="shift-event-type">
+                            {eventInfo.event.extendedProps.type === 'morning' && (
+                              <>
+                                <FiSun /> Mañana
+                              </>
+                            )}
+                            {eventInfo.event.extendedProps.type === 'afternoon' && (
+                              <>
+                                <FiClock /> Tarde
+                              </>
+                            )}
+                            {eventInfo.event.extendedProps.type === 'night' && (
+                              <>
+                                <FiMoon /> Noche
+                              </>
+                            )}
+                          </div>
                         </div>
-                        <div className="shift-event-title">
-                          {eventInfo.event.title}
-                        </div>
-                        <div className="shift-event-type">
-                          {eventInfo.event.extendedProps.type === 'morning' && (
-                            <>
-                              <FiSun /> Mañana
-                            </>
-                          )}
-                          {eventInfo.event.extendedProps.type === 'afternoon' && (
-                            <>
-                              <FiClock /> Tarde
-                            </>
-                          )}
-                          {eventInfo.event.extendedProps.type === 'night' && (
-                            <>
-                              <FiMoon /> Noche
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    )}
-                  />
-                </div>
+                      )}
+                    />
+                  </div>
+                )}
               </>
             )}
           </div>
