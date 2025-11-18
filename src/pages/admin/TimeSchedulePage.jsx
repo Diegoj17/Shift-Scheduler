@@ -304,11 +304,10 @@ const handleAssignFromDetails = async (availability) => {
                       minute: '2-digit',
                       hour12: true
                     }}
-                    dayHeaderFormat={{
-                      weekday: 'short',
-                      day: 'numeric',
-                      month: 'short'
-                    }}
+                    // Mostrar solo el nombre corto del día en la cabecera
+                    // para evitar que se muestren múltiples formatos de fecha
+                    // concatenados en la vista semanal/día.
+                    dayHeaderFormat={{ weekday: 'short' }}
                     buttonText={{
                       today: 'Hoy',
                       month: 'Mes',

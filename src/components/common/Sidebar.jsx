@@ -1,4 +1,5 @@
 // Sidebar.jsx
+import React from 'react';
 import {
   FaThLarge,
   FaCalendarAlt,
@@ -11,7 +12,8 @@ import {
   FaChevronLeft,
   FaChevronRight,
   FaCog,
-  FaListAlt
+  FaListAlt,
+  FaUserClock 
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import '../../styles/components/common/Sidebar.css';
@@ -21,13 +23,15 @@ const Sidebar = ({ isOpen, onToggle, activeItem, onItemClick, darkMode, menuItem
   const defaultMenuItems = [
     { id: 'dashboard', label: 'Inicio', icon: <FaThLarge />, path: '/admin/dashboard' },
     { id: 'calendario', label: 'Calendario', icon: <FaCalendarAlt />, path: '/admin/calendar' },
-    { id: 'disponibilidad', label: 'Disponibilidad', icon: <FaListAlt  />, path: '/admin/availability' },
-    { id: 'solicitudes', label: 'Solicitudes', icon: <FaClipboardList />, path: '/admin/shift-change-review' },
+    { id: 'disponibilidad', label: 'Disponibilidad', icon: <FaUserClock  />, path: '/admin/availability' },
+    { id: 'solicitudes', label: 'Solicitudes', icon: <FaClipboardList  />, path: '/admin/shift-change-review' },
     { id: 'presencia', label: 'Presencia', icon: <FaUserCheck />, path: '/admin/attendance' },
     { id: 'documentos', label: 'Documentos', icon: <FaFileAlt />, path: '/admin/documents' },
     { id: 'equipo', label: 'Equipo', icon: <FaUsers />, path: '/admin/management' },
     { id: 'informes', label: 'Informes', icon: <FaChartBar />, path: '/admin/reports' },
-    { id: 'configuracion', label: 'Configuración', icon: <FaCog />, path: '/admin/settings' },
+    // Nota: 'Configuración' removido de la lista por defecto para evitar que
+    // aparezca en páginas donde no se desee. Añádelo explícitamente al pasar
+    // `menuItems` si se necesita.
   ];
 
   // Si se pasan menuItems por props (como en SidebarEmployee), úsalos; si no, usa los por defecto
@@ -38,14 +42,22 @@ const Sidebar = ({ isOpen, onToggle, activeItem, onItemClick, darkMode, menuItem
     dashboard: <FaThLarge />,
     calendar: <FaCalendarAlt />,
     calendarPage: <FaCalendarAlt />,
-    availability: <FaClipboardList />,
-    shiftTypeManager: <FaUsers />,
+    // inglés
+    availability: <FaUserClock  />,
     requests: <FaClipboardList />,
     presence: <FaUserCheck />,
     documents: <FaFileAlt />,
     team: <FaUsers />,
     reports: <FaChartBar />,
-    settings: <FaCog />,
+    shiftTypeManager: <FaUsers />,
+    // español (sinónimos)
+    disponibilidad: <FaUserClock />,
+    solicitudes: <FaClipboardList />,
+    presencia: <FaUserCheck />,
+    documentos: <FaFileAlt />,
+    equipo: <FaUsers />,
+    informes: <FaChartBar />,
+    configuracion: <FaCog />,
   };
 
   // Mapeo por defecto de id -> path para items que no incluyan `path`
@@ -58,7 +70,6 @@ const Sidebar = ({ isOpen, onToggle, activeItem, onItemClick, darkMode, menuItem
     documentos: '/admin/documents',
     equipo: '/admin/management',
     informes: '/admin/reports',
-    configuracion: '/admin/settings'
   };
 
   const handleNavigation = (path) => {
@@ -100,14 +111,16 @@ const Sidebar = ({ isOpen, onToggle, activeItem, onItemClick, darkMode, menuItem
                 data-tooltip={!isOpen ? item.label : ''}
               >
                 <span className="nav-icon">
-                  {
-                    // Si item.icon ya es un elemento React
-                    item.icon && item.icon.$$typeof ? item.icon
-                    // Si es un string, intentar mapearlo
-                    : (typeof item.icon === 'string' ? (iconMap[item.icon] || null)
-                    // Si es una función/componente, renderizar
-                    : (typeof item.icon === 'function' ? (function IconWrapper(){ const Icon = item.icon; return <Icon />; })() : null))
-                  }
+                  {(() => {
+                    const icon = item.icon;
+                    if (React.isValidElement(icon)) return icon;
+                    if (typeof icon === 'string') return iconMap[icon] || null;
+                    if (typeof icon === 'function') {
+                      const IconComp = icon;
+                      return <IconComp />;
+                    }
+                    return null;
+                  })()}
                 </span>
                 {isOpen && <span className="nav-label">{item.label}</span>}
                 {activeItem === item.id && <div className="active-indicator"></div>}
