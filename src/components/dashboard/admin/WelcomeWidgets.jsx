@@ -16,6 +16,8 @@ const WelcomeWidgets = () => {
       icon: <HiOutlineClipboardList />,
       title: "Solicitudes",
       description: "Revisa y aprueba las solicitudes de cambios de turno."
+      ,
+      path: '/admin/shift-change-review'
     },
     {
       icon: <HiOutlineChartBar />,
