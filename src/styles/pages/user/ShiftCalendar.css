@@ -53,6 +53,7 @@
   background: var(--shift-bg-secondary);
   display: flex;
   width: 100%;
+  max-width: none !important;
 }
 
 .shift-main-content {
@@ -61,6 +62,7 @@
   transition: margin-left 0.3s ease;
   background: var(--shift-bg-secondary);
   width: 100%;
+  max-width: none !important;
 }
 
 .shift-main-content.shift-sidebar-collapsed {
@@ -70,6 +72,9 @@
 .shift-content-area {
   padding: 0;
   min-height: calc(100vh - 80px);
+  width: 100%;
+  max-width: none !important;
+  overflow-x: hidden;
 }
 
 /* ============================================
@@ -77,15 +82,13 @@
    ============================================ */
 
 .shift-page-header {
-  padding: 24px 32px;
-  background: white;
-  border-bottom: 2px solid var(--shift-border-light);
-  box-shadow: var(--shift-shadow-sm);
+  padding: 1.5rem 1rem;
+  margin-bottom: -2rem;
 }
 
 .shift-header-actions {
   display: flex;
-  gap: 12px;
+  gap: 0.5rem;
   flex-wrap: wrap;
 }
 
@@ -156,21 +159,137 @@
    ============================================ */
 
 .shift-calendar-content {
-  padding: 24px 32px;
+  padding: 1.5rem 1rem;
+  width: 100%;
+  max-width: 100%;
+  flex: 1;
 }
 
 .shift-calendar-wrapper {
   background: white;
   border-radius: var(--shift-radius-xl);
-  padding: 24px;
+  padding: 1.5rem 1rem;
+  width: 100%;
+  max-width: 100%;
   border: 2px solid var(--shift-border-light);
   box-shadow: var(--shift-shadow-md);
   transition: var(--shift-transition-base);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
 }
 
 .shift-calendar-wrapper:hover {
   box-shadow: var(--shift-shadow-lg);
   transform: translateY(-2px);
+}
+
+.shift-empty-state-full-width {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 1.5rem 1rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 400px !important;
+  box-sizing: border-box !important;
+}
+
+.shift-calendar-wrapper .shift-empty-state {
+  padding: 1.5rem 1rem;
+  background: transparent;
+  border: none;
+  min-height: 400px; /* Aumentar altura para coincidir con calendario */
+  box-shadow: none;
+  width: 100% !important;
+  max-width: 100% !important;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Asegurar que el contenido interno del empty state ocupe ancho completo */
+.shift-calendar-wrapper .shift-empty-state .shift-empty-content {
+  max-width: none !important;
+  width: 100% !important;
+  text-align: center;
+}
+
+/* Cuando no hay turnos: forzar que el empty state llene todo el ancho del área */
+.shift-calendar-wrapper.shift-calendar-empty-fullwidth {
+  padding: 0; /* el empty state interno tendrá su propio padding */
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
+
+.shift-calendar-wrapper.shift-calendar-empty-fullwidth .shift-empty-state {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 2rem 1.25rem !important;
+  min-height: 420px !important;
+  box-sizing: border-box !important;
+  background: white;
+  border-radius: var(--shift-radius-xl);
+  border: 2px solid var(--shift-border-light);
+  box-shadow: var(--shift-shadow-md);
+}
+
+.shift-calendar-wrapper.shift-calendar-empty-fullwidth .shift-empty-state .shift-empty-content {
+  max-width: none !important;
+  width: 100% !important;
+  text-align: center;
+}
+
+.shift-empty-calendar-container {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: white;
+  border-radius: var(--shift-radius-xl);
+  border: 2px solid var(--shift-border-light);
+  box-shadow: var(--shift-shadow-md);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 500px;
+}
+
+/* Forzar que el EmptyState interno ocupe todo el ancho del contenedor */
+.shift-empty-calendar-container .shift-empty-state {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 4rem 2rem !important;
+  min-height: 500px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Asegurar que el contenido interno también ocupe ancho completo */
+.shift-empty-calendar-container .shift-empty-state .shift-empty-content {
+  width: 100% !important;
+  max-width: none !important;
+  text-align: center;
+}
+
+/* Eliminar cualquier fondo o borde extra del EmptyState dentro de este contenedor */
+.shift-empty-calendar-container .shift-empty-state {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
 }
 
 /* Colores por tipo de turno */
@@ -200,6 +319,7 @@
 
 .fc {
   font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  width: 100% !important;
 }
 
 .fc-theme-standard td,
@@ -249,6 +369,10 @@
   color: var(--shift-text-primary);
   font-size: 0.85rem;
   text-transform: uppercase;
+  /* Evitar que el texto del encabezado de día haga wrap al reducir espacio */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   letter-spacing: 0.8px;
   border-bottom: 3px solid var(--shift-border-light);
 }
@@ -427,6 +551,9 @@
   background: white;
   border-radius: var(--shift-radius-xl);
   border: 2px solid var(--shift-border-light);
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .shift-loading-spinner {

@@ -7,7 +7,10 @@
   --background-light: #f8fafc;
   --border-color: #e2e8f0;
   --error-color: #e53e3e;
-  --success-color: #38a169;
+  /* Color de éxito (verde) - unificado para vistas admin y usuario */
+  --success-color: #22543d; /* color principal (texto / iconos) */
+  --success-light: #d4f4dd; /* fondo suave para badges y cards */
+  --success-contrast: #22543d; /* color de contraste (texto sobre fondos claros) */
   --sidebar-width: 260px;
   --sidebar-width-closed: 70px;
   --header-height: 70px;

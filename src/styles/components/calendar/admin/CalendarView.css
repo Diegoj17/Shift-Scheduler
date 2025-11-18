@@ -475,6 +475,6 @@
 .calendar-btn-nav:focus,
 .calendar-btn-today:focus,
 .calendar-btn-view:focus {
-  outline: 3px solid rgba(102, 126, 234, 0.4);
+  outline: 3px solid rgba(0, 47, 255, 0.4);
   outline-offset: 2px;
 }

@@ -88,7 +88,8 @@
 .time-schedule-details-status.available {
   background: var(--success-color);
   color: white;
-  box-shadow: 0 6px 18px rgba(34,197,94,0.12);
+  /* sombra con la tonalidad de éxito unificada */
+  box-shadow: 0 6px 18px rgba(34,84,61,0.12);
   border: 1px solid rgba(0,0,0,0.04);
 }
 
@@ -203,7 +204,7 @@
 }
 
 .time-schedule-details-availability-card.available {
-  background: rgba(56, 161, 105, 0.1);
+  background: var(--success-light);
   border-color: var(--success-color);
 }
 

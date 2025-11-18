@@ -7,13 +7,20 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 80px 40px;
+  padding: 4rem 2rem;
   text-align: center;
-  background: linear-gradient(135deg, #f8fafc, white);
-  border-radius: 16px;
-  border: 2px dashed #e2e8f0;
   min-height: 500px;
   animation: shift-empty-fade-in 0.5s ease;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Eliminar cualquier estilo de fondo/borde del empty state base */
+.shift-empty-state {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
 }
 
 @keyframes shift-empty-fade-in {
@@ -27,10 +34,7 @@
   }
 }
 
-/* ============================================
-   ILUSTRACIÓN
-   ============================================ */
-
+/* Resto de tus estilos existentes para shift-empty-illustration, etc. */
 .shift-empty-illustration {
   margin-bottom: 32px;
   position: relative;
@@ -88,21 +92,20 @@
 
 .shift-empty-content {
   margin-bottom: 36px;
-  max-width: 500px;
+
 }
 
 .shift-empty-state h3 {
-  margin: 0 0 16px 0;
   font-size: 1.75rem;
   font-weight: 700;
-  color: #2d3748;
+  color: #000000;
   letter-spacing: -0.3px;
 }
 
 .shift-empty-state p {
   margin: 0;
   font-size: 1.1rem;
-  color: #718096;
+  color: #000000;
   line-height: 1.6;
   font-weight: 500;
 }
@@ -247,4 +250,35 @@
   .shift-empty-state {
     animation: none;
   }
+}
+
+/* ============================================
+   AJUSTES CUANDO SE USA DENTRO DEL WRAPPER DEL CALENDARIO
+   Evita doble borde/padding que desacomoda el layout
+   ============================================ */
+.shift-empty-state-full-width {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 !important;
+  padding: 1.5rem 1rem !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 400px !important;
+  box-sizing: border-box !important;
+}
+
+.shift-calendar-wrapper .shift-empty-state .shift-empty-icon {
+  font-size: 5rem;
+}
+
+/* Forzar que el contenido interno no tenga max-width que reduzca el ancho */
+.shift-calendar-wrapper .shift-empty-state .shift-empty-content {
+  max-width: none;
+  width: 100%;
+}
+
+.shift-calendar-wrapper .shift-empty-state .shift-reset-btn {
+  margin: 0 auto;
 }

@@ -118,8 +118,8 @@
 }
 
 .time-availability-list-badge.available {
-  background: #d4f4dd;
-  color: #22543d;
+  background: var(--success-light);
+  color: var(--success-contrast);
 }
 
 .time-availability-list-badge.unavailable {

@@ -55,6 +55,20 @@ const ShiftCalendarPage = () => {
     }
   }, [sidebarOpen]);
 
+  // Cuando se muestran/ocultan los filtros forzamos que FullCalendar reajuste tamaño
+  useEffect(() => {
+    if (calendarRef.current) {
+      // pequeño timeout para esperar layout reflow
+      setTimeout(() => {
+        try {
+          calendarRef.current.getApi().updateSize();
+        } catch (err) {
+          void err;
+        }
+      }, 200);
+    }
+  }, [showFilters]);
+
   // Modifica tu loadMyShifts para procesar los datos
 // Agrega este debug en loadMyShifts
 const loadMyShifts = async () => {
@@ -462,16 +476,18 @@ const getShiftTypeFromData = (shift) => {
             )}
             
             {loading ? (
+              <div className="shift-calendar-wrapper">
               <div className="shift-loading-state">
                 <div className="shift-loading-spinner"></div>
                 <p>Cargando turnos...</p>
+                </div>
               </div>
             ) : shifts.length === 0 ? (
-              <EmptyState onResetFilters={handleResetFilters} />
+              <div className="shift-empty-calendar-container">
+                <EmptyState onResetFilters={handleResetFilters} />
+              </div>
             ) : (
               <>
-
-
                 <div className="shift-calendar-wrapper">
                   <FullCalendar
                     key={calendarKey}
@@ -528,11 +544,7 @@ const getShiftTypeFromData = (shift) => {
                       minute: '2-digit',
                       hour12: false
                     }}
-                    dayHeaderFormat={{
-                      weekday: 'short',
-                      day: 'numeric',
-                      month: 'short'
-                    }}
+                    dayHeaderFormat={{ weekday: 'short' }}
                     eventDisplay="block"
                     
                     eventDidMount={(info) => {
@@ -576,7 +588,8 @@ const getShiftTypeFromData = (shift) => {
               </>
             )}
           </div>
-        </div>
+
+          </div>
       </div>
 
       <ShiftDetails 

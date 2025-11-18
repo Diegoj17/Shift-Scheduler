@@ -18,6 +18,36 @@ const CalendarView = ({ events, onEventClick, onEventDrop, onDateClick}) => {
     }
   }, []);
 
+  // Forzar re-render del calendario cuando cambian los eventos desde el padre
+  useEffect(() => {
+    if (calendarRef.current) {
+      try {
+        const api = calendarRef.current.getApi();
+        // Para asegurar que FullCalendar actualice el DOM de los eventos
+        // removemos y re-agregamos los eventos recibidos desde la prop.
+        // Esto fuerza la ejecución de `eventDidMount` y aplica estilos
+        // sin necesidad de recargar la página.
+        if (typeof api.removeAllEvents === 'function') {
+          api.removeAllEvents();
+        }
+        if (Array.isArray(events)) {
+          events.forEach((ev) => {
+            try {
+              api.addEvent(ev);
+            } catch (e) {
+              // si un evento no es válido, ignorar y continuar
+            }
+          });
+        }
+        // Intentar rerender y render por compatibilidad
+        if (typeof api.rerenderEvents === 'function') api.rerenderEvents();
+        if (typeof api.render === 'function') api.render();
+      } catch (e) {
+        // ignore
+      }
+    }
+  }, [events]);
+
   const handleViewChange = (view) => {
     if (calendarRef.current) {
       const api = calendarRef.current.getApi();
@@ -140,6 +170,34 @@ const CalendarView = ({ events, onEventClick, onEventDrop, onDateClick}) => {
           selectable={true}
           selectMirror={true}
           eventClick={handleEventClick}
+          // Aplicar color personalizado por tipo de turno cuando el evento se monta
+          eventDidMount={(info) => {
+            try {
+              const ev = info.event;
+              const el = info.el;
+              // Preferir extendedProps.color, fallback a backgroundColor
+              const color = ev.extendedProps?.color || ev.backgroundColor || ev.extendedProps?.backgroundColor;
+              if (color) {
+                // Queremos que sólo la línea izquierda tenga el color (no todo el fondo)
+                // Dejar el fondo blanco / por defecto y aplicar el borde izquierdo.
+                el.style.backgroundColor = 'transparent';
+                el.style.borderColor = '';
+                el.style.borderLeftStyle = 'solid';
+                el.style.borderLeftColor = color;
+                el.style.borderLeftWidth = '5px';
+                el.style.boxShadow = el.style.boxShadow || '0 2px 8px rgba(0,0,0,0.06)';
+
+                // Aplicar color al título (texto) para que destaque en vez de colorear todo
+                const title = el.querySelector('.calendar-event-title-text');
+                if (title) title.style.color = color;
+                // Mantener el resto del texto más tenue
+                const timeText = el.querySelector('.calendar-event-time-text');
+                if (timeText) timeText.style.color = '#475569';
+              }
+            } catch (err) {
+              // ignore
+            }
+          }}
           
           dayMaxEventRows={3}
           eventMaxStack={3}
@@ -190,6 +248,38 @@ const CalendarView = ({ events, onEventClick, onEventDrop, onDateClick}) => {
     </div>
   );
 };
+
+// Utilidad para decidir si un color hex es claro
+function isColorLight(hex) {
+  if (!hex) return false;
+  // aceptar formatos: #rrggbb o rgb(...)
+  let r, g, b;
+  try {
+    if (hex.startsWith('rgb')) {
+      const parts = hex.match(/\d+/g);
+      if (parts && parts.length >= 3) {
+        r = Number(parts[0]); g = Number(parts[1]); b = Number(parts[2]);
+      }
+    } else {
+      const clean = hex.replace('#', '').trim();
+      if (clean.length === 3) {
+        r = parseInt(clean[0] + clean[0], 16);
+        g = parseInt(clean[1] + clean[1], 16);
+        b = parseInt(clean[2] + clean[2], 16);
+      } else if (clean.length === 6) {
+        r = parseInt(clean.substring(0,2), 16);
+        g = parseInt(clean.substring(2,4), 16);
+        b = parseInt(clean.substring(4,6), 16);
+      }
+    }
+    if (r == null) return false;
+    // calcular luminancia relativa
+    const luminance = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+    return luminance > 0.6; // umbral: si es alto, el color es claro
+  } catch (e) {
+    return false;
+  }
+}
 
 function renderEventContent(eventInfo) {
   const { event } = eventInfo;
