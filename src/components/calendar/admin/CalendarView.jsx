@@ -12,40 +12,51 @@ const CalendarView = ({ events, onEventClick, onEventDrop, onDateClick}) => {
   const [currentTitle, setCurrentTitle] = useState('');
 
   useEffect(() => {
+    let rafId;
     if (calendarRef.current) {
-      const calendarApi = calendarRef.current.getApi();
-      calendarApi.updateSize();
+      // Ejecutar en el siguiente frame para evitar flushSync dentro del render
+      rafId = requestAnimationFrame(() => {
+        try {
+          const calendarApi = calendarRef.current.getApi();
+          calendarApi.updateSize();
+        } catch (e) {
+          // ignore
+        }
+      });
     }
+    return () => { if (rafId) cancelAnimationFrame(rafId); };
   }, []);
 
   // Forzar re-render del calendario cuando cambian los eventos desde el padre
   useEffect(() => {
+    let rafId;
     if (calendarRef.current) {
-      try {
-        const api = calendarRef.current.getApi();
-        // Para asegurar que FullCalendar actualice el DOM de los eventos
-        // removemos y re-agregamos los eventos recibidos desde la prop.
-        // Esto fuerza la ejecución de `eventDidMount` y aplica estilos
-        // sin necesidad de recargar la página.
-        if (typeof api.removeAllEvents === 'function') {
-          api.removeAllEvents();
+      // Ejecutar en un microtask/frame separado para evitar flushSync durante render
+      rafId = requestAnimationFrame(() => {
+        try {
+          const api = calendarRef.current.getApi();
+          // Para asegurar que FullCalendar actualice el DOM de los eventos
+          if (typeof api.removeAllEvents === 'function') {
+            api.removeAllEvents();
+          }
+          if (Array.isArray(events)) {
+            events.forEach((ev) => {
+              try {
+                api.addEvent(ev);
+              } catch (err) {
+                // si un evento no es válido, ignorar y continuar
+              }
+            });
+          }
+          // Intentar rerender y render por compatibilidad
+          if (typeof api.rerenderEvents === 'function') api.rerenderEvents();
+          if (typeof api.render === 'function') api.render();
+        } catch (err) {
+          // ignore
         }
-        if (Array.isArray(events)) {
-          events.forEach((ev) => {
-            try {
-              api.addEvent(ev);
-            } catch (e) {
-              // si un evento no es válido, ignorar y continuar
-            }
-          });
-        }
-        // Intentar rerender y render por compatibilidad
-        if (typeof api.rerenderEvents === 'function') api.rerenderEvents();
-        if (typeof api.render === 'function') api.render();
-      } catch (e) {
-        // ignore
-      }
+      });
     }
+    return () => { if (rafId) cancelAnimationFrame(rafId); };
   }, [events]);
 
   const handleViewChange = (view) => {

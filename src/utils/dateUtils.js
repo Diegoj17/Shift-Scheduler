@@ -151,8 +151,12 @@ export const formatTime = (dateStr) => {
       date = new Date(dateStr);
     }
     if (isNaN(date.getTime())) return s.slice(0,5);
-    // Usar formato AM/PM (ej. 1:00 PM)
-    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    // Forzar formato 12h con AM/PM (ej. 1:00 PM)
+    const hours = date.getHours();
+    const minutes = String(date.getMinutes()).padStart(2, '0');
+    const hour12 = ((hours + 11) % 12) + 1;
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    return `${hour12}:${minutes} ${ampm}`;
   } catch {
     return String(dateStr).slice(0,5);
   }

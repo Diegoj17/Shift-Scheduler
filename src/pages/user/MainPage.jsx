@@ -11,6 +11,7 @@ import UpcomingShiftsCard from '../../components/dashboard/user/UpcomingShiftsCa
 import MonthlyStatsCard from '../../components/dashboard/user/MonthlyStatsCard.jsx';
 import RemindersCard from '../../components/dashboard/user/RemindersCard.jsx';
 import menuItems from '../../components/common/sidebarMenu.jsx';
+import { useToast } from '../../contexts/NotificationToastContext.jsx';
 import '@/styles/components/dashboard/user/WelcomeCard.css';
 
 // Nota: moved activeItem state into component
@@ -19,6 +20,7 @@ const MainPage = () => {
   const navigate = useNavigate();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeItem, setActiveItem] = useState('dashboard');
+  const { showToast } = useToast();
   // Estado local para controlar el sidebar (abierto / colapsado)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [employee] = useState({
@@ -63,6 +65,12 @@ const MainPage = () => {
     }, 1000);
 
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    // Este efecto se ejecutará cuando el componente se monte
+    // y mostrará toasts si hay notificaciones pendientes
+    console.log('🏠 MainPage montada - Sistema de toasts activo');
   }, []);
 
   // Polling: refrescar turno de hoy y próximos turnos cada X minutos
@@ -177,23 +185,34 @@ const MainPage = () => {
   const handleActionClick = (actionId) => {
     const action = quickActions.find(a => a.id === actionId);
     if (!action) return;
-    // Navegar a la página de solicitud de cambio si se pulsa "Solicitar Cambio"
+
+    // Mostrar toast de confirmación
+    showToast({
+      type: 'info',
+      title: 'Acción Iniciada',
+      message: `Procesando: ${action.title}`
+    });
+
+    // Navegación existente
     if (action.id === 1) {
       navigate('/employee/shift-change-request');
       return;
     }
-    // Navegar a la página de calendario si se pulsa "Ver Calendario"
     if (action.id === 3) {
       navigate('/employee/calendar');
       return;
     }
-    // Navegar a Registrar Horas si se pulsa "Registrar Horas"
     if (action.id === 2) {
       navigate('/employee/time');
       return;
     }
-    // por defecto, mantener comportamiento de alerta
-    alert(`Acción seleccionada: ${action.title}`);
+    
+    // Por defecto, mantener comportamiento de alerta pero con toast
+    showToast({
+      type: 'success',
+      title: action.title,
+      message: 'Acción completada exitosamente'
+    });
   };
 
   const handleToggleSidebar = () => {
@@ -201,7 +220,11 @@ const MainPage = () => {
   };
 
   const handleClockAction = () => {
-    // Ir a la página de registrar horas para manejar entrada/salida
+    showToast({
+      type: 'info', 
+      title: 'Registro de Tiempo',
+      message: 'Redirigiendo al registro de horas...'
+    });
     navigate('/employee/time');
   };
 

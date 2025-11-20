@@ -5,6 +5,7 @@ import RegisterPage from '../src/pages/RegisterPage.jsx';
 import PasswordReset from './pages/PasswordResetPage.jsx';
 import PasswordResetConfirmPage from './pages/PasswordResetConfirmPage.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
+import { NotificationToastProvider } from './contexts/NotificationToastContext.jsx';
 import ProfileView from './components/profile/ProfileView.jsx';
 import EditProfile from './components/profile/EditProfile.jsx';
 import ChangePassword from './components/profile/ChangePassword.jsx';
@@ -26,6 +27,7 @@ function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
+        <NotificationToastProvider>
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -101,6 +103,7 @@ function App() {
             </ProtectedRoute>
           } />
         </Routes>
+        </NotificationToastProvider>
       </BrowserRouter>
     </AuthProvider>
   )

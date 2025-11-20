@@ -1,62 +1,24 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { FaBars, FaBell, FaUser, FaKey } from 'react-icons/fa';
-import { useNavigate } from 'react-router-dom';
+import { FaBars, FaBell } from 'react-icons/fa';
 import ProfileMenu from '../profile/ProfileMenu';
 import NotificationMenu from '../notification/NotificationMenu';
+import useNotifications from '../../hooks/useNotifications';
 import '../../styles/components/common/Header.css';
 
 const Header = ({ onToggleSidebar, pageTitle = 'Dashboard' }) => {
-  const navigate = useNavigate();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const notificationsRef = useRef(null);
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1,
-      type: 'warning',
-      title: 'Turno Pendiente',
-      message: 'Tienes un turno por confirmar para mañana',
-      time: 'Hace 5 min',
-      iconName: 'warning',
-      unread: true
-    },
-    {
-      id: 2,
-      type: 'success',
-      title: 'Solicitud Aprobada',
-      message: 'Tu solicitud de vacaciones ha sido aprobada',
-      time: 'Hace 1 hora',
-      iconName: 'success',
-      unread: true
-    },
-    {
-      id: 3,
-      type: 'info',
-      title: 'Nuevo Horario',
-      message: 'Se ha publicado el horario de la próxima semana',
-      time: 'Hace 2 horas',
-      iconName: 'calendar',
-      unread: false
-    },
-    {
-      id: 4,
-      type: 'info',
-      title: 'Recordatorio',
-      message: 'Reunión de equipo a las 10:00 AM',
-      time: 'Hace 1 día',
-      iconName: 'clock',
-      unread: false
-    }
-  ]);
-
-  const markAsRead = (notificationId) => {
-    setNotifications(prev => prev.map(n => n.id === notificationId ? { ...n, unread: false } : n));
-  };
-
-  const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
-  };
-
-  const unreadCount = notifications.filter(n => n.unread).length;
+  
+  // ✅ Hook personalizado para notificaciones reales con auto-refresh cada 30s
+  const { 
+    notifications,
+    unreadCount, 
+    loadNotifications,
+    refresh,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification
+  } = useNotifications(true, 30000);
 
   // Cerrar menú de notificaciones al hacer clic fuera
   useEffect(() => {
@@ -70,10 +32,24 @@ const Header = ({ onToggleSidebar, pageTitle = 'Dashboard' }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const toggleNotifications = () => {
-    setNotificationsOpen(!notificationsOpen);
+  const toggleNotifications = async () => {
+    const newState = !notificationsOpen;
+    setNotificationsOpen(newState);
+    
+    // Recargar notificaciones al abrir el menú
+    if (newState) {
+      try {
+        await refresh();
+        console.log('🔔 Notificaciones actualizadas al abrir menú:', notifications.length);
+      } catch (error) {
+        console.error('Error cargando notificaciones:', error);
+      }
+    }
   };
 
+  const handleCloseNotifications = () => {
+    setNotificationsOpen(false);
+  };
 
   return (
     <header className="main-header">
@@ -88,15 +64,19 @@ const Header = ({ onToggleSidebar, pageTitle = 'Dashboard' }) => {
       </div>
 
       <div className="header-right">
-
         {/* Menú de Notificaciones */}
         <div className="notification-container" ref={notificationsRef}>
           <button 
-            className={`notification-trigger ${notificationsOpen ? 'active' : ''}`}
+            className={`notification-trigger ${notificationsOpen ? 'active' : ''} ${unreadCount > 0 ? 'has-notifications' : ''}`}
             onClick={toggleNotifications}
+            title={unreadCount > 0 ? `${unreadCount} notificación${unreadCount !== 1 ? 'es' : ''} sin leer` : 'Notificaciones'}
           >
             <FaBell className="react-icon notification-icon" />
-            <span className="notification-badge">{unreadCount}</span>
+            {unreadCount > 0 && (
+              <span className="notification-badge">
+                {unreadCount > 99 ? '99+' : unreadCount}
+              </span>
+            )}
           </button>
 
           {notificationsOpen && (
@@ -104,7 +84,8 @@ const Header = ({ onToggleSidebar, pageTitle = 'Dashboard' }) => {
               notifications={notifications}
               onMarkAsRead={markAsRead}
               onMarkAllRead={markAllAsRead}
-              onClose={() => setNotificationsOpen(false)}
+              onDeleteNotification={deleteNotification}
+              onClose={handleCloseNotifications}
             />
           )}
         </div>

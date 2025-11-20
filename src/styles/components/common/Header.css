@@ -99,10 +99,8 @@
   justify-content: center;
   width: 46px;
   height: 46px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  background: transparent;
   border: none;
-  border-radius: 12px;
-  color: #64748b;
   font-size: 1.125rem;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -110,17 +108,15 @@
 }
 
 .notification-trigger:hover {
-  background: #ffffff;
-  border-color: #4f8cff;
-  color: #0f172a;
+  background: transparent;
+  border-color: transparent;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.15);
+  border: none;
 }
 
 .notification-trigger.active {
-  background: #4f8cff;
-  border-color: #4f8cff;
   color: white;
+  border: none;
 }
 
 .notification-badge {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import TimeEntryCard from '../../components/time/user/TimeEntryCard';
 import TimeExitCard from '../../components/time/user/TimeExitCard';
 import TimeNotification from '../../components/time/user/TimeNotification';
@@ -8,6 +8,7 @@ import SidebarEmployee from '../../components/common/SidebarEmployee';
 import Header from '../../components/common/Header';
 import timeEntryService from '../../services/timeEntryService';
 import shiftService from '../../services/shiftService';
+import { formatTime } from '../../utils/dateUtils';
 import '../../styles/pages/user/TimeClockPage.css';
 
 const getLocalDateString = (date = new Date()) => {
@@ -17,48 +18,10 @@ const getLocalDateString = (date = new Date()) => {
   return `${year}-${month}-${day}`;
 };
 
-const formatTimestampToLocal = (timestamp) => {
-  if (!timestamp) return '--:--:--';
-  
-  try {
-    const date = new Date(timestamp);
-    
-    // Verificar que la fecha sea válida
-    if (isNaN(date.getTime())) {
-      return '--:--:--';
-    }
-    
-    // Formatear en hora local
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-    
-    return `${hours}:${minutes}:${seconds}`;
-  } catch (error) {
-    console.error('Error formateando timestamp:', error);
-    return '--:--:--';
-  }
-};
-
-const formatTimestampToLocalShort = (timestamp) => {
-  if (!timestamp) return '--:--';
-  
-  try {
-    const date = new Date(timestamp);
-    if (isNaN(date.getTime())) return '--:--';
-    
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    
-    return `${hours}:${minutes}`;
-  } catch (error) {
-    return '--:--';
-  }
-};
+// NOTE: time formatting is handled by `formatTime` from utils/dateUtils
 
 const TimeClockPage = () => {
   const [notification, setNotification] = useState(null);
-  const [currentDate, setCurrentDate] = useState(new Date());
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeItem, setActiveItem] = useState("registrar-horas");
   const [loading, setLoading] = useState(true);
@@ -79,87 +42,52 @@ const TimeClockPage = () => {
     }
   });
 
-  // ✅ Cargar datos iniciales
-  useEffect(() => {
-    loadInitialData();
-  }, []);
-
-  // ✅ Actualizar reloj cada segundo
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentDate(new Date());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
+  // ✅ Cargar datos iniciales (la llamada se realiza después de definir la función)
 
   // TimeClockPage.jsx - ACTUALIZAR loadInitialData
 
-const loadInitialData = async (silent = false) => {
+const loadInitialData = useCallback(async (silent = false) => {
   try {
     if (!silent) setLoading(true);
     
     console.log('🔄 [TimeClockPage] Cargando datos iniciales...');
     
-    // ✅ Usar fecha local en lugar de UTC
+    // ✅ Fecha actual en hora local Colombia
     const today = new Date();
-    const yesterday = new Date(today);
-    yesterday.setDate(today.getDate() - 1);
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-    
     const todayStr = getLocalDateString(today);
-    const yesterdayStr = getLocalDateString(yesterday);
-    const tomorrowStr = getLocalDateString(tomorrow);
     
-    console.log('📅 [DEBUG] Fechas locales (Colombia):');
-    console.log('  Ayer:', yesterdayStr);
-    console.log('  Hoy:', todayStr);
-    console.log('  Mañana:', tomorrowStr);
+    console.log('📅 [DEBUG] Fecha de hoy:', todayStr);
 
-    // 1. Obtener turnos en rango amplio
+    // 1. Obtener SOLO turnos de HOY
     const shiftsData = await shiftService.getMyShifts({
-      start_date: yesterdayStr,
-      end_date: tomorrowStr
+      start_date: todayStr,
+      end_date: todayStr
     });
 
-    console.log('📊 Turnos encontrados:', shiftsData);
+    console.log('📊 Turnos encontrados para HOY:', shiftsData);
 
     // 2. Obtener registros de hoy
     const todayEntries = await timeEntryService.getTodayEntries();
-    console.log('📝 Registros de hoy (raw):', todayEntries);
+    console.log('📝 Registros de hoy:', todayEntries);
 
-    // ✅ Verificar si hay entrada Y salida registradas
+    // ✅ Verificar registros
     const hasCheckIn = !!todayEntries.check_in;
     const hasCheckOut = !!todayEntries.check_out;
     const bothRegistered = hasCheckIn && hasCheckOut;
 
-    console.log('✅ Estado de registros:', {
-      hasCheckIn,
-      hasCheckOut,
-      bothRegistered
-    });
+    console.log('✅ Estado de registros:', { hasCheckIn, hasCheckOut, bothRegistered });
 
-    // ✅ Convertir timestamps a hora local
-    if (todayEntries.check_in) {
-      todayEntries.check_in.time_local = formatTimestampToLocalShort(todayEntries.check_in.timestamp);
-      console.log('✅ Entrada:', todayEntries.check_in.time_local);
-    }
-    
-    if (todayEntries.check_out) {
-      todayEntries.check_out.time_local = formatTimestampToLocalShort(todayEntries.check_out.timestamp);
-      console.log('✅ Salida:', todayEntries.check_out.time_local);
-    }
+    // Dejar timestamps crudos en todayEntries; el formateo se hace en los componentes
 
-    // 3. Determinar turno activo
+    // ✅ DETERMINAR SI HAY TURNOS PARA HOY - LÓGICA CRÍTICA
+    const hasShiftsForToday = shiftsData && shiftsData.length > 0;
     let activeShift = null;
-    if (shiftsData && shiftsData.length > 0) {
-      const currentTime = today.toTimeString().slice(0, 5);
-      const todayShifts = shiftsData.filter(shift => shift.date === todayStr);
-      
-      console.log('📋 Turnos de HOY:', todayShifts);
 
-      // Buscar turno activo AHORA
-      activeShift = todayShifts.find(shift => {
+    if (hasShiftsForToday) {
+      const currentTime = today.toTimeString().slice(0, 5);
+      
+      // Buscar turno activo
+      activeShift = shiftsData.find(shift => {
         const shiftStart = shift.start_time || '';
         const shiftEnd = shift.end_time || '';
         
@@ -169,30 +97,42 @@ const loadInitialData = async (silent = false) => {
         return currentTime >= shiftStart && currentTime <= shiftEnd;
       });
 
-      // Si no hay activo, buscar el próximo
+      // Si no hay activo, buscar próximo
       if (!activeShift) {
-        const upcomingShift = todayShifts.find(shift => {
-          return currentTime < (shift.start_time || '');
-        });
-        activeShift = upcomingShift || todayShifts[0];
+        activeShift = shiftsData.find(shift => currentTime < (shift.start_time || '')) || shiftsData[0];
       }
     }
 
-    console.log('🎯 Turno seleccionado:', activeShift);
+    console.log('🎯 ¿Hay turnos para hoy?:', hasShiftsForToday);
+    console.log('🎯 Turno activo/encontrado:', activeShift);
 
-    // ✅ CRÍTICO: Si ya hay entrada Y salida, NO hay turno activo
-    const hasActiveTurn = bothRegistered ? false : !!activeShift;
-
-    setShiftData({
-      hasActiveShift: hasActiveTurn,  // ✅ False si ya completó el día
+    // ✅ ESTADO FINAL - LIMPIAR CUANDO NO HAY TURNOS
+    const finalState = {
+      // ✅ SI NO HAY TURNOS PARA HOY -> NO HAY TURNO ACTIVO
+      hasActiveShift: hasShiftsForToday ? !bothRegistered && !!activeShift : false,
+      
       entryRegistered: hasCheckIn,
       exitRegistered: hasCheckOut,
-      shiftStart: activeShift?.start_time || '--:--',
-      shiftEnd: activeShift?.end_time || '--:--',
-      shiftTypeName: activeShift?.shift_type_name || (bothRegistered ? 'Jornada completa' : 'Sin turno'),
-      currentShift: activeShift,
-      todayEntries: todayEntries
-    });
+      
+      // ✅ SI NO HAY TURNOS -> LIMPIAR HORARIOS
+      shiftStart: hasShiftsForToday ? (activeShift?.start_time || '--:--') : '--:--',
+      shiftEnd: hasShiftsForToday ? (activeShift?.end_time || '--:--') : '--:--',
+      
+      // ✅ SI NO HAY TURNOS -> "Sin turno"
+      shiftTypeName: hasShiftsForToday ? (activeShift?.shift_type_name || 'Jornada completa') : 'Sin turno',
+      
+      currentShift: hasShiftsForToday ? activeShift : null,
+      todayEntries: todayEntries,
+      
+      // ✅ FECHA ACTUAL PARA EL SUMMARY
+      currentDate: todayStr,
+      
+      // ✅ NUEVO: INDICAR EXPLÍCITAMENTE SI HAY TURNOS
+      hasShiftsForToday: hasShiftsForToday
+    };
+
+    console.log('🎛️ ESTADO FINAL CONFIGURADO:', finalState);
+    setShiftData(finalState);
 
   } catch (error) {
     console.error('❌ Error cargando datos:', error);
@@ -200,7 +140,13 @@ const loadInitialData = async (silent = false) => {
   } finally {
     setLoading(false);
   }
-};
+}, []);
+
+  // Llamar al inicializador después de su definición
+  useEffect(() => {
+    loadInitialData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleEntryRegister = async () => {
     try {
@@ -226,8 +172,8 @@ const loadInitialData = async (silent = false) => {
 
       console.log('✅ Entrada registrada (raw):', entry);
 
-      // ✅ Convertir timestamp a hora local
-      entry.time_local = formatTimestampToLocalShort(entry.timestamp);
+      // ✅ Convertir timestamp a formato 12h (AM/PM)
+      entry.time_local = formatTime(entry.timestamp || entry.time);
       console.log('✅ Hora local de entrada:', entry.time_local);
 
       // Actualizar estado
@@ -278,8 +224,8 @@ const loadInitialData = async (silent = false) => {
 
       console.log('✅ Salida registrada (raw):', exit);
 
-      // ✅ Convertir timestamp a hora local
-      exit.time_local = formatTimestampToLocalShort(exit.timestamp);
+      // ✅ Convertir timestamp a formato 12h (AM/PM)
+      exit.time_local = formatTime(exit.timestamp || exit.time);
       console.log('✅ Hora local de salida:', exit.time_local);
 
       // Actualizar estado

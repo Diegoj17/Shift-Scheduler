@@ -1,17 +1,16 @@
-// Axios.js - Versión corregida
+// Axios.js - Versión mejorada con notificaciones
 import axios from 'axios';
 
 // IMPORTANTE: Verifica que esta URL sea correcta para tu backend
 const RAW_API_URL = import.meta?.env?.VITE_API_URL || 'https://shift-scheduler-main-production.up.railway.app/api';
 
-// Normalizar la URL base: eliminar barras finales y manejar si la env ya incluye `/auth`
+// Normalizar la URL base
 const _normalized = String(RAW_API_URL).replace(/\/+$/g, '');
 const authBase = _normalized.endsWith('/auth') ? _normalized : `${_normalized}/auth`;
-const apiBase = _normalized.endsWith('/auth') ? _normalized.replace(/\/auth$/, '') : _normalized;
 
-const API_BASE_URL = apiBase;
+const API_BASE_URL = _normalized;
 
-// Log para facilitar debugging en producción (se puede remover después)
+// Log para facilitar debugging en producción
 console.debug('API URL config:', { RAW_API_URL, API_BASE_URL, authBase });
 
 // Helper para leer cookies
@@ -51,6 +50,7 @@ const createApiInstance = (baseURL) => {
 // Crear instancias - CORREGIDO
 const authApi = createApiInstance(authBase); // https://.../api/auth
 const shiftsApi = createApiInstance(API_BASE_URL + '/shifts'); // https://.../api/shifts
+const notificationsApi = createApiInstance(API_BASE_URL + '/notifications'); // https://.../api/notifications
 
 // Interceptor de respuestas para manejar errores
 const handleResponseError = (error) => {
@@ -68,28 +68,30 @@ const handleResponseError = (error) => {
   return Promise.reject(error);
 };
 
+// Aplicar interceptores de error a todas las instancias
 authApi.interceptors.response.use(r => r, handleResponseError);
 shiftsApi.interceptors.response.use(r => r, handleResponseError);
+notificationsApi.interceptors.response.use(r => r, handleResponseError);
 
-// Logging temporal de requests salientes del cliente (solo en DEV)
-shiftsApi.interceptors.request.use((config) => {
-  try {
-    if (import.meta?.env?.DEV) {
-      const isShiftEndpoint = String(config.url).includes('/shift');
-      if (isShiftEndpoint) {
-        try {
-          console.debug('[shiftsApi] Outgoing request:', { 
-            method: config.method, 
-            url: config.url, 
-            fullURL: config.baseURL + config.url,
-            data: config.data 
-          });
-        } catch { /* ignore */ }
+// Logging temporal de requests salientes (solo en DEV)
+const addRequestLogging = (apiInstance, apiName) => {
+  apiInstance.interceptors.request.use((config) => {
+    try {
+      if (import.meta?.env?.DEV) {
+        console.debug(`[${apiName}] Outgoing request:`, { 
+          method: config.method, 
+          url: config.url, 
+          fullURL: config.baseURL + config.url,
+          data: config.data 
+        });
       }
-    }
-  } catch { /* ignore */ }
-  return config;
-});
+    } catch { /* ignore */ }
+    return config;
+  });
+};
+
+addRequestLogging(shiftsApi, 'shiftsApi');
+addRequestLogging(notificationsApi, 'notificationsApi');
 
 // ==========================================
 // API para usuarios
@@ -173,7 +175,6 @@ export const shiftAPI = {
   getShifts: async (params = {}) => {
     try {
       console.log('🔄 Obteniendo turnos...');
-      // shiftsApi baseURL: /api/shifts → /api/shifts/shifts/
       const response = await shiftsApi.get('/shifts/', { params });
       console.log('✅ Turnos obtenidos:', response.data?.length || 0);
       return response.data;
@@ -249,7 +250,6 @@ export const shiftAPI = {
   getShiftTypes: async () => {
     try {
       console.log('🔄 Solicitando tipos de turno...');
-      // shiftsApi baseURL: /api/shifts → /api/shifts/shift-types/
       const response = await shiftsApi.get('/shift-types/');
       console.log('✅ Tipos de turno recibidos:', response.data?.length || 0);
       return response.data;
@@ -304,36 +304,221 @@ export const shiftAPI = {
   },
 
   // DISPONIBILIDADES
-
   createAvailability: async (availabilityData) => {
     const response = await shiftsApi.post('/availability/new/', availabilityData);
     return response.data;
   },
-
 
   getAvailabilities: async (params = {}) => {
     const response = await shiftsApi.get('/availability/', { params });
     return response.data;
   },
 
-  // Actualizar disponibilidad (solo el dueño)
   updateAvailability: async (availabilityId, availabilityData) => {
     const response = await shiftsApi.put(`/availability/${availabilityId}/edit/`, availabilityData);
     return response.data;
   },
 
-  // Eliminar disponibilidad (solo el dueño)
   deleteAvailability: async (availabilityId) => {
     const response = await shiftsApi.delete(`/availability/${availabilityId}/delete/`);
     return response.data;
   },
 
-  // Verificar disponibilidad de un empleado en un horario específico
   checkEmployeeAvailability: async (checkData) => {
     const response = await shiftsApi.post('/availability/check/', checkData);
     return response.data;
   }
 };
 
-export { authApi, shiftsApi };
+// ==========================================
+// API para NOTIFICACIONES - NUEVA SECCIÓN
+// ==========================================
+export const notificationAPI = {
+  // NOTIFICACIONES
+  getNotifications: async (params = {}) => {
+    try {
+      console.log('🔄 Obteniendo notificaciones...');
+      const response = await notificationsApi.get('/notifications/', { params });
+      console.log('✅ Notificaciones obtenidas:', response.data?.notifications?.length || 0);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error obteniendo notificaciones:', error.response?.status, error.response?.data);
+      throw new Error(error.response?.data?.detail || 'No se pudo obtener las notificaciones');
+    }
+  },
+
+  getNotification: async (notificationId) => {
+    try {
+      const response = await notificationsApi.get(`/notifications/${notificationId}/`);
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.detail || error.response?.data?.message || 'Error al obtener notificación';
+      throw new Error(message);
+    }
+  },
+
+  markAsRead: async (notificationId) => {
+    try {
+      const response = await notificationsApi.post(`/notifications/${notificationId}/mark_as_read/`);
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.detail || error.response?.data?.message || 'Error al marcar notificación como leída';
+      throw new Error(message);
+    }
+  },
+
+  markAllAsRead: async () => {
+    try {
+      const response = await notificationsApi.post('/notifications/mark_all_as_read/');
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.detail || error.response?.data?.message || 'Error al marcar todas como leídas';
+      throw new Error(message);
+    }
+  },
+
+  deleteNotification: async (notificationId) => {
+    try {
+      const response = await notificationsApi.delete(`/notifications/${notificationId}/`);
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.detail || error.response?.data?.message || 'Error al eliminar notificación';
+      throw new Error(message);
+    }
+  },
+
+  deleteAllRead: async () => {
+    try {
+      const response = await notificationsApi.delete('/notifications/delete_all_read/');
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.detail || error.response?.data?.message || 'Error al eliminar notificaciones leídas';
+      throw new Error(message);
+    }
+  },
+
+  getUnreadCount: async () => {
+    try {
+      const response = await notificationsApi.get('/notifications/unread_count/');
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error obteniendo conteo de no leídas:', error.response?.status, error.response?.data);
+      // En caso de error, retornar 0 para no romper la UI
+      return { unread_count: 0 };
+    }
+  },
+
+  // PREFERENCIAS DE NOTIFICACIÓN
+  getPreferences: async () => {
+    try {
+      console.log('🔄 Obteniendo preferencias de notificación...');
+      const response = await notificationsApi.get('/preferences/');
+      console.log('✅ Preferencias obtenidas');
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error obteniendo preferencias:', error.response?.status, error.response?.data);
+      throw new Error(error.response?.data?.detail || 'No se pudo obtener las preferencias');
+    }
+  },
+
+  updatePreferences: async (preferences) => {
+    try {
+      console.log('🔄 Actualizando preferencias...');
+      const response = await notificationsApi.put('/preferences/update_preferences/', preferences);
+      console.log('✅ Preferencias actualizadas');
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error actualizando preferencias:', error.response?.status, error.response?.data);
+      const message = error.response?.data?.detail || error.response?.data?.message || 'Error al actualizar preferencias';
+      throw new Error(message);
+    }
+  },
+
+  updatePreferencesPartial: async (preferences) => {
+    try {
+      console.log('🔄 Actualizando preferencias (PATCH)...');
+      const response = await notificationsApi.patch('/preferences/update_preferences/', preferences);
+      console.log('✅ Preferencias actualizadas');
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error actualizando preferencias:', error.response?.status, error.response?.data);
+      const message = error.response?.data?.detail || error.response?.data?.message || 'Error al actualizar preferencias';
+      throw new Error(message);
+    }
+  }
+};
+
+// ==========================================
+// Servicio de notificaciones para compatibilidad
+// ==========================================
+export const notificationService = {
+  /**
+   * Obtiene todas las notificaciones del usuario
+   */
+  async getNotifications(params = {}) {
+    return await notificationAPI.getNotifications(params);
+  },
+
+  /**
+   * Obtiene solo notificaciones no leídas
+   */
+  async getUnreadNotifications(limit = 10) {
+    return await notificationAPI.getNotifications({ 
+      is_read: false, 
+      limit 
+    });
+  },
+
+  /**
+   * Obtiene el conteo de notificaciones no leídas
+   */
+  async getUnreadCount() {
+    const response = await notificationAPI.getUnreadCount();
+    return response.unread_count;
+  },
+
+  /**
+   * Marca una notificación como leída
+   */
+  async markAsRead(notificationId) {
+    return await notificationAPI.markAsRead(notificationId);
+  },
+
+  /**
+   * Marca todas las notificaciones como leídas
+   */
+  async markAllAsRead() {
+    return await notificationAPI.markAllAsRead();
+  },
+
+  /**
+   * Elimina una notificación
+   */
+  async deleteNotification(notificationId) {
+    return await notificationAPI.deleteNotification(notificationId);
+  },
+
+  /**
+   * Elimina todas las notificaciones leídas
+   */
+  async deleteAllRead() {
+    return await notificationAPI.deleteAllRead();
+  },
+
+  /**
+   * Obtiene las preferencias de notificación del usuario
+   */
+  async getPreferences() {
+    return await notificationAPI.getPreferences();
+  },
+
+  /**
+   * Actualiza las preferencias de notificación
+   */
+  async updatePreferences(preferences) {
+    return await notificationAPI.updatePreferences(preferences);
+  }
+};
+
+export { authApi, shiftsApi, notificationsApi };
 export default authApi;

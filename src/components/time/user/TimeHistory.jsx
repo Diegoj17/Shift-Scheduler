@@ -1,65 +1,9 @@
-import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react';
 import timeEntryService from '../../../services/timeEntryService';
+import { formatTime } from '../../../utils/dateUtils';
 import '../../../styles/components/time/user/TimeHistory.css';
 
-/**
- * Helper para convertir timestamp a hora local de Colombia
- */
-const convertToLocalTime = (timestamp) => {
-  try {
-    if (!timestamp) return '-';
-    
-    const date = new Date(timestamp);
-    if (isNaN(date.getTime())) return '-';
-    
-    // Forzar conversión a hora local del navegador (Colombia)
-    const hours = String(date.getHours()).padStart(2, '0');
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const seconds = String(date.getSeconds()).padStart(2, '0');
-    
-    return `${hours}:${minutes}:${seconds}`;
-  } catch (error) {
-    console.error('Error convirtiendo a hora local:', error);
-    return '-';
-  }
-};
-
-/**
- * Helper para formatear hora - PRIORIZA timestamp sobre time
- */
-const formatTime = (entry) => {
-  try {
-    console.log('🔍 Formateando entry:', entry);
-    
-    // ✅ SIEMPRE usar el timestamp (es más confiable)
-    if (entry.timestamp) {
-      const formatted = convertToLocalTime(entry.timestamp);
-      console.log(`✅ Timestamp convertido: ${entry.timestamp} → ${formatted}`);
-      return formatted;
-    }
-    
-    // Fallback: usar el campo 'time' si existe
-    if (entry.time && typeof entry.time === 'string') {
-      if (entry.time.includes(':')) {
-        const parts = entry.time.split(':');
-        if (parts.length >= 2) {
-          const hours = parts[0].padStart(2, '0');
-          const minutes = parts[1].padStart(2, '0');
-          const seconds = parts[2] ? parts[2].split('.')[0].padStart(2, '0') : '00';
-          const formatted = `${hours}:${minutes}:${seconds}`;
-          console.log(`⚠️ Usando campo time: ${entry.time} → ${formatted}`);
-          return formatted;
-        }
-      }
-    }
-    
-    console.warn('❌ No se pudo formatear la hora:', entry);
-    return '-';
-  } catch (error) {
-    console.error('❌ Error formateando hora:', error);
-    return '-';
-  }
-};
+// Usar formatTime de utils para mostrar AM/PM
 
 const TimeHistory = forwardRef((props, ref) => {
   const [filter, setFilter] = useState('all');
@@ -69,15 +13,13 @@ const TimeHistory = forwardRef((props, ref) => {
   useImperativeHandle(ref, () => ({
     refreshHistory: () => {
       console.log('🔄 [TimeHistory] Refresh solicitado');
+      // loadHistory definida más abajo
       loadHistory();
     }
   }));
 
-  useEffect(() => {
-    loadHistory();
-  }, [filter]);
 
-  const loadHistory = async () => {
+  const loadHistory = useCallback(async () => {
     try {
       setLoading(true);
       console.log('🔄 [TimeHistory] Cargando historial con filtro:', filter);
@@ -133,10 +75,10 @@ const TimeHistory = forwardRef((props, ref) => {
         }
         
         if (entry.entry_type === 'check_in') {
-          groupedByDate[date].check_in = formatTime(entry);
+          groupedByDate[date].check_in = formatTime(entry.timestamp || entry.time || entry.time_local);
           groupedByDate[date].check_in_timestamp = entry.timestamp;
         } else if (entry.entry_type === 'check_out') {
-          groupedByDate[date].check_out = formatTime(entry);
+          groupedByDate[date].check_out = formatTime(entry.timestamp || entry.time || entry.time_local);
           groupedByDate[date].check_out_timestamp = entry.timestamp;
         }
       });
@@ -178,7 +120,19 @@ const TimeHistory = forwardRef((props, ref) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
+
+  // Exponer método imperativo y disparar carga al montar / cambiar filtro
+  useImperativeHandle(ref, () => ({
+    refreshHistory: () => {
+      console.log('🔄 [TimeHistory] Refresh solicitado');
+      loadHistory();
+    }
+  }), [loadHistory]);
+
+  useEffect(() => {
+    loadHistory();
+  }, [loadHistory]);
 
   const getStatusClass = (status) => {
     switch (status) {
