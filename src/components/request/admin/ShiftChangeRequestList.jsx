@@ -16,6 +16,17 @@ const ShiftChangeRequestList = () => {
     loadRequests();
   }, [filter]);
 
+  // If the requests list changes, and the selectedRequest is no longer present, close modal
+  useEffect(() => {
+    if (selectedRequest && requests) {
+      const exists = requests.some(r => (r.id || r._id) === (selectedRequest.id || selectedRequest._id));
+      if (!exists) {
+        setShowModal(false);
+        setSelectedRequest(null);
+      }
+    }
+  }, [requests, selectedRequest]);
+
   const loadRequests = async () => {
     try {
       setLoading(true);
@@ -83,6 +94,22 @@ const ShiftChangeRequestList = () => {
     });
   };
 
+  // Mapear valores de filtro a etiquetas en español
+  const getFilterLabel = (f) => {
+    switch (f) {
+      case 'pending':
+        return 'pendientes';
+      case 'all':
+        return 'disponibles';
+      case 'approved':
+        return 'aprobadas';
+      case 'rejected':
+        return 'rechazadas';
+      default:
+        return f;
+    }
+  };
+
   // Usamos formatTime importado desde utils (muestra AM/PM)
 
   if (loading) {
@@ -136,7 +163,7 @@ const ShiftChangeRequestList = () => {
       {requests.length === 0 ? (
         <div className="shift-review-empty">
           <MdSchedule size={48} />
-          <p>No hay solicitudes {filter !== 'all' ? filter : 'disponibles'}</p>
+          <p>No hay solicitudes {getFilterLabel(filter)}</p>
         </div>
       ) : (
         <div className="shift-review-table-wrapper">
@@ -153,13 +180,13 @@ const ShiftChangeRequestList = () => {
               </tr>
             </thead>
             <tbody>
-              {requests.map(request => (
-                <tr key={request.id}>
-                  <td className="shift-review-cell-id">#{request.id}</td>
+              {requests.map((request, idx) => (
+                <tr key={request.id ?? request._id ?? idx}>
+                    <td className="shift-review-cell-id">#{request.id ?? request._id ?? ''}</td>
                   <td>
                     <div className="shift-review-employee-info">
                       <span className="shift-review-employee-name">
-                        {request.requesting_employee_name}
+                        {request.requesting_employee_name || request.requester?.full_name || request.requesting_employee || request.requester_name || '-'}
                       </span>
                       <span className="shift-review-employee-position">
                         {request.requesting_employee_position}
@@ -168,9 +195,9 @@ const ShiftChangeRequestList = () => {
                   </td>
                   <td>
                     <div className="shift-review-shift-info">
-                      <span className="shift-review-shift-date">{request.original_shift_date}</span>
+                      <span className="shift-review-shift-date">{request.original_shift_date || request.original_shift?.date || '-'}</span>
                       <span className="shift-review-shift-time">
-                        {formatTime(request.original_shift_start)} - {formatTime(request.original_shift_end)}
+                        {formatTime(request.original_shift_start || request.original_shift?.start_time)} - {formatTime(request.original_shift_end || request.original_shift?.end_time)}
                       </span>
                       <span className="shift-review-shift-type">{request.original_shift_type}</span>
                     </div>
@@ -184,7 +211,7 @@ const ShiftChangeRequestList = () => {
                       <span className="shift-review-no-proposal">Sin propuesta</span>
                     )}
                   </td>
-                  <td>{formatDate(request.created_at)}</td>
+                  <td>{formatDate(request.created_at || request.createdAt || request.date)}</td>
                   <td>{getStatusBadge(request.status)}</td>
                   <td>
                     <button

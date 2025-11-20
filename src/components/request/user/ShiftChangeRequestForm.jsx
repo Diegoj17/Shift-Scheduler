@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { MdSwapHoriz, MdPerson, MdCalendarToday, MdNotes, MdWarning } from 'react-icons/md';
+import { MdSwapHoriz, MdPerson, MdCalendarToday, MdNotes, MdWarning, MdError } from 'react-icons/md';
 import shiftService from '../../../services/shiftService';
 import shiftChangeService from '../../../services/shiftChangeService';
 import { formatTime } from '../../../utils/dateUtils';
@@ -20,33 +20,30 @@ const ShiftChangeRequestForm = () => {
     reason: ''
   });
 
-  // Helper: obtener nombre del tipo de turno evitando mostrar la nota por error
   const getShiftTypeName = (shift) => {
     if (!shift) return 'Turno';
-    // Priorizar campo específico de tipo
+    
     if (shift.shift_type_name && String(shift.shift_type_name).trim() !== '') {
-      // Si por alguna razón la nota coincide con el campo, preferimos no tomar la nota
-      if (shift.notes && String(shift.notes).trim() !== '' && String(shift.notes).trim() === String(shift.shift_type_name).trim()) {
-        // fallback: intentar otros campos
+      if (shift.notes && String(shift.notes).trim() !== '' && 
+          String(shift.notes).trim() === String(shift.shift_type_name).trim()) {
+        // Evitar usar la nota si coincide
       } else {
         return shift.shift_type_name;
       }
     }
 
-    // Si viene como objeto
     if (shift.shift_type && typeof shift.shift_type === 'object' && shift.shift_type.name) {
       return shift.shift_type.name;
     }
 
-    // Si viene como string o id
     if (shift.shift_type && typeof shift.shift_type === 'string' && shift.shift_type.trim() !== '') {
       return shift.shift_type;
     }
 
-    // Si existe un campo shift_type_name alternativo
-    if (shift.shiftTypeName && String(shift.shiftTypeName).trim() !== '') return shift.shiftTypeName;
+    if (shift.shiftTypeName && String(shift.shiftTypeName).trim() !== '') {
+      return shift.shiftTypeName;
+    }
 
-    // No mostrar la nota como tipo; devolver genérico
     return 'Turno';
   };
 
@@ -55,51 +52,44 @@ const ShiftChangeRequestForm = () => {
     loadEmployees();
   }, []);
 
-  // Cargar turnos del empleado actual (próximos 30 días)
   const loadMyShifts = async () => {
-  try {
-    const today = new Date();
-    const nextMonth = new Date(today);
-    nextMonth.setDate(today.getDate() + 30);
+    try {
+      const today = new Date();
+      const nextMonth = new Date(today);
+      nextMonth.setDate(today.getDate() + 30);
 
-    console.log('🕐 Fechas para filtro:', {
-      hoy: today.toISOString(),
-      hoyLocal: today.toString(),
-      en30Dias: nextMonth.toISOString(),
-      en30DiasLocal: nextMonth.toString()
-    });
-
-    const getLocalDate = (date) => {
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
-
-    const shifts = await shiftService.getMyShifts({
-      start_date: getLocalDate(today),
-      end_date: getLocalDate(nextMonth)
-    });
-
-    console.log('📋 Turnos recibidos del backend:', shifts);
-    
-    if (shifts.length === 0) {
-      console.log('🔍 Debug: No hay turnos. Verificando parámetros enviados:', {
-        start_date: getLocalDate(today),
-        end_date: getLocalDate(nextMonth),
-        hoy: today,
-        hoyLocal: getLocalDate(today)
+      console.log('🕐 Fechas para filtro:', {
+        hoy: today.toISOString(),
+        hoyLocal: today.toString(),
+        en30Dias: nextMonth.toISOString(),
+        en30DiasLocal: nextMonth.toString()
       });
+
+      const getLocalDate = (date) => {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      };
+
+      const shifts = await shiftService.getMyShifts({
+        start_date: getLocalDate(today),
+        end_date: getLocalDate(nextMonth)
+      });
+
+      console.log('📋 Turnos recibidos del backend:', shifts);
+      
+      if (shifts.length === 0) {
+        console.log('🔍 Debug: No hay turnos.');
+      }
+
+      setMyShifts(shifts);
+    } catch (error) {
+      console.error('Error cargando mis turnos:', error);
+      showNotification('error', 'Error al cargar tus turnos');
     }
+  };
 
-    setMyShifts(shifts);
-  } catch (error) {
-    console.error('Error cargando mis turnos:', error);
-    showNotification('error', 'Error al cargar tus turnos');
-  }
-};
-
-  // Cargar lista de empleados
   const loadEmployees = async () => {
     try {
       const empList = await shiftService.getEmployees();
@@ -110,7 +100,6 @@ const ShiftChangeRequestForm = () => {
     }
   };
 
-  // ✅ NUEVO: Cargar turnos del empleado seleccionado
   const loadEmployeeShifts = async (employeeId) => {
     if (!employeeId) {
       setEmployeeShifts([]);
@@ -145,7 +134,6 @@ const ShiftChangeRequestForm = () => {
       [name]: value
     }));
 
-    // Si cambia el empleado propuesto, cargar sus turnos
     if (name === 'proposedEmployeeId') {
       loadEmployeeShifts(value);
       setFormData(prev => ({
@@ -155,37 +143,49 @@ const ShiftChangeRequestForm = () => {
     }
   };
 
+  // ✅ CORREGIDO: Validación estricta según serializer
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validaciones
+    // Validaciones básicas
     if (!formData.originalShiftId) {
       showNotification('error', 'Debes seleccionar el turno que deseas cambiar');
       return;
     }
 
-    if (!formData.reason || formData.reason.trim().length < 10) {
-      showNotification('error', 'El motivo debe tener al menos 10 caracteres');
+    // ✅ OBLIGATORIO: Validar compañero propuesto
+    if (!formData.proposedEmployeeId) {
+      showNotification('error', 'Debes seleccionar un compañero para el intercambio');
       return;
     }
 
-    // Si propone empleado, debe seleccionar su turno
-    if (formData.proposedEmployeeId && !formData.proposedShiftId) {
+    // ✅ OBLIGATORIO: Validar turno del compañero
+    if (!formData.proposedShiftId) {
       showNotification('error', 'Debes seleccionar el turno del compañero propuesto');
+      return;
+    }
+
+    // ✅ Validar motivo
+    if (!formData.reason || formData.reason.trim().length < 10) {
+      showNotification('error', 'El motivo debe tener al menos 10 caracteres');
       return;
     }
 
     setLoading(true);
 
     try {
-      await shiftChangeService.createChangeRequest({
+      const payload = {
         originalShiftId: parseInt(formData.originalShiftId),
-        proposedEmployeeId: formData.proposedEmployeeId ? parseInt(formData.proposedEmployeeId) : null,
-        proposedShiftId: formData.proposedShiftId ? parseInt(formData.proposedShiftId) : null,
+        proposedEmployeeId: parseInt(formData.proposedEmployeeId),
+        proposedShiftId: parseInt(formData.proposedShiftId),
         reason: formData.reason.trim()
-      });
+      };
 
-      showNotification('success', '✓ Solicitud enviada exitosamente');
+      console.log('📤 Enviando solicitud CON compañero:', payload);
+
+      await shiftChangeService.createChangeRequest(payload);
+
+      showNotification('success', '✓ Solicitud de intercambio enviada exitosamente');
 
       // Limpiar formulario
       setFormData({
@@ -200,6 +200,7 @@ const ShiftChangeRequestForm = () => {
       loadMyShifts();
 
     } catch (error) {
+      console.error('❌ Error al enviar solicitud:', error);
       showNotification('error', error.message || 'Error al enviar solicitud');
     } finally {
       setLoading(false);
@@ -211,7 +212,6 @@ const ShiftChangeRequestForm = () => {
     setTimeout(() => setNotification(null), 5000);
   };
 
-  // Obtener información del turno seleccionado
   const selectedShift = myShifts.find(s => s.id === parseInt(formData.originalShiftId));
   const selectedEmployee = employees.find(e => e.id === parseInt(formData.proposedEmployeeId));
   const selectedProposedShift = employeeShifts.find(s => s.id === parseInt(formData.proposedShiftId));
@@ -225,8 +225,22 @@ const ShiftChangeRequestForm = () => {
         <div>
           <h2 className="shift-change-form-title">Solicitar Cambio de Turno</h2>
           <p className="shift-change-form-subtitle">
-            Completa el formulario para solicitar el cambio. Las solicitudes deben realizarse con al menos 24 horas de anticipación.
+            Completa el formulario para solicitar el cambio. <strong>Debes seleccionar un compañero y su turno</strong> para el intercambio y realizar la solicitud antes de 24 horas del turno original.
           </p>
+        </div>
+      </div>
+
+      {/* ✅ NUEVO: Mensaje informativo sobre requisitos */}
+      <div className="shift-change-requirement-box">
+        <MdError size={20} />
+        <div>
+          <strong>Requisitos para solicitar cambio:</strong>
+          <ul>
+            <li>Debes seleccionar un compañero para intercambio</li>
+            <li>Debes seleccionar el turno específico del compañero</li>
+            <li>El motivo debe tener al menos 10 caracteres</li>
+            <li>La solicitud debe hacerse con al menos 24 horas de anticipación</li>
+          </ul>
         </div>
       </div>
 
@@ -265,7 +279,6 @@ const ShiftChangeRequestForm = () => {
             )}
           </div>
 
-          {/* Información del turno seleccionado */}
           {selectedShift && (
             <div className="shift-change-selected-info">
               <div className="shift-change-info-card">
@@ -278,24 +291,24 @@ const ShiftChangeRequestForm = () => {
                   {formatTime(selectedShift.start_time)} - {formatTime(selectedShift.end_time)}
                 </span>
               </div>
-                <div className="shift-change-info-card">
-                  <span className="shift-change-info-label">Tipo:</span>
-                  <span className="shift-change-info-value">{getShiftTypeName(selectedShift)}</span>
-                </div>
+              <div className="shift-change-info-card">
+                <span className="shift-change-info-label">Tipo:</span>
+                <span className="shift-change-info-value">{getShiftTypeName(selectedShift)}</span>
+              </div>
             </div>
           )}
         </div>
 
-        {/* Compañero propuesto (opcional) */}
+        {/* ✅ CORREGIDO: Sección OBLIGATORIA de compañero propuesto */}
         <div className="shift-change-form-section">
           <h3 className="shift-change-section-title">
             <MdPerson size={20} />
-            Proponer compañero para intercambio (opcional)
+            Compañero para intercambio *
           </h3>
 
           <div className="shift-change-form-group">
             <label htmlFor="proposedEmployeeId" className="shift-change-label">
-              Selecciona un compañero
+              Selecciona un compañero *
             </label>
             <select
               id="proposedEmployeeId"
@@ -303,8 +316,9 @@ const ShiftChangeRequestForm = () => {
               value={formData.proposedEmployeeId}
               onChange={handleInputChange}
               className="shift-change-select"
+              required
             >
-              <option value="">-- Sin propuesta --</option>
+              <option value="">-- Selecciona un compañero --</option>
               {employees.map(emp => (
                 <option key={emp.id} value={emp.id}>
                   {emp.name} - {emp.position}
@@ -312,11 +326,11 @@ const ShiftChangeRequestForm = () => {
               ))}
             </select>
             <p className="shift-change-help-text">
-              Opcional: Proponer un compañero aumenta la probabilidad de aprobación
+              Elige al compañero con quien deseas intercambiar turnos
             </p>
           </div>
 
-          {/* ✅ NUEVO: Mostrar turnos del empleado seleccionado */}
+          {/* Turnos del empleado seleccionado */}
           {formData.proposedEmployeeId && (
             <div className="shift-change-form-group">
               <label htmlFor="proposedShiftId" className="shift-change-label">
@@ -335,7 +349,7 @@ const ShiftChangeRequestForm = () => {
                     value={formData.proposedShiftId}
                     onChange={handleInputChange}
                     className="shift-change-select"
-                    required={!!formData.proposedEmployeeId}
+                    required
                   >
                     <option value="">-- Selecciona el turno --</option>
                     {employeeShifts.map(shift => (
@@ -348,14 +362,14 @@ const ShiftChangeRequestForm = () => {
                   {employeeShifts.length === 0 && (
                     <div className="shift-change-warning-box">
                       <MdWarning size={20} />
-                      <p>Este empleado no tiene turnos disponibles para intercambio</p>
+                      <p>Este empleado no tiene turnos disponibles para intercambio en los próximos 60 días</p>
                     </div>
                   )}
 
                   {/* Información del turno propuesto seleccionado */}
                   {selectedProposedShift && (
                     <div className="shift-change-proposed-info">
-                      <h4 className="shift-change-proposed-title">Turno seleccionado:</h4>
+                      <h4 className="shift-change-proposed-title">Turno seleccionado del compañero:</h4>
                       <div className="shift-change-selected-info">
                         <div className="shift-change-info-card">
                           <span className="shift-change-info-label">Fecha:</span>
@@ -368,8 +382,8 @@ const ShiftChangeRequestForm = () => {
                           </span>
                         </div>
                         <div className="shift-change-info-card">
-                <span className="shift-change-info-label">Tipo:</span>
-                <span className="shift-change-info-value">{getShiftTypeName(selectedProposedShift)}</span>
+                          <span className="shift-change-info-label">Tipo:</span>
+                          <span className="shift-change-info-value">{getShiftTypeName(selectedProposedShift)}</span>
                         </div>
                       </div>
                     </div>
@@ -384,7 +398,7 @@ const ShiftChangeRequestForm = () => {
         <div className="shift-change-form-section">
           <h3 className="shift-change-section-title">
             <MdNotes size={20} />
-            Motivo de la solicitud
+            Motivo de la solicitud *
           </h3>
 
           <div className="shift-change-form-group">
@@ -404,7 +418,7 @@ const ShiftChangeRequestForm = () => {
               maxLength={500}
             />
             <p className="shift-change-help-text">
-              {formData.reason.length}/500 caracteres
+              {formData.reason.length}/500 caracteres {formData.reason.length < 10 && `(mínimo 10)`}
             </p>
           </div>
         </div>
@@ -432,7 +446,7 @@ const ShiftChangeRequestForm = () => {
             className="shift-change-btn-primary"
             disabled={loading || myShifts.length === 0}
           >
-            {loading ? 'Enviando...' : 'Enviar Solicitud'}
+            {loading ? 'Enviando...' : 'Enviar Solicitud de Intercambio'}
           </button>
         </div>
       </form>

@@ -1,6 +1,7 @@
 import React from 'react';
 import TimeDigitalClock from './TimeDigitalClock';
 import { MdLogout } from 'react-icons/md';
+import { formatTime } from '../../../utils/dateUtils';
 import '../../../styles/components/time/user/TimeExitCard.css';
 
 const TimeExitCard = ({ onRegister, isDisabled, shiftData }) => {
@@ -48,7 +49,7 @@ const TimeExitCard = ({ onRegister, isDisabled, shiftData }) => {
         </div>
         <div className="time-shift-info-row">
           <span className="time-shift-info-label">Hora de salida</span>
-          <span className="time-shift-info-value">{shiftData.shiftEnd}</span>
+          <span className="time-shift-info-value">{formatTime(shiftData.shiftEnd)}</span>
         </div>
         <div className="time-shift-info-row">
           <span className="time-shift-info-label">Estado</span>
@@ -75,7 +76,7 @@ const TimeExitCard = ({ onRegister, isDisabled, shiftData }) => {
       {shiftData.exitRegistered && shiftData.todayEntries?.check_out && (
         <div className="time-registered-info">
           <small>
-            Salida registrada a las {shiftData.todayEntries.check_out.time_local || shiftData.todayEntries.check_out.time}
+            Salida registrada a las {formatTime(shiftData.todayEntries.check_out.timestamp || shiftData.todayEntries.check_out.time_local || shiftData.todayEntries.check_out.time)}
           </small>
         </div>
       )}

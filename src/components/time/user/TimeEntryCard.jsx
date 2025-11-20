@@ -1,6 +1,7 @@
 import React from 'react';
 import TimeDigitalClock from './TimeDigitalClock';
 import { MdLogin } from 'react-icons/md';
+import { formatTime } from '../../../utils/dateUtils';
 import '../../../styles/components/time/user/TimeEntryCard.css';
 
 const TimeEntryCard = ({ onRegister, isDisabled, shiftData }) => {
@@ -48,7 +49,7 @@ const TimeEntryCard = ({ onRegister, isDisabled, shiftData }) => {
         </div>
         <div className="time-shift-info-row">
           <span className="time-shift-info-label">Hora de inicio</span>
-          <span className="time-shift-info-value">{shiftData.shiftStart}</span>
+          <span className="time-shift-info-value">{formatTime(shiftData.shiftStart)}</span>
         </div>
         <div className="time-shift-info-row">
           <span className="time-shift-info-label">Estado</span>
@@ -75,7 +76,7 @@ const TimeEntryCard = ({ onRegister, isDisabled, shiftData }) => {
       {shiftData.entryRegistered && shiftData.todayEntries?.check_in && (
         <div className="time-registered-info">
           <small>
-            Entrada registrada a las {shiftData.todayEntries.check_in.time_local || shiftData.todayEntries.check_in.time}
+            Entrada registrada a las {formatTime(shiftData.todayEntries.check_in.timestamp || shiftData.todayEntries.check_in.time_local || shiftData.todayEntries.check_in.time)}
           </small>
         </div>
       )}
