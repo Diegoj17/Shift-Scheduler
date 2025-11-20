@@ -1,27 +1,15 @@
 // Axios.js - Versión mejorada con notificaciones
 import axios from 'axios';
 
-// IMPORTANTE: Verifica que esta URL sea correcta para tu backend
 const RAW_API_URL = import.meta?.env?.VITE_API_URL || 'https://shift-scheduler-main-production.up.railway.app/api';
 
 // Normalizar la URL base
-const _normalized = String(RAW_API_URL).replace(/\/+$/g, '');
-const authBase = _normalized.endsWith('/auth') ? _normalized : `${_normalized}/auth`;
+const API_BASE_URL = String(RAW_API_URL).replace(/\/+$/g, '');
 
-const API_BASE_URL = _normalized;
+// Log para debugging
+console.debug('🔧 API URL config:', { RAW_API_URL, API_BASE_URL });
 
-// Log para facilitar debugging en producción
-console.debug('API URL config:', { RAW_API_URL, API_BASE_URL, authBase });
-
-// Helper para leer cookies
-function getCookie(name) {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop().split(';').shift();
-  return null;
-}
-
-// Configuración SIMPLIFICADA - sin CSRF complejo
+// Configuración base de Axios
 const createApiInstance = (baseURL) => {
   const instance = axios.create({
     baseURL,
@@ -37,20 +25,36 @@ const createApiInstance = (baseURL) => {
     const token = localStorage.getItem('token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log('🔐 Token añadido a la petición');
-    } else {
-      console.warn('⚠️ No se encontró token en localStorage');
     }
     return config;
   });
+
+  // Interceptor de respuesta para errores
+  instance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+      console.error('API Error:', {
+        status: error.response?.status,
+        data: error.response?.data,
+        url: error.config?.url
+      });
+
+      if (error.response?.status === 401) {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
+      
+      return Promise.reject(error);
+    }
+  );
 
   return instance;
 };
 
 // Crear instancias - CORREGIDO
-const authApi = createApiInstance(authBase); // https://.../api/auth
-const shiftsApi = createApiInstance(API_BASE_URL + '/shifts'); // https://.../api/shifts
-const notificationsApi = createApiInstance(API_BASE_URL + '/notifications'); // https://.../api/notifications
+const authApi = createApiInstance(API_BASE_URL + '/auth');
+const shiftsApi = createApiInstance(API_BASE_URL + '/shifts');    // ← SIN /auth/
+const notificationsApi = createApiInstance(API_BASE_URL + '/notifications'); // ← SIN /auth/
 
 // Interceptor de respuestas para manejar errores
 const handleResponseError = (error) => {
