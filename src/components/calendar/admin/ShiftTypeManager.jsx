@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { FaClock, FaPlus, FaEdit, FaTrash, FaTimes, FaCheck } from 'react-icons/fa';
 import { validateShiftTypeRange, validateShiftTypeName } from '../../../utils/shiftValidation';
+import { formatTime } from '../../../utils/dateUtils';
 import '../../../styles/components/calendar/admin/ShiftTypeManager.css';
 
 const ShiftTypeManager = ({ shiftTypes, onSave, onUpdate, onDelete }) => {
@@ -147,7 +148,7 @@ const ShiftTypeManager = ({ shiftTypes, onSave, onUpdate, onDelete }) => {
                 <h4>{type.name}</h4>
                 <p className="calendar-type-time">
                   <FaClock className="calendar-time-icon" aria-hidden="true" />
-                  {type.startTime} - {type.endTime}
+                  {formatTime(type.startTime)} - {formatTime(type.endTime)}
                 </p>
               </div>
               <div className="calendar-type-actions">

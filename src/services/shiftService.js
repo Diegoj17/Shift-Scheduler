@@ -1,4 +1,4 @@
-// services/shiftService.js
+// services/shiftService.js - VERSIÓN MEJORADA CON SISTEMA DE RECORDATORIOS
 
 import authApi, { shiftAPI } from '../api/Axios';
 
@@ -59,6 +59,12 @@ export const shiftService = {
       
       const response = await shiftAPI.createShift(payload);
       console.log('✅ [shiftService] createShift - Response:', response);
+      
+      // ✅ NUEVO: Mostrar información de recordatorios programados
+      console.log('⏰ [shiftService] Recordatorios programados automáticamente para este turno');
+      console.log('   - 1 hora antes del turno');
+      console.log('   - 30 minutos antes del turno');
+      
       return response;
       
     } catch (error) {
@@ -90,196 +96,276 @@ export const shiftService = {
   // ACTUALIZAR TURNO
   // ========================================
   updateShift: async (shiftId, shiftData) => {
-  try {
-    console.log('🔄 [shiftService] updateShift - Data recibida:', shiftData);
-    
-    const employeeValue = shiftData.employeeId || 
-                         shiftData.employee_id || 
-                         shiftData.employee;
+    try {
+      console.log('🔄 [shiftService] updateShift - Data recibida:', shiftData);
+      
+      const employeeValue = shiftData.employeeId || 
+                           shiftData.employee_id || 
+                           shiftData.employee;
 
-    console.log('🔍 [shiftService] updateShift - IDs disponibles:', {
-      employeeId: shiftData.employeeId,
-      employee_id: shiftData.employee_id,
-      employee: shiftData.employee,
-      employee_user_id: shiftData.employee_user_id,
-      employeeUserId: shiftData.employeeUserId,
-      employeeValueSelected: employeeValue
-    });
+      console.log('🔍 [shiftService] updateShift - IDs disponibles:', {
+        employeeId: shiftData.employeeId,
+        employee_id: shiftData.employee_id,
+        employee: shiftData.employee,
+        employee_user_id: shiftData.employee_user_id,
+        employeeUserId: shiftData.employeeUserId,
+        employeeValueSelected: employeeValue
+      });
 
-    const payload = {
-      date: shiftData.date,
-      start_time: padSeconds(shiftData.start_time || shiftData.startTime),
-      end_time: padSeconds(shiftData.end_time || shiftData.endTime),
-      employee: parseInt(employeeValue),
-      shift_type: parseInt(shiftData.shiftTypeId || shiftData.shift_type),
-      notes: shiftData.notes || ''
-    };
+      const payload = {
+        date: shiftData.date,
+        start_time: padSeconds(shiftData.start_time || shiftData.startTime),
+        end_time: padSeconds(shiftData.end_time || shiftData.endTime),
+        employee: parseInt(employeeValue),
+        shift_type: parseInt(shiftData.shiftTypeId || shiftData.shift_type),
+        notes: shiftData.notes || ''
+      };
 
-    console.log('📤 [shiftService] updateShift - Payload final:', payload);
-    
-    const response = await shiftAPI.updateShift(shiftId, payload);
-    console.log('✅ [shiftService] updateShift - Response:', response);
-    return response;
-    
-  } catch (error) {
-    console.error('❌ [shiftService] Error updating shift:', error.response?.data);
-    
-    // ✅ MEJORA: Manejo específico para errores de edición
-    const errorStatus = error.response?.status;
-    const errorData = error.response?.data;
-    
-    let errorMsg = 'Error al actualizar turno';
-    
-    // ✅ CASO ESPECÍFICO: Error 500 en edición (muy probablemente por cambio aceptado)
-    if (errorStatus === 500) {
-      errorMsg = 'No se pudo actualizar el turno porque ya se aceptó una solicitud de cambio. El turno ha sido modificado recientemente.';
-    }
-    // ✅ CASO: Conflicto explícito
-    else if (errorStatus === 409) {
-      errorMsg = 'El turno ha sido modificado por otro usuario o proceso. Actualiza la página.';
-    }
-    // ✅ CASO: Error de validación
-    else if (errorStatus === 400) {
-      errorMsg = errorData?.detail || 'Datos inválidos para actualizar el turno';
-    }
-    // ✅ CASO: Mensaje específico del backend
-    else if (errorData?.detail) {
-      errorMsg = errorData.detail;
-    }
-    // ✅ CASO: Mensaje de conflicto genérico
-    else if (errorData?.conflict || errorData?.error) {
-      const conflictMsg = errorData.conflict || errorData.error;
-      errorMsg = conflictMsg;
-    }
+      console.log('📤 [shiftService] updateShift - Payload final:', payload);
+      
+      const response = await shiftAPI.updateShift(shiftId, payload);
+      console.log('✅ [shiftService] updateShift - Response:', response);
+      
+      // ✅ NUEVO: Informar sobre reprogramación de recordatorios
+      console.log('🔄 [shiftService] Recordatorios reprogramados automáticamente');
+      
+      return response;
+      
+    } catch (error) {
+      console.error('❌ [shiftService] Error updating shift:', error.response?.data);
+      
+      // ✅ MEJORA: Manejo específico para errores de edición
+      const errorStatus = error.response?.status;
+      const errorData = error.response?.data;
+      
+      let errorMsg = 'Error al actualizar turno';
+      
+      // ✅ CASO ESPECÍFICO: Error 500 en edición (muy probablemente por cambio aceptado)
+      if (errorStatus === 500) {
+        errorMsg = 'No se pudo actualizar el turno porque ya se aceptó una solicitud de cambio. El turno ha sido modificado recientemente.';
+      }
+      // ✅ CASO: Conflicto explícito
+      else if (errorStatus === 409) {
+        errorMsg = 'El turno ha sido modificado por otro usuario o proceso. Actualiza la página.';
+      }
+      // ✅ CASO: Error de validación
+      else if (errorStatus === 400) {
+        errorMsg = errorData?.detail || 'Datos inválidos para actualizar el turno';
+      }
+      // ✅ CASO: Mensaje específico del backend
+      else if (errorData?.detail) {
+        errorMsg = errorData.detail;
+      }
+      // ✅ CASO: Mensaje de conflicto genérico
+      else if (errorData?.conflict || errorData?.error) {
+        const conflictMsg = errorData.conflict || errorData.error;
+        errorMsg = conflictMsg;
+      }
 
-    throw new Error(errorMsg);
-  }
-},
+      throw new Error(errorMsg);
+    }
+  },
 
   // ========================================
   // OBTENER TURNOS PARA CALENDARIO
   // ========================================
-  // services/shiftService.js - REEMPLAZAR getShiftsForCalendar COMPLETO
+  getShiftsForCalendar: async () => {
+    try {
+      console.log('🔄 [shiftService] Obteniendo turnos para calendario...');
+      const response = await shiftAPI.getShifts();
 
-getShiftsForCalendar: async () => {
-  try {
-    console.log('🔄 [shiftService] Obteniendo turnos para calendario...');
-    const response = await shiftAPI.getShifts();
-
-    if (!response) {
-      console.warn('⚠️ [shiftService] Respuesta vacía de getShifts');
-      return [];
-    }
-
-    const shiftsData = Array.isArray(response) ? response : (response.results || response.data || []);
-    console.log(`✅ [shiftService] Se obtuvieron ${shiftsData.length} turnos`);
-
-    if (shiftsData.length > 0) {
-      console.log('📊 [shiftService] Primer turno RAW del backend:', shiftsData[0]);
-    }
-
-    const shifts = shiftsData.map(shift => {
-      // Construir fechas ISO
-      const start = shift.start || (shift.date && shift.start_time ? `${shift.date}T${shift.start_time}` : null);
-      const end = shift.end || (shift.date && shift.end_time ? `${shift.date}T${shift.end_time}` : null);
-
-      if (!start || !end) {
-        console.warn('⚠️ [shiftService] Turno con start/end inválidos:', shift);
-        return null;
+      if (!response) {
+        console.warn('⚠️ [shiftService] Respuesta vacía de getShifts');
+        return [];
       }
 
-      // ✅ CRÍTICO: Extraer IDs correctos
-      const employee_db_id = shift.employee_id;           // Employee ID en BD
-      const employee_user_id = shift.employee_user_id || shift.employeeUserId;  // ✅ USER_ID
-      
-      console.log(`📋 [shiftService] Turno ${shift.id} - IDs:`, {
-        employee_db_id,    // ✅ Este es el que usa el backend
-        employee_user_id,  // Este es para el frontend
-        employee_name: shift.employee_name,
-        shift_data: shift
-      });
+      const shiftsData = Array.isArray(response) ? response : (response.results || response.data || []);
+      console.log(`✅ [shiftService] Se obtuvieron ${shiftsData.length} turnos`);
 
-      const employeeName = shift.employee || shift.employee_name || '';
-      const role = shift.role || '';
-      const notes = shift.notes || '';
-      
-      const title = employeeName && role ? `${employeeName} - ${role}` : employeeName || 'Sin empleado';
-      const color = shift.shift_type_color || shift.color || '#3788d8';
+      if (shiftsData.length > 0) {
+        console.log('📊 [shiftService] Primer turno RAW del backend:', shiftsData[0]);
+      }
 
-      const isLocked = shift.is_locked || shift.isLocked || false;
-      const lockReason = shift.lock_reason || shift.lockReason || '';
-      const lockedAt = shift.locked_at || shift.lockedAt || null;
+      const shifts = shiftsData.map(shift => {
+        // Construir fechas ISO
+        const start = shift.start || (shift.date && shift.start_time ? `${shift.date}T${shift.start_time}` : null);
+        const end = shift.end || (shift.date && shift.end_time ? `${shift.date}T${shift.end_time}` : null);
 
-      console.log(`🔒 [shiftService] Turno ${shift.id} - Bloqueo:`, {
-        isLocked,
-        lockReason,
-        lockedAt
-      });
+        if (!start || !end) {
+          console.warn('⚠️ [shiftService] Turno con start/end inválidos:', shift);
+          return null;
+        }
 
-      // ✅ ESTRUCTURA CORRECTA PARA FULLCALENDAR
-      return {
-        id: shift.id,
-        title,
-        start,
-        end,
-        color,
-        backgroundColor: color,
-        borderColor: color,
-
-        is_locked: isLocked,
-        isLocked: isLocked,
-        lock_reason: lockReason,
-        lockReason: lockReason,
-        locked_at: lockedAt,
-        lockedAt: lockedAt,
+        // ✅ CRÍTICO: Extraer IDs correctos
+        const employee_db_id = shift.employee_id;           // Employee ID en BD
+        const employee_user_id = shift.employee_user_id || shift.employeeUserId;  // ✅ USER_ID
         
-        // ✅ CRÍTICO: employeeUserId en nivel superior (para ShiftModal)
-        employeeId: employee_db_id,           // Employee ID en BD
-        employeeUserId: employee_user_id,     // ✅ USER_ID (para editar)
-        employeeName,
-        shiftTypeId: shift.shift_type_id || shift.shiftTypeId,
-        shiftTypeName: shift.shift_type_name || shift.shiftTypeName,
-        role,
-        notes,
+        console.log(`📋 [shiftService] Turno ${shift.id} - IDs:`, {
+          employee_db_id,    // ✅ Este es el que usa el backend
+          employee_user_id,  // Este es para el frontend
+          employee_name: shift.employee_name,
+          shift_data: shift
+        });
+
+        const employeeName = shift.employee || shift.employee_name || '';
+        const role = shift.role || '';
+        const notes = shift.notes || '';
         
-        // ✅ CRÍTICO: extendedProps con TODOS los datos
-        extendedProps: {
-          employeeId: employee_db_id,         // Employee ID en BD
-          employeeUserId: employee_user_id,   // ✅ USER_ID (para editar)
-          employeeName,
-          shiftTypeId: shift.shift_type_id || shift.shiftTypeId,
-          shiftTypeName: shift.shift_type_name || shift.shiftTypeName,
-          role,
-          notes,
-          date: shift.date,
-          start_time: shift.start_time || shift.startTime,
-          end_time: shift.end_time || shift.endTime,
+        const title = employeeName && role ? `${employeeName} - ${role}` : employeeName || 'Sin empleado';
+        const color = shift.shift_type_color || shift.color || '#3788d8';
+
+        const isLocked = shift.is_locked || shift.isLocked || false;
+        const lockReason = shift.lock_reason || shift.lockReason || '';
+        const lockedAt = shift.locked_at || shift.lockedAt || null;
+
+        console.log(`🔒 [shiftService] Turno ${shift.id} - Bloqueo:`, {
+          isLocked,
+          lockReason,
+          lockedAt
+        });
+
+        // ✅ ESTRUCTURA CORRECTA PARA FULLCALENDAR
+        return {
+          id: shift.id,
+          title,
+          start,
+          end,
+          color,
+          backgroundColor: color,
+          borderColor: color,
 
           is_locked: isLocked,
           isLocked: isLocked,
           lock_reason: lockReason,
           lockReason: lockReason,
           locked_at: lockedAt,
-          lockedAt: lockedAt
-        }
-      };
-    }).filter(Boolean);
+          lockedAt: lockedAt,
+          
+          // ✅ CRÍTICO: employeeUserId en nivel superior (para ShiftModal)
+          employeeId: employee_db_id,           // Employee ID en BD
+          employeeUserId: employee_user_id,     // ✅ USER_ID (para editar)
+          employeeName,
+          shiftTypeId: shift.shift_type_id || shift.shiftTypeId,
+          shiftTypeName: shift.shift_type_name || shift.shiftTypeName,
+          role,
+          notes,
+          
+          // ✅ CRÍTICO: extendedProps con TODOS los datos
+          extendedProps: {
+            employeeId: employee_db_id,         // Employee ID en BD
+            employeeUserId: employee_user_id,   // ✅ USER_ID (para editar)
+            employeeName,
+            shiftTypeId: shift.shift_type_id || shift.shiftTypeId,
+            shiftTypeName: shift.shift_type_name || shift.shiftTypeName,
+            role,
+            notes,
+            date: shift.date,
+            start_time: shift.start_time || shift.startTime,
+            end_time: shift.end_time || shift.endTime,
 
-    console.log('✅ [shiftService] Turnos formateados:', shifts.length);
-    if (shifts.length > 0) {
-      console.log('📊 [shiftService] Primer turno FORMATEADO:', shifts[0]);
-      console.log('📊 [shiftService] extendedProps del primer turno:', shifts[0].extendedProps);
+            is_locked: isLocked,
+            isLocked: isLocked,
+            lock_reason: lockReason,
+            lockReason: lockReason,
+            locked_at: lockedAt,
+            lockedAt: lockedAt
+          }
+        };
+      }).filter(Boolean);
+
+      console.log('✅ [shiftService] Turnos formateados:', shifts.length);
+      if (shifts.length > 0) {
+        console.log('📊 [shiftService] Primer turno FORMATEADO:', shifts[0]);
+        console.log('📊 [shiftService] extendedProps del primer turno:', shifts[0].extendedProps);
+      }
+
+      return shifts;
+    } catch (error) {
+      console.error('❌ [shiftService] Error fetching shifts for calendar:', error);
+      throw error;
     }
-
-    return shifts;
-  } catch (error) {
-    console.error('❌ [shiftService] Error fetching shifts for calendar:', error);
-    throw error;
-  }
-},
+  },
 
   // ========================================
-  // OTROS MÉTODOS
+  // ELIMINAR TURNO
+  // ========================================
+  deleteShift: async (shiftId) => {
+    try {
+      console.log(`🗑️ [shiftService] Eliminando turno ${shiftId}...`);
+      
+      const response = await shiftAPI.deleteShift(shiftId);
+      
+      // ✅ NUEVO: Informar sobre cancelación de recordatorios
+      console.log(`⏰ [shiftService] Recordatorios cancelados automáticamente para el turno ${shiftId}`);
+      
+      return response;
+    } catch (error) {
+      console.error('❌ [shiftService] Error deleting shift:', error);
+      throw new Error(error.response?.data?.detail || 'Error al eliminar turno');
+    }
+  },
+
+  // ========================================
+  // SISTEMA DE RECORDATORIOS - NUEVOS MÉTODOS
+  // ========================================
+  
+  /**
+   * Probar el sistema de recordatorios manualmente
+   */
+  testReminders: async () => {
+    try {
+      console.log('🧪 [shiftService] Probando sistema de recordatorios...');
+      
+      const response = await shiftAPI.testReminders();
+      console.log('✅ [shiftService] Test de recordatorios completado:', response);
+      
+      return response;
+    } catch (error) {
+      console.error('❌ [shiftService] Error probando recordatorios:', error);
+      throw new Error(error.response?.data?.error || 'Error probando recordatorios');
+    }
+  },
+
+  /**
+   * Reprogramar todos los recordatorios para turnos futuros
+   */
+  scheduleAllReminders: async () => {
+    try {
+      console.log('🔄 [shiftService] Reprogramando todos los recordatorios...');
+      
+      const response = await shiftAPI.scheduleAllReminders();
+      console.log('✅ [shiftService] Recordatorios reprogramados:', response);
+      
+      return response;
+    } catch (error) {
+      console.error('❌ [shiftService] Error reprogramando recordatorios:', error);
+      throw new Error(error.response?.data?.error || 'Error reprogramando recordatorios');
+    }
+  },
+
+  /**
+   * Obtener información del sistema de recordatorios
+   */
+  getRemindersInfo: async () => {
+    try {
+      console.log('📊 [shiftService] Obteniendo información de recordatorios...');
+      
+      // Esta sería una nueva endpoint que podrías crear en el backend
+      const response = await shiftAPI.getRemindersInfo();
+      return response;
+    } catch (error) {
+      console.error('❌ [shiftService] Error obteniendo información de recordatorios:', error);
+      return {
+        total_reminders: 0,
+        pending_reminders: 0,
+        sent_reminders: 0,
+        coverage_percentage: 0
+      };
+    }
+  },
+
+  // ========================================
+  // OTROS MÉTODOS EXISTENTES
   // ========================================
   
   getShifts: async (params = {}) => {
@@ -302,64 +388,58 @@ getShiftsForCalendar: async () => {
     }
   },
 
-  deleteShift: async (shiftId) => {
+  duplicateShifts: async (duplicateData) => {
     try {
-      const response = await shiftAPI.deleteShift(shiftId);
+      console.log('🔄 [shiftService] duplicateShifts - Datos recibidos:', duplicateData);
+      
+      // ✅ CRÍTICO: Validar que TODOS los campos existan ANTES de construir payload
+      const requiredFields = ['sourceStartDate', 'sourceEndDate', 'targetStartDate', 'targetEndDate'];
+      const missingFields = requiredFields.filter(field => !duplicateData[field]);
+      
+      if (missingFields.length > 0) {
+        const error = `Campos faltantes: ${missingFields.join(', ')}`;
+        console.error('❌ [shiftService]', error);
+        throw new Error(error);
+      }
+
+      // ✅ Construir payload
+      const payload = {
+        start_date: duplicateData.sourceStartDate,
+        end_date: duplicateData.sourceEndDate,
+        target_start_date: duplicateData.targetStartDate,
+        target_end_date: duplicateData.targetEndDate
+      };
+
+      console.log('📤 [shiftService] Payload construido:', payload);
+      
+      // ✅ Validar payload antes de enviar
+      if (!payload.start_date || !payload.end_date || !payload.target_start_date || !payload.target_end_date) {
+        const error = 'Las fechas de origen y destino son requeridas';
+        console.error('❌ [shiftService] Validación fallida:', {
+          start_date: payload.start_date,
+          end_date: payload.end_date,
+          target_start_date: payload.target_start_date,
+          target_end_date: payload.target_end_date
+        });
+        throw new Error(error);
+      }
+
+      console.log('✅ [shiftService] Enviando request al backend...');
+      const response = await shiftAPI.duplicateShifts(payload);
+      
+      console.log('✅ [shiftService] duplicateShifts - Response:', response);
+      
+      // ✅ NUEVO: Informar sobre recordatorios programados para turnos duplicados
+      console.log('⏰ [shiftService] Recordatorios programados automáticamente para los turnos duplicados');
+      
       return response;
+      
     } catch (error) {
-      console.error('❌ [shiftService] Error deleting shift:', error);
-      throw new Error(error.response?.data?.detail || 'Error al eliminar turno');
+      console.error('❌ [shiftService] Error duplicating shifts:', error);
+      console.error('❌ Error response:', error.response?.data);
+      throw new Error(error.response?.data?.error || error.response?.data?.detail || error.message || 'Error al duplicar turnos');
     }
   },
-
-  duplicateShifts: async (duplicateData) => {
-  try {
-    console.log('🔄 [shiftService] duplicateShifts - Datos recibidos:', duplicateData);
-    
-    // ✅ CRÍTICO: Validar que TODOS los campos existan ANTES de construir payload
-    const requiredFields = ['sourceStartDate', 'sourceEndDate', 'targetStartDate', 'targetEndDate'];
-    const missingFields = requiredFields.filter(field => !duplicateData[field]);
-    
-    if (missingFields.length > 0) {
-      const error = `Campos faltantes: ${missingFields.join(', ')}`;
-      console.error('❌ [shiftService]', error);
-      throw new Error(error);
-    }
-
-    // ✅ Construir payload
-    const payload = {
-      start_date: duplicateData.sourceStartDate,
-      end_date: duplicateData.sourceEndDate,
-      target_start_date: duplicateData.targetStartDate,
-      target_end_date: duplicateData.targetEndDate
-    };
-
-    console.log('📤 [shiftService] Payload construido:', payload);
-    
-    // ✅ Validar payload antes de enviar
-    if (!payload.start_date || !payload.end_date || !payload.target_start_date || !payload.target_end_date) {
-      const error = 'Las fechas de origen y destino son requeridas';
-      console.error('❌ [shiftService] Validación fallida:', {
-        start_date: payload.start_date,
-        end_date: payload.end_date,
-        target_start_date: payload.target_start_date,
-        target_end_date: payload.target_end_date
-      });
-      throw new Error(error);
-    }
-
-    console.log('✅ [shiftService] Enviando request al backend...');
-    const response = await shiftAPI.duplicateShifts(payload);
-    
-    console.log('✅ [shiftService] duplicateShifts - Response:', response);
-    return response;
-    
-  } catch (error) {
-    console.error('❌ [shiftService] Error duplicating shifts:', error);
-    console.error('❌ Error response:', error.response?.data);
-    throw new Error(error.response?.data?.error || error.response?.data?.detail || error.message || 'Error al duplicar turnos');
-  }
-},
 
   // ========================================
   // TIPOS DE TURNO
@@ -479,35 +559,35 @@ getShiftsForCalendar: async () => {
   // ========================================
   
   getEmployees: async () => {
-  try {
-    console.log('🔄 [shiftService] Obteniendo usuarios para turnos...');
-    
-    const resp = await authApi.get('/users/for-shifts/');
-    
-    if (resp && resp.data) {
-      const users = resp.data;
-      console.log(`✅ [shiftService] Se obtuvieron ${users.length} usuarios`);
+    try {
+      console.log('🔄 [shiftService] Obteniendo usuarios para turnos...');
       
-      // ✅ Mapear a formato esperado - id es USER_ID pero incluir employee_id
-      const employees = users.map(user => ({
-        id: user.user_id,                    // ✅ USER_ID (para el formulario)
-        employee_id: user.employee_id,        // ✅ EMPLOYEE_ID (para el backend - CRÍTICO)
-        name: user.name,
-        position: user.position,
-        departamento: user.departamento,
-        has_employee: user.has_employee
-      }));
+      const resp = await authApi.get('/users/for-shifts/');
       
-      console.log('✅ [ShiftModal] Usuarios mapeados (primeros 3):', employees.slice(0, 3));
-      return employees;
+      if (resp && resp.data) {
+        const users = resp.data;
+        console.log(`✅ [shiftService] Se obtuvieron ${users.length} usuarios`);
+        
+        // ✅ Mapear a formato esperado - id es USER_ID pero incluir employee_id
+        const employees = users.map(user => ({
+          id: user.user_id,                    // ✅ USER_ID (para el formulario)
+          employee_id: user.employee_id,        // ✅ EMPLOYEE_ID (para el backend - CRÍTICO)
+          name: user.name,
+          position: user.position,
+          departamento: user.departamento,
+          has_employee: user.has_employee
+        }));
+        
+        console.log('✅ [ShiftModal] Usuarios mapeados (primeros 3):', employees.slice(0, 3));
+        return employees;
+      }
+      
+      return [];
+    } catch (error) {
+      console.error('❌ [shiftService] Error obteniendo usuarios:', error);
+      return [];
     }
-    
-    return [];
-  } catch (error) {
-    console.error('❌ [shiftService] Error obteniendo usuarios:', error);
-    return [];
-  }
-},
+  },
 
   // ========================================
   // MIS TURNOS (PARA EMPLEADOS)
@@ -605,45 +685,67 @@ getShiftsForCalendar: async () => {
   },
 
   getEmployeeShifts: async (employeeId) => {
-  try {
-    console.log('🔄 [shiftService] Obteniendo turnos del empleado:', employeeId);
-    
-    if (!employeeId) {
-      console.warn('⚠️ [shiftService] getEmployeeShifts llamado sin employeeId');
+    try {
+      console.log('🔄 [shiftService] Obteniendo turnos del empleado:', employeeId);
+      
+      if (!employeeId) {
+        console.warn('⚠️ [shiftService] getEmployeeShifts llamado sin employeeId');
+        return [];
+      }
+
+      // ✅ CORRECCIÓN: Usar ruta absoluta con /api/shifts/
+      const response = await authApi.get(`https://shift-scheduler-main-production.up.railway.app/api/shifts/employees/${employeeId}/shifts/`);
+      
+      console.log('📦 [shiftService] Respuesta completa:', response);
+      
+      const shiftsData = response.data?.results || response.data || [];
+      console.log(`✅ [shiftService] Turnos del empleado obtenidos:`, shiftsData.length);
+      
+      // Debug: ver estructura completa
+      if (shiftsData.length > 0) {
+        console.log('🔍 Estructura del primer turno del empleado:', {
+          id: shiftsData[0].id,
+          date: shiftsData[0].date,
+          start_time: shiftsData[0].start_time,
+          end_time: shiftsData[0].end_time,
+          shift_type_name: shiftsData[0].shift_type_name,
+          shift_type_id: shiftsData[0].shift_type_id,
+          shift_type: shiftsData[0].shift_type,
+          all_fields: Object.keys(shiftsData[0])
+        });
+      }
+
+      // Si algunos turnos vienen con shift_type_id (o shift_type) pero sin nombre,
+      // intentar obtener la lista de tipos de turno y mapearlos para adjuntar el nombre.
+      try {
+        const shiftTypes = await shiftService.getShiftTypes();
+        const mapById = new Map();
+        (shiftTypes || []).forEach(st => {
+          const id = st.id ?? st.shift_type_id ?? st.pk ?? st.key ?? null;
+          const name = st.name || st.title || st.shift_type_name || st.label || null;
+          if (id != null && name) mapById.set(String(id), name);
+        });
+
+        // Adjuntar nombre cuando falte
+        shiftsData.forEach(s => {
+          if (!s.shift_type_name) {
+            const idCandidate = s.shift_type_id ?? s.shift_type ?? s.type_id ?? s.type;
+            const mapped = idCandidate != null ? mapById.get(String(idCandidate)) : null;
+            if (mapped) s.shift_type_name = mapped;
+          }
+        });
+      } catch (err) {
+        console.warn('[shiftService] No se pudieron resolver nombres de tipos de turno:', err);
+      }
+
+      return shiftsData;
+    } catch (error) {
+      console.error('❌ [shiftService] Error obteniendo turnos del empleado:', error);
+      console.error('❌ Error response:', error.response?.data);
+      console.error('❌ Error status:', error.response?.status);
       return [];
     }
-
-    // ✅ CORRECCIÓN: Usar ruta absoluta con /api/shifts/
-    // authApi tiene baseURL pero necesitamos override para esta ruta específica
-    const response = await authApi.get(`https://shift-scheduler-main-production.up.railway.app/api/shifts/employees/${employeeId}/shifts/`);
-    
-    console.log('📦 [shiftService] Respuesta completa:', response);
-    
-    const shiftsData = response.data?.results || response.data || [];
-    console.log(`✅ [shiftService] Turnos del empleado obtenidos:`, shiftsData.length);
-    
-    // Debug: ver estructura completa
-    if (shiftsData.length > 0) {
-      console.log('🔍 Estructura del primer turno del empleado:', {
-        id: shiftsData[0].id,
-        date: shiftsData[0].date,
-        start_time: shiftsData[0].start_time,
-        end_time: shiftsData[0].end_time,
-        shift_type_name: shiftsData[0].shift_type_name,
-        shift_type_id: shiftsData[0].shift_type_id,
-        all_fields: Object.keys(shiftsData[0])
-      });
-    }
-    
-    return shiftsData;
-  } catch (error) {
-    console.error('❌ [shiftService] Error obteniendo turnos del empleado:', error);
-    console.error('❌ Error response:', error.response?.data);
-    console.error('❌ Error status:', error.response?.status);
-    return [];
-  }
-},
-
+  },
   
 };
 

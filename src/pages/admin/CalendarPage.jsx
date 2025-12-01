@@ -74,8 +74,6 @@ const CalendarPage = () => {
     { id: "calendario", label: "Calendario", icon: "calendar" },
     { id: "disponibilidad", label: "Disponibilidad", icon: "availability" },
     { id: "solicitudes", label: "Solicitudes", icon: "requests" },
-    { id: "presencia", label: "Presencia", icon: "presence" },
-    { id: "documentos", label: "Documentos", icon: "documents" },
     { id: "equipo", label: "Equipo", icon: "team" },
     { id: "informes", label: "Informes", icon: "reports" },
   ];
@@ -471,11 +469,29 @@ const initializeData = async () => {
   }
 };
 
-  const handleUpdateShiftType = async (updatedType) => {
+  const handleUpdateShiftType = async (updatedTypeOrId, maybeData) => {
     try {
-  const result = await shiftService.updateShiftType(updatedType.id, updatedType);
-  const normalized = normalizeShiftType(result);
-  setShiftTypes(prev => prev.map(type => type.id === updatedType.id ? normalized : type));
+      // Aceptar dos formas de llamada: (updatedTypeObject) o (id, data)
+      let shiftTypeId;
+      let payload;
+
+      if (updatedTypeOrId && typeof updatedTypeOrId === 'object') {
+        shiftTypeId = updatedTypeOrId.id ?? updatedTypeOrId.pk ?? null;
+        payload = updatedTypeOrId;
+      } else {
+        shiftTypeId = updatedTypeOrId;
+        payload = maybeData || {};
+      }
+
+      if (!shiftTypeId) {
+        console.error('handleUpdateShiftType: no se proporcionó id del tipo de turno', { updatedTypeOrId, maybeData });
+        showNotification('error', 'ID del tipo de turno no proporcionado');
+        return;
+      }
+
+      const result = await shiftService.updateShiftType(shiftTypeId, payload);
+      const normalized = normalizeShiftType(result);
+      setShiftTypes(prev => prev.map(type => type.id === shiftTypeId ? normalized : type));
       showNotification('success', 'Tipo de turno actualizado exitosamente');
     } catch (error) {
       console.error('Error updating shift type:', error);

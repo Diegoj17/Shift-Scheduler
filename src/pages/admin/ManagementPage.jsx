@@ -157,8 +157,6 @@ const ManagementPage = () => {
     { id: 'calendario', label: 'Calendario', icon: 'calendar' },
     { id: 'disponibilidad', label: 'Disponibilidad', icon: 'availability' },
     { id: 'solicitudes', label: 'Solicitudes', icon: 'requests' },
-    { id: 'presencia', label: 'Presencia', icon: 'presence' },
-    { id: 'documentos', label: 'Documentos', icon: 'documents' },
     { id: 'equipo', label: 'Equipo', icon: 'team' },
     { id: 'informes', label: 'Informes', icon: 'reports' }
   ];

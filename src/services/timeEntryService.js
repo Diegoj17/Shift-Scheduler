@@ -76,6 +76,10 @@ export const timeEntryService = {
       if (filters.entry_type) {
         params.append('entry_type', filters.entry_type);
       }
+      // Permitir filtro por employee_id cuando backend lo soporte (reporte admin)
+      if (filters.employee_id) {
+        params.append('employee_id', filters.employee_id);
+      }
 
       const response = await shiftsApi.get(`/time-entry/?${params.toString()}`);
       console.log('✅ [timeEntryService] Historial obtenido:', response.data);

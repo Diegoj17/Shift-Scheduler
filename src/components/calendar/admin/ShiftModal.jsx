@@ -1,8 +1,57 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FaTimes, FaCheck, FaExclamationTriangle, FaUser, FaClock, FaSave, FaLock,FaBriefcase, FaTrash, FaInfoCircle } from 'react-icons/fa';
 import { detectShiftConflicts, calculateShiftDuration } from '../../../utils/shiftValidation';
-import { formatDateForInput, formatTimeForInput, combineDateAndTime, timeStringToMinutes } from '../../../utils/dateUtils';
+import { formatDateForInput, formatTimeForInput, combineDateAndTime, timeStringToMinutes, formatTime } from '../../../utils/dateUtils';
 import '../../../styles/components/calendar/admin/ShiftModal.css';
+
+const TIMEZONE_OFFSET = -5 * 60; // UTC-05:00 (Bogotá, Lima, Quito)
+const TIMEZONE_ISO_SUFFIX = getTimezoneIsoSuffix(TIMEZONE_OFFSET);
+
+function getTimezoneIsoSuffix(offsetMinutes) {
+  const sign = offsetMinutes <= 0 ? '-' : '+';
+  const absolute = Math.abs(offsetMinutes);
+  const hours = String(Math.floor(absolute / 60)).padStart(2, '0');
+  const minutes = String(Math.abs(absolute % 60)).padStart(2, '0');
+  return `${sign}${hours}:${minutes}`;
+}
+
+function normalizeTimeInput(timeStr = '00:00') {
+  if (!timeStr) return '00:00:00';
+  const parts = String(timeStr).split(':');
+  const hours = parts[0] ? parts[0].padStart(2, '0') : '00';
+  const minutes = parts[1] ? parts[1].padStart(2, '0') : '00';
+  const seconds = parts[2] ? parts[2].padStart(2, '0') : '00';
+  return `${hours}:${minutes}:${seconds}`;
+}
+
+function normalizeDateInput(dateInput) {
+  if (!dateInput) return '';
+  if (typeof dateInput === 'string') {
+    return dateInput.slice(0, 10);
+  }
+  return formatDateForInput(dateInput);
+}
+
+function createDateAtTimezone(dateInput, timeInput = '00:00') {
+  const normalizedDate = normalizeDateInput(dateInput);
+  if (!normalizedDate) return null;
+  const normalizedTime = normalizeTimeInput(timeInput);
+  const date = new Date(`${normalizedDate}T${normalizedTime}${TIMEZONE_ISO_SUFFIX}`);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function isTimeInPast(dateInput, timeInput) {
+  if (!dateInput || !timeInput) return false;
+  const targetDate = createDateAtTimezone(dateInput, timeInput);
+  if (!targetDate) return false;
+  return targetDate.getTime() < Date.now();
+}
+
+function isShiftTypeInPast(type, selectedDate) {
+  if (!type || !selectedDate) return false;
+  const typeStartTime = type.startTime || type.start_time || type.start || '00:00';
+  return isTimeInPast(selectedDate, typeStartTime);
+}
 
 const ShiftModal = ({ 
   isOpen, 
@@ -15,6 +64,16 @@ const ShiftModal = ({
   existingShifts,
   unavailabilities = []
 }) => {
+  // Zona horaria fija manejada vía utilidades (UTC-05:00 Bogotá/Lima/Quito)
+
+  const formatDisplayTime = (timeValue) => (timeValue ? formatTime(timeValue) : '--');
+  const getTypeTimeWindow = (type) => {
+    if (!type) return '-- - --';
+    const start = type.startTime || type.start_time || type.start || '';
+    const end = type.endTime || type.end_time || type.end || '';
+    return `${formatDisplayTime(start)} - ${formatDisplayTime(end)}`;
+  };
+
   const formatDateDisplay = (dateInput) => {
     if (!dateInput) return '';
     if (typeof dateInput === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
@@ -33,8 +92,8 @@ const ShiftModal = ({
     employeeId: '',
     shiftTypeId: '',
     date: formatDateForInput(new Date()),
-    startTime: '09:00',
-    endTime: '17:00',
+    startTime: '',
+    endTime: '',
     notes: ''
   });
 
@@ -47,6 +106,7 @@ const ShiftModal = ({
   const [availabilityMessage, setAvailabilityMessage] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [generalAlert, setGeneralAlert] = useState(null); 
+  const [pastShiftTypes, setPastShiftTypes] = useState([]); // Tipos de turno que ya pasaron
   const isLocked = shift?.is_locked || shift?.isLocked || false;
   const lockReason = shift?.lock_reason || shift?.lockReason || '';
 
@@ -110,8 +170,8 @@ const ShiftModal = ({
         employeeId: '',
         shiftTypeId: '',
         date: formatDateForInput(new Date()),
-        startTime: '09:00',
-        endTime: '17:00',
+        startTime: '',
+        endTime: '',
         notes: ''
       });
       setSelectedEmployee(null);
@@ -121,7 +181,25 @@ const ShiftModal = ({
     setConflicts([]);
     setShowDeleteConfirm(false);
     setAutoDetectedType(false);
+    setPastShiftTypes([]);
   }, [shift, isOpen, employees]);
+
+  // ✅ NUEVO: useEffect para calcular tipos de turno que ya pasaron
+  useEffect(() => {
+    if (formData.date && Array.isArray(shiftTypes)) {
+      const pastTypes = shiftTypes.filter(type => 
+        isShiftTypeInPast(type, formData.date)
+      ).map(type => String(type.id));
+      
+      setPastShiftTypes(pastTypes);
+      
+      // Si el tipo de turno actual ya pasó, limpiarlo
+      if (pastTypes.includes(formData.shiftTypeId)) {
+        setFormData(prev => ({ ...prev, shiftTypeId: '' }));
+        setAutoDetectedType(false);
+      }
+    }
+  }, [formData.date, formData.shiftTypeId, shiftTypes]);
 
   // ✅ MEJORA: Calcular disponibilidad con razones detalladas
   useEffect(() => {
@@ -131,8 +209,10 @@ const ShiftModal = ({
 
       if (!formData.employeeId || !formData.date || !Array.isArray(shiftTypes) || shiftTypes.length === 0) {
         shiftTypes.forEach(t => { 
-          map[String(t.id)] = true; 
-          reasonsMap[String(t.id)] = '';
+          // Verificar si el tipo ya pasó
+          const isPast = isShiftTypeInPast(t, formData.date);
+          map[String(t.id)] = !isPast; // No disponible si ya pasó
+          reasonsMap[String(t.id)] = isPast ? 'Este horario ya pasó' : '';
         });
         setTypeAvailabilityMap({ ...map, _reasons: reasonsMap });
         return;
@@ -144,8 +224,9 @@ const ShiftModal = ({
       if (!selEmp) {
         console.warn('⚠️ [ShiftModal] No se encontró empleado con ID:', formData.employeeId);
         shiftTypes.forEach(t => { 
-          map[String(t.id)] = true; 
-          reasonsMap[String(t.id)] = '';
+          const isPast = isShiftTypeInPast(t, formData.date);
+          map[String(t.id)] = !isPast;
+          reasonsMap[String(t.id)] = isPast ? 'Este horario ya pasó' : '';
         });
         setTypeAvailabilityMap({ ...map, _reasons: reasonsMap });
         return;
@@ -219,13 +300,24 @@ const ShiftModal = ({
       const hasAvailData = empAvailRanges.length > 0;
 
       if (!hasAvailData) {
-        console.log('ℹ️ [ShiftModal] No hay disponibilidades registradas, permitiendo todos los tipos');
+        console.log('ℹ️ [ShiftModal] No hay disponibilidades registradas, permitiendo todos los tipos que no hayan pasado');
         shiftTypes.forEach(t => { 
-          map[String(t.id)] = true; 
-          reasonsMap[String(t.id)] = '';
+          const isPast = isShiftTypeInPast(t, formData.date);
+          map[String(t.id)] = !isPast; // Solo disponible si no ha pasado
+          reasonsMap[String(t.id)] = isPast ? 'Este horario ya pasó' : 'SIN_REGISTROS';
         });
+        // marcar que no hay registros de disponibilidad para este empleado en esta fecha
+        map._hasAvail = false;
       } else {
         shiftTypes.forEach(type => {
+          // Verificar primero si el tipo ya pasó
+          const isPast = isShiftTypeInPast(type, formData.date);
+          if (isPast) {
+            map[String(type.id)] = false;
+            reasonsMap[String(type.id)] = 'Este horario ya pasó';
+            return;
+          }
+
           const ts = type.startTime || type.start_time || type.start || '';
           const te = type.endTime || type.end_time || type.end || '';
           const start = combineDateAndTime(formData.date, ts);
@@ -248,15 +340,15 @@ const ShiftModal = ({
           if (hasExplicitAvailable) {
             if (coveringAvailable.length === 0) {
               available = false;
-              reason = `Fuera del horario disponible (${ts} - ${te})`;
+              reason = `Fuera del horario disponible (${formatDisplayTime(ts)} - ${formatDisplayTime(te)})`;
             } else if (overlappingUnavailable.length > 0) {
               available = false;
-              reason = `No disponible en este horario (${ts} - ${te})`;
+              reason = `No disponible en este horario (${formatDisplayTime(ts)} - ${formatDisplayTime(te)})`;
             }
           } else {
             if (overlappingUnavailable.length > 0) {
               available = false;
-              reason = `Marcado como no disponible (${ts} - ${te})`;
+              reason = `Marcado como no disponible (${formatDisplayTime(ts)} - ${formatDisplayTime(te)})`;
             }
           }
 
@@ -268,18 +360,24 @@ const ShiftModal = ({
           }
         });
       }
-
+      // indicar que sí existen registros de disponibilidad para este empleado
+      map._hasAvail = true;
       console.log('✅ [ShiftModal] Mapa de disponibilidad calculado:', map);
-      setTypeAvailabilityMap({ ...map, _reasons: reasonsMap });
+      setTypeAvailabilityMap({ ...map, _reasons: reasonsMap, _hasAvail: map._hasAvail });
     } catch (err) {
       console.error('❌ Error calculando disponibilidad por tipo:', err);
       const fallback = {};
-      shiftTypes.forEach(t => { fallback[String(t.id)] = true; });
+      shiftTypes.forEach(t => { 
+        const isPast = isShiftTypeInPast(t, formData.date);
+        fallback[String(t.id)] = !isPast;
+      });
+      fallback._hasAvail = false;
+      fallback._reasons = {};
       setTypeAvailabilityMap(fallback);
     }
   }, [formData.employeeId, formData.date, shiftTypes, unavailabilities, employees]);
 
-  // Detección de tipos por tiempo
+  // Detección de tipos por tiempo (modificada para no detectar tipos que ya pasaron)
   const detectShiftTypeByTime = useCallback((startTimeStr, endTimeStr) => {
     if (!shiftTypes.length) return null;
 
@@ -296,6 +394,11 @@ const ShiftModal = ({
     let bestScore = -1;
 
     shiftTypes.forEach(type => {
+      // Saltar tipos que ya pasaron
+      if (isShiftTypeInPast(type, formData.date)) {
+        return;
+      }
+
       let typeStartTotalMinutes = timeStringToMinutes(type.startTime);
       let typeEndTotalMinutes = timeStringToMinutes(type.endTime);
 
@@ -325,7 +428,7 @@ const ShiftModal = ({
     });
 
     return bestMatch;
-  }, [shiftTypes]);
+  }, [shiftTypes, formData.date]);
 
   useEffect(() => {
     if (formData.startTime && formData.endTime && !autoDetectedType) {
@@ -354,6 +457,9 @@ const ShiftModal = ({
 
     if (field === 'startTime' || field === 'endTime') {
       setAutoDetectedType(false);
+      if (!value) {
+        setDuration(0);
+      }
     }
 
     // Actualizar empleado seleccionado
@@ -361,28 +467,23 @@ const ShiftModal = ({
       const emp = employees.find(e => String(e.id) === String(value));
       setSelectedEmployee(emp || null);
     }
+
+    // Si cambia la fecha, limpiar el tipo de turno si ya pasó
+    if (field === 'date') {
+      const endOfSelectedDay = createDateAtTimezone(value, '23:59');
+      if (endOfSelectedDay && endOfSelectedDay < Date.now()) {
+        setGeneralAlert({
+          type: 'warning',
+          message: 'Estás creando un turno en una fecha pasada. Solo podrás seleccionar horarios futuros.'
+        });
+      } else {
+        setGeneralAlert(null);
+      }
+    }
   };
 
   const handleTimeChange = (field, value) => {
     handleChange(field, value);
-    
-    setTimeout(() => {
-      if (formData.startTime && formData.endTime && !autoDetectedType) {
-        const detectedType = detectShiftTypeByTime(
-          field === 'startTime' ? value : formData.startTime,
-          field === 'endTime' ? value : formData.endTime
-        );
-        if (detectedType && detectedType.id !== formData.shiftTypeId) {
-          setFormData(prev => ({ 
-            ...prev, 
-            shiftTypeId: detectedType.id,
-            startTime: field === 'startTime' ? value : prev.startTime,
-            endTime: field === 'endTime' ? value : prev.endTime
-          }));
-          setAutoDetectedType(true);
-        }
-      }
-    }, 100);
   };
 
   const validateForm = () => {
@@ -394,6 +495,8 @@ const ShiftModal = ({
     
     if (!formData.shiftTypeId) {
       newErrors.shiftTypeId = 'Selecciona un tipo de turno';
+    } else if (pastShiftTypes.includes(formData.shiftTypeId)) {
+      newErrors.shiftTypeId = 'No puedes seleccionar un tipo de turno que ya pasó';
     }
     
     if (!formData.date) {
@@ -402,10 +505,14 @@ const ShiftModal = ({
     
     if (!formData.startTime) {
       newErrors.time = 'Selecciona hora de inicio';
+    } else if (isTimeInPast(formData.date, formData.startTime)) {
+      newErrors.time = 'La hora de inicio ya pasó';
     }
     
     if (!formData.endTime) {
       newErrors.time = 'Selecciona hora de fin';
+    } else if (isTimeInPast(formData.date, formData.endTime)) {
+      newErrors.time = 'La hora de fin ya pasó';
     }
     
     if (formData.startTime && formData.endTime) {
@@ -479,6 +586,15 @@ const ShiftModal = ({
       setGeneralAlert({ 
         type: 'error', 
         message: 'No puedes editar este turno porque está bloqueado. ' + (lockReason || 'Turno intercambiado.')
+      });
+      return;
+    }
+
+    // ✅ NUEVO: Validar si el turno sería en el pasado
+    if (isTimeInPast(formData.date, formData.startTime)) {
+      setGeneralAlert({
+        type: 'error',
+        message: 'No puedes crear un turno en el pasado. La hora de inicio ya pasó.'
       });
       return;
     }
@@ -574,12 +690,22 @@ const ShiftModal = ({
   const handleTypeClick = (type) => {
     const key = String(type.id);
     const isAvailable = typeAvailabilityMap[key] !== false;
-    const reason = typeAvailabilityMap._reasons?.[key] || 'No disponible';
+    // reason read from _reasons when needed below
 
+    // Mensajes más amigables según la causa
     if (isAvailable) {
+      // Si no hay registros del empleado, avisar primero
+      if (!typeAvailabilityMap?._hasAvail) {
+        setAvailabilityMessage('Empleado sin registros de disponibilidad para esta fecha');
+        setTimeout(() => setAvailabilityMessage(''), 4000);
+        return;
+      }
       applyShiftTypeHours(type.id);
     } else {
-      setAvailabilityMessage(`${type.name}: ${reason}`);
+      // Si la razón fue marcada como SIN_REGISTROS, traducir
+      const raw = typeAvailabilityMap._reasons?.[key] || '';
+      const pretty = raw === 'SIN_REGISTROS' ? 'Empleado sin registros de disponibilidad para esta fecha' : raw || 'No disponible';
+      setAvailabilityMessage(`${type.name}: ${pretty}`);
       setTimeout(() => setAvailabilityMessage(''), 4000);
     }
   };
@@ -588,6 +714,11 @@ const ShiftModal = ({
 
   const selectedShiftType = shiftTypes.find(type => type.id === formData.shiftTypeId);
   const hasAvailabilityData = unavailabilities && unavailabilities.length > 0;
+
+  // Filtrar tipos de turno para mostrar solo los que no han pasado
+  const availableShiftTypes = shiftTypes.filter(type => 
+    !pastShiftTypes.includes(String(type.id))
+  );
 
   return (
     <div className="calendar-modal-overlay" onClick={onClose}>
@@ -666,9 +797,14 @@ const ShiftModal = ({
                   Basado en disponibilidad del empleado
                 </span>
               )}
+              {pastShiftTypes.length > 0 && (
+                <span style={{ marginLeft: '10px', fontSize: '12px', color: '#dc2626', fontWeight: 'normal' }}>
+                  ({pastShiftTypes.length} tipo(s) oculto(s) porque ya pasaron)
+                </span>
+              )}
             </label>
             <div className="calendar-shift-type-selector">
-              {shiftTypes.map(type => {
+              {availableShiftTypes.map(type => {
                 const key = String(type.id);
                 const isAvailable = typeAvailabilityMap[key] !== false;
                 const reason = typeAvailabilityMap._reasons?.[key] || '';
@@ -684,18 +820,28 @@ const ShiftModal = ({
                     role="button"
                     tabIndex={0}
                     aria-disabled={!isAvailable}
-                    aria-label={`${type.name} ${type.startTime} - ${type.endTime} ${!isAvailable ? 'No disponible' : ''}`}
+                      aria-label={`${type.name} ${getTypeTimeWindow(type)} ${!isAvailable ? 'No disponible' : ''}`}
                   >
                     <div className="calendar-type-color-dot" style={{ backgroundColor: type.color }}></div>
                     <div className="calendar-type-option-info">
                       <span className="calendar-type-name">{type.name}</span>
-                      <span className="calendar-type-hours">{type.startTime} - {type.endTime}</span>
+                        <span className="calendar-type-hours">{getTypeTimeWindow(type)}</span>
                     </div>
-                    {!isAvailable && <span className="calendar-type-unavailable-badge">No disponible</span>}
+                      {!isAvailable && <span className="calendar-type-unavailable-badge">No disponible</span>}
+                      {isAvailable && !typeAvailabilityMap?._hasAvail && (
+                        <span className="calendar-type-unavailable-badge">Sin registros</span>
+                      )}
                     {formData.shiftTypeId === type.id && <FaCheck className="calendar-check-icon" />}
                   </div>
                 );
               })}
+              {availableShiftTypes.length === 0 && (
+                <div className="calendar-no-types-available">
+                  <FaExclamationTriangle />
+                  <p>No hay tipos de turno disponibles para esta fecha/hora</p>
+                  <p className="calendar-no-types-subtext">Todos los tipos de turno ya han pasado según la hora actual (UTC-05:00)</p>
+                </div>
+              )}
             </div>
             {errors.shiftTypeId && <span className="calendar-error-message">{errors.shiftTypeId}</span>}
             {availabilityMessage && (
@@ -720,29 +866,50 @@ const ShiftModal = ({
                 value={formData.date}
                 onChange={(e) => handleChange('date', e.target.value)}
                 className={errors.time ? 'calendar-input-error' : ''}
+                min={formatDateForInput(new Date())} // No permitir fechas pasadas
               />
             </div>
 
             <div className="calendar-form-group">
               <label htmlFor="startTime">Hora Inicio *</label>
-              <input
-                type="time"
-                id="startTime"
-                value={formData.startTime}
-                onChange={(e) => handleTimeChange('startTime', e.target.value)}
-                className={errors.time ? 'calendar-input-error' : ''}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="time"
+                  id="startTime"
+                  value={formData.startTime}
+                  onChange={(e) => handleTimeChange('startTime', e.target.value)}
+                  className={errors.time ? 'calendar-input-error' : ''}
+                  disabled={isTimeInPast(formData.date, formData.startTime) && !shift?.id}
+                  style={{ color: 'transparent' }}
+                />
+                <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#6b7280' }}>{formatDisplayTime(formData.startTime)}</span>
+              </div>
+              {isTimeInPast(formData.date, formData.startTime) && !shift?.id && (
+                <div className="calendar-past-time-warning">
+                  Esta hora ya pasó
+                </div>
+              )}
             </div>
 
             <div className="calendar-form-group">
               <label htmlFor="endTime">Hora Fin *</label>
-              <input
-                type="time"
-                id="endTime"
-                value={formData.endTime}
-                onChange={(e) => handleTimeChange('endTime', e.target.value)}
-                className={errors.time ? 'calendar-input-error' : ''}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type="time"
+                  id="endTime"
+                  value={formData.endTime}
+                  onChange={(e) => handleTimeChange('endTime', e.target.value)}
+                  className={errors.time ? 'calendar-input-error' : ''}
+                  disabled={isTimeInPast(formData.date, formData.endTime) && !shift?.id}
+                  style={{ color: 'transparent' }}
+                />
+                <span style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#6b7280' }}>{formatDisplayTime(formData.endTime)}</span>
+              </div>
+              {isTimeInPast(formData.date, formData.endTime) && !shift?.id && (
+                <div className="calendar-past-time-warning">
+                  Esta hora ya pasó
+                </div>
+              )}
             </div>
           </div>
 
@@ -813,7 +980,7 @@ const ShiftModal = ({
                 </div>
                 <div className="calendar-summary-item">
                   <span className="calendar-summary-label">Horario:</span>
-                  <span className="calendar-summary-value">{formData.startTime} - {formData.endTime}</span>
+                  <span className="calendar-summary-value">{formatDisplayTime(formData.startTime)} - {formatDisplayTime(formData.endTime)}</span>
                 </div>
                 <div className="calendar-summary-item">
                   <span className="calendar-summary-label">Puesto:</span>
@@ -841,7 +1008,7 @@ const ShiftModal = ({
               <button 
                 type="submit" 
                 className="calendar-btn-primary" 
-                disabled={isLocked}
+                disabled={isLocked || pastShiftTypes.includes(formData.shiftTypeId)}
                 >
                 <FaSave /> {shift?.id ? 'Actualizar' : 'Crear'} Turno
               </button>
@@ -870,7 +1037,7 @@ const ShiftModal = ({
                   <div className="calendar-shift-details">
                     <p><strong>Empleado:</strong> {selectedEmployee?.name || 'Desconocido'}</p>
                     <p><strong>Fecha:</strong> {formatDateDisplay(formData.date)}</p>
-                    <p><strong>Horario:</strong> {formData.startTime} - {formData.endTime}</p>
+                    <p><strong>Horario:</strong> {formatDisplayTime(formData.startTime)} - {formatDisplayTime(formData.endTime)}</p>
                     <p><strong>Tipo:</strong> {selectedShiftType?.name || 'No especificado'}</p>
                   </div>
                   <p className="calendar-warning-note">Esta acción no se puede deshacer.</p>

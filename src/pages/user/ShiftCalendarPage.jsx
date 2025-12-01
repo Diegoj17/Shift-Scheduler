@@ -469,6 +469,10 @@ const ShiftCalendarPage = () => {
 
 // getShiftTypeFromData removed from here (now declared at module scope)
 
+  // Mostrar siempre las 24 horas (00:00 - 24:00) para que se vea completo
+  // Esto evita que el calendario 'recorte' la vista a la franja mínima de turnos.
+  const slotMinTime = '00:00:00';
+
   return (
     <div className="shift-page-container">
       <SidebarEmployee 
@@ -572,11 +576,11 @@ const ShiftCalendarPage = () => {
                       datesSet={handleDatesSet}
                       eventClick={handleEventClick}
                       height="auto"
-                      slotMinTime="06:00:00"
+                      slotMinTime={slotMinTime}
                       slotMaxTime="24:00:00"
                       allDaySlot={false}
                       nowIndicator={true}
-                      scrollTime="08:00:00"
+                      scrollTime={slotMinTime}
                       slotDuration="01:00:00"
                       slotLabelInterval="01:00:00"
                       eventMinHeight={80}
