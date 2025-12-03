@@ -1,4 +1,4 @@
-// Axios.js - Versión mejorada con notificaciones
+// Axios.js - VERSIÓN COMPLETA CON SISTEMA DE RECORDATORIOS
 import axios from 'axios';
 
 const RAW_API_URL = import.meta?.env?.VITE_API_URL || 'https://shift-scheduler-main-production.up.railway.app/api';
@@ -172,7 +172,7 @@ export const userAPI = {
 };
 
 // ==========================================
-// API para turnos - VERSIÓN CORREGIDA
+// API para turnos - VERSIÓN COMPLETA CON RECORDATORIOS
 // ==========================================
 export const shiftAPI = {
   // TURNOS
@@ -247,6 +247,51 @@ export const shiftAPI = {
     } catch (error) {
       const message = error.response?.data?.detail || error.response?.data?.message || 'Error al duplicar turnos';
       throw new Error(message);
+    }
+  },
+
+  // ✅ NUEVO: SISTEMA DE RECORDATORIOS
+  testReminders: async () => {
+    try {
+      console.log('🧪 Probando sistema de recordatorios...');
+      const response = await shiftsApi.post('/shifts/test-reminders/');
+      console.log('✅ Test de recordatorios completado:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error probando recordatorios:', error.response?.status, error.response?.data);
+      const message = error.response?.data?.error || error.response?.data?.detail || 'Error probando recordatorios';
+      throw new Error(message);
+    }
+  },
+
+  scheduleAllReminders: async () => {
+    try {
+      console.log('🔄 Reprogramando todos los recordatorios...');
+      const response = await shiftsApi.post('/shifts/schedule-reminders/');
+      console.log('✅ Recordatorios reprogramados:', response.data);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error reprogramando recordatorios:', error.response?.status, error.response?.data);
+      const message = error.response?.data?.error || error.response?.data?.detail || 'Error reprogramando recordatorios';
+      throw new Error(message);
+    }
+  },
+
+  getRemindersInfo: async () => {
+    try {
+      console.log('📊 Obteniendo información de recordatorios...');
+      // Este endpoint podría crearse en el backend para obtener estadísticas
+      const response = await shiftsApi.get('/shifts/reminders-info/');
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error obteniendo información de recordatorios:', error.response?.status, error.response?.data);
+      // Si el endpoint no existe, retornar datos por defecto
+      return {
+        total_reminders: 0,
+        pending_reminders: 0,
+        sent_reminders: 0,
+        coverage_percentage: 0
+      };
     }
   },
 
@@ -335,7 +380,7 @@ export const shiftAPI = {
 };
 
 // ==========================================
-// API para NOTIFICACIONES - NUEVA SECCIÓN
+// API para NOTIFICACIONES - VERSIÓN COMPLETA CON RECORDATORIOS
 // ==========================================
 export const notificationAPI = {
   // NOTIFICACIONES
@@ -409,6 +454,43 @@ export const notificationAPI = {
       console.error('❌ Error obteniendo conteo de no leídas:', error.response?.status, error.response?.data);
       // En caso de error, retornar 0 para no romper la UI
       return { unread_count: 0 };
+    }
+  },
+
+  // ✅ NUEVO: MÉTODOS ESPECÍFICOS PARA RECORDATORIOS
+  getReminderNotifications: async (limit = 20) => {
+    try {
+      console.log('⏰ Obteniendo notificaciones de recordatorios...');
+      const response = await notificationsApi.get('/notifications/', {
+        params: { 
+          type: 'shift_reminder',
+          limit,
+          ordering: '-created_at'
+        }
+      });
+      console.log('✅ Notificaciones de recordatorios obtenidas:', response.data?.notifications?.length || 0);
+      return response.data;
+    } catch (error) {
+      console.error('❌ Error obteniendo notificaciones de recordatorios:', error.response?.status, error.response?.data);
+      throw new Error(error.response?.data?.detail || 'No se pudo obtener las notificaciones de recordatorios');
+    }
+  },
+
+  getNotificationsByType: async (type, limit = 20) => {
+    try {
+      console.log(`🔔 Obteniendo notificaciones de tipo: ${type}`);
+      const response = await notificationsApi.get('/notifications/', {
+        params: { 
+          type,
+          limit,
+          ordering: '-created_at'
+        }
+      });
+      console.log(`✅ Notificaciones de tipo ${type} obtenidas:`, response.data?.notifications?.length || 0);
+      return response.data;
+    } catch (error) {
+      console.error(`❌ Error obteniendo notificaciones de tipo ${type}:`, error.response?.status, error.response?.data);
+      throw new Error(error.response?.data?.detail || `No se pudo obtener las notificaciones de tipo ${type}`);
     }
   },
 
@@ -521,6 +603,15 @@ export const notificationService = {
    */
   async updatePreferences(preferences) {
     return await notificationAPI.updatePreferences(preferences);
+  },
+
+  // ✅ NUEVO: MÉTODOS PARA RECORDATORIOS
+  async getReminderNotifications(limit = 20) {
+    return await notificationAPI.getReminderNotifications(limit);
+  },
+
+  async getNotificationsByType(type, limit = 20) {
+    return await notificationAPI.getNotificationsByType(type, limit);
   }
 };
 

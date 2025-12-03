@@ -1,0 +1,99 @@
+/* ReportsPage.css */
+
+.reports-time-page-container {
+  min-height: 100vh;
+  display: flex;
+  width: 100vw;
+}
+
+.reports-time-main-content {
+   flex: 1;
+  margin-left: 280px;
+  transition: margin-left 0.3s ease;
+  width: 100%;
+}
+
+.reports-time-main-content.sidebar-collapsed {
+  margin-left:80px;
+}
+
+.reports-time-content-area {
+  padding: 1rem 1.5rem 1rem 1rem;
+  min-height: calc(100vh - 80px);
+}
+
+/* Submenu de navegación */
+.reports-time-submenu {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: var(--login-shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+}
+
+.reports-time-submenu-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border: 2px solid var(--login-border-color, #e2e8f0);
+  border-radius: 10px;
+  background: white;
+  color: var(--login-text-dark, #222b45);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--login-transition, all 0.3s ease);
+}
+
+.reports-time-submenu-btn:hover {
+  border-color: var(--login-primary-color, #4f8cff);
+  background: rgba(79, 140, 255, 0.05);
+  transform: translateY(-2px);
+}
+
+.reports-time-submenu-btn.active {
+  border-color: var(--login-primary-color, #4f8cff);
+  background: linear-gradient(135deg, var(--login-primary-color, #4f8cff), var(--login-primary-dark, #3358e6));
+  color: white;
+  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.3);
+}
+
+.reports-time-submenu-icon {
+  font-size: 1.25rem;
+}
+
+.reports-time-content {
+  animation: reports-time-fade-in 0.4s ease;
+}
+
+@keyframes reports-time-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .reports-time-content-area {
+    padding: 1rem;
+  }
+
+  .reports-time-submenu {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .reports-time-submenu-btn {
+    width: 100%;
+  }
+}

@@ -52,7 +52,10 @@ export const useNotifications = (autoRefresh = true, refreshInterval = 30000) =>
       
       // Obtener TODAS las notificaciones del usuario
       const data = await notificationService.getNotifications({ limit: 50 });
-      const allNotifications = data.notifications || [];
+      // El backend puede devolver { notifications: [...] } o { results: [...] } o un arreglo plano
+      const allNotifications = (data && (data.notifications || data.results))
+        ? (data.notifications || data.results)
+        : (Array.isArray(data) ? data : []);
       
       // ✅ FILTRAR por rol
       const allowedTypes = getNotificationTypesByRole();

@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { FaTimes, FaUser, FaEnvelope, FaPhone, FaBuilding, FaIdCard, FaCalendarAlt, FaLock, FaUnlock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import '../../styles/components/management/UserModal.css';
 import Modal from '../common/Modal';
+import { departments, positionsByDepartment, jobPositions } from '../../utils/departments';
 
 const UserModal = ({ user, action, onSave, onClose }) => {
   const [formData, setFormData] = useState({
@@ -26,46 +27,8 @@ const UserModal = ({ user, action, onSave, onClose }) => {
   const modalRef = useRef(null);
   const [customPosition, setCustomPosition] = useState('');
 
-  // Listado básico de departamentos y puestos por departamento (memoizados)
-  const departments = useMemo(() => [
-    'Administración',
-    'Recursos Humanos',
-    'Operaciones',
-    'Atención al Cliente',
-    'IT',
-    'Logística',
-    'Limpieza',
-    'Seguridad',
-    'Mantenimiento',
-    'Gerencia'
-  ], []);
-
-  const positionsByDepartment = useMemo(() => ({
-    'Administración': ['Contable', 'Asistente Administrativo', 'Analista'],
-    'Recursos Humanos': ['Reclutador', 'Coordinador de RRHH', 'Generalista'],
-    'Operaciones': ['Supervisor de Turnos', 'Encargado de Área', 'Operario'],
-    'Atención al Cliente': ['Recepcionista', 'Agente de Call Center', 'Atención en Mostrador'],
-    'IT': ['Desarrollador', 'Soporte Técnico', 'Administrador de Sistemas'],
-    'Logística': ['Chofer', 'Encargado de Logística', 'Almacenista'],
-    'Limpieza': ['Operario de Limpieza', 'Coordinador de Limpieza'],
-    'Seguridad': ['Guardia', 'Supervisor de Seguridad'],
-    'Mantenimiento': ['Técnico de Mantenimiento', 'Electricista', 'Plomero'],
-    'Gerencia': ['Gerente General', 'Asistente de Gerencia']
-  }), []);
-
-  // Puestos orientados a operaciones/sala/cocina/servicio (fallback cuando no hay departamento)
-  const jobPositions = useMemo(() => [
-    'Mesero',
-    'Cocinero',
-    'Bartender',
-    'Barista',
-    'Cajero',
-    'Auxiliar de Cocina',
-    'Host/Hostess',
-    'Portero',
-    'Técnico',
-    'Operario'
-  ], []);
+  // Las listas de `departments`, `positionsByDepartment` y `jobPositions`
+  // se importan desde `src/utils/departments.js` para mantenerlas sincronizadas.
 
   useEffect(() => {
     if (user && action === 'edit') {

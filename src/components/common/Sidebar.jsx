@@ -25,8 +25,6 @@ const Sidebar = ({ isOpen, onToggle, activeItem, onItemClick, darkMode, menuItem
     { id: 'calendario', label: 'Calendario', icon: <FaCalendarAlt />, path: '/admin/calendar' },
     { id: 'disponibilidad', label: 'Disponibilidad', icon: <FaUserClock  />, path: '/admin/availability' },
     { id: 'solicitudes', label: 'Solicitudes', icon: <FaClipboardList  />, path: '/admin/shift-change-review' },
-    { id: 'presencia', label: 'Presencia', icon: <FaUserCheck />, path: '/admin/attendance' },
-    { id: 'documentos', label: 'Documentos', icon: <FaFileAlt />, path: '/admin/documents' },
     { id: 'equipo', label: 'Equipo', icon: <FaUsers />, path: '/admin/management' },
     { id: 'informes', label: 'Informes', icon: <FaChartBar />, path: '/admin/reports' },
     // Nota: 'Configuración' removido de la lista por defecto para evitar que

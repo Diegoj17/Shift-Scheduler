@@ -1,0 +1,393 @@
+
+.reports-time-department-container {
+  margin: 0 auto;
+}
+
+/* Reutiliza los estilos de filtros del EmployeeHoursReport */
+.reports-time-filters-card {
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  box-shadow: var(--login-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+  margin-bottom: 2rem;
+  border: 1px solid var(--login-border-color, #e2e8f0);
+}
+
+.reports-time-filters-header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--login-border-color, #e2e8f0);
+}
+
+.reports-time-filters-icon {
+  font-size: 1.5rem;
+  color: var(--login-primary-color, #4f8cff);
+}
+
+.reports-time-filters-header h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--login-text-dark, #222b45);
+  margin: 0;
+}
+
+.reports-time-filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.reports-time-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.reports-time-filter-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--login-text-dark, #222b45);
+}
+
+.reports-time-label-icon {
+  color: var(--login-primary-color, #4f8cff);
+}
+
+.reports-time-filter-input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 2px solid var(--login-border-color, #e2e8f0);
+  border-radius: 10px;
+  font-size: 1rem;
+  color: var(--login-text-dark, #222b45);
+  transition: var(--login-transition, all 0.3s ease);
+  background: white;
+}
+
+.reports-time-filter-input:focus {
+  outline: none;
+  border-color: var(--login-primary-color, #4f8cff);
+  box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.1);
+}
+
+.reports-time-generate-btn {
+  width: 100%;
+  padding: 1rem;
+  background: linear-gradient(135deg, var(--login-primary-color, #4f8cff), var(--login-primary-dark, #3358e6));
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--login-transition, all 0.3s ease);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.3);
+}
+
+.reports-time-generate-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(79, 140, 255, 0.4);
+}
+
+.reports-time-generate-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Resumen Card con 4 items */
+.reports-time-summary-card {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.reports-time-summary-item {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: var(--login-shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-left: 4px solid var(--login-primary-color, #4f8cff);
+  transition: var(--login-transition, all 0.3s ease);
+}
+
+.reports-time-summary-item:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--login-shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+}
+
+.reports-time-summary-item.highlight {
+  border-left-color: var(--login-primary-color, #4f8cff);
+  background: linear-gradient(135deg, rgba(79, 140, 255, 0.05), rgba(51, 88, 230, 0.05));
+}
+
+.reports-time-summary-item.accent {
+  border-left-color: var(--login-secondary-color, #ff6b6b);
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.05), rgba(229, 62, 62, 0.05));
+}
+
+.reports-time-summary-item.accent .reports-time-summary-icon {
+  color: var(--login-secondary-color, #ff6b6b);
+}
+
+.reports-time-summary-icon {
+  font-size: 2rem;
+  color: var(--login-primary-color, #4f8cff);
+}
+
+.reports-time-summary-label {
+  font-size: 0.875rem;
+  color: var(--login-text-light, #6b7280);
+  margin: 0 0 0.25rem 0;
+  font-weight: 500;
+}
+
+.reports-time-summary-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--login-text-dark, #222b45);
+  margin: 0;
+}
+
+/* Estadística especial */
+.reports-time-stats-card {
+  background: linear-gradient(135deg, rgba(79, 140, 255, 0.1), rgba(51, 88, 230, 0.05));
+  padding: 1.5rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  border: 2px solid rgba(79, 140, 255, 0.2);
+}
+
+.reports-time-stat-item {
+  text-align: center;
+}
+
+.reports-time-stat-label {
+  font-size: 0.95rem;
+  color: var(--login-text-light, #6b7280);
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+}
+
+.reports-time-stat-value {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--login-primary-color, #4f8cff);
+  margin: 0;
+}
+
+/* Exportación */
+.reports-time-export-section {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: var(--login-shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+  margin-bottom: 2rem;
+  border: 1px solid var(--login-border-color, #e2e8f0);
+}
+
+.reports-time-export-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--login-text-dark, #222b45);
+  margin: 0 0 1rem 0;
+}
+
+.reports-time-export-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.reports-time-export-btn {
+  flex: 1;
+  min-width: 120px;
+  padding: 0.875rem 1.5rem;
+  border: 2px solid;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--login-transition, all 0.3s ease);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.reports-time-export-btn.pdf {
+  background: white;
+  color: #e53e3e;
+  border-color: #e53e3e;
+}
+
+.reports-time-export-btn.pdf:hover {
+  background: #e53e3e;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(229, 62, 62, 0.3);
+}
+
+.reports-time-export-btn.excel {
+  background: white;
+  color: #38a169;
+  border-color: #38a169;
+}
+
+.reports-time-export-btn.excel:hover {
+  background: #38a169;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(56, 161, 105, 0.3);
+}
+
+.reports-time-export-btn.csv {
+  background: white;
+  color: #3182ce;
+  border-color: #3182ce;
+}
+
+.reports-time-export-btn.csv:hover {
+  background: #3182ce;
+  color: white;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(49, 130, 206, 0.3);
+}
+
+/* Tabla */
+.reports-time-table-card {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: var(--login-shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+  border: 1px solid var(--login-border-color, #e2e8f0);
+}
+
+.reports-time-table-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--login-text-dark, #222b45);
+  margin: 0 0 1rem 0;
+}
+
+.reports-time-table-wrapper {
+  overflow-x: auto;
+}
+
+.reports-time-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.reports-time-table thead th {
+  background: linear-gradient(135deg, var(--login-primary-color, #4f8cff), var(--login-primary-dark, #3358e6));
+  color: white;
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.reports-time-table thead th:first-child {
+  border-top-left-radius: 10px;
+}
+
+.reports-time-table thead th:last-child {
+  border-top-right-radius: 10px;
+}
+
+.reports-time-table tbody tr {
+  border-bottom: 1px solid var(--login-border-color, #e2e8f0);
+  transition: var(--login-transition, all 0.3s ease);
+}
+
+.reports-time-table tbody tr:hover {
+  background: rgba(79, 140, 255, 0.05);
+}
+
+.reports-time-table tbody td {
+  padding: 1rem;
+  color: var(--login-text-dark, #222b45);
+  font-size: 0.95rem;
+}
+
+.reports-time-hours-cell {
+  font-weight: 700;
+  color: var(--login-primary-color, #4f8cff);
+}
+
+.reports-time-shifts-cell {
+  font-weight: 600;
+  color: var(--login-secondary-color, #ff6b6b);
+}
+
+/* Estado vacío */
+.reports-time-empty-state {
+  background: white;
+  padding: 4rem 2rem;
+  border-radius: 16px;
+  box-shadow: var(--login-shadow-md, 0 4px 6px -1px rgba(0, 0, 0, 0.1));
+  text-align: center;
+  border: 2px dashed var(--login-border-color, #e2e8f0);
+}
+
+.reports-time-empty-icon {
+  font-size: 4rem;
+  color: var(--login-text-light, #6b7280);
+  margin-bottom: 1rem;
+}
+
+.reports-time-empty-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--login-text-dark, #222b45);
+  margin: 0 0 0.5rem 0;
+}
+
+.reports-time-empty-description {
+  font-size: 1rem;
+  color: var(--login-text-light, #6b7280);
+  margin: 0;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .reports-time-filters-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .reports-time-summary-card {
+    grid-template-columns: 1fr;
+  }
+
+  .reports-time-export-buttons {
+    flex-direction: column;
+  }
+
+  .reports-time-export-btn {
+    width: 100%;
+  }
+
+  .reports-time-table-wrapper {
+    overflow-x: scroll;
+  }
+}
