@@ -22,7 +22,8 @@ const WelcomeWidgets = () => {
     {
       icon: <HiOutlineChartBar />,
       title: "Reportes",
-      description: "Genera reportes detallados de asistencia y horarios."
+      description: "Genera reportes detallados de asistencia y horarios.",
+      path: '/admin/reports'
     },
     {
       icon: <HiOutlineUsers />,

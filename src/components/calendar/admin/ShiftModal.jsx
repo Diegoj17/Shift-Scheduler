@@ -646,21 +646,29 @@ const ShiftModal = ({
       employees.find(emp => String(emp.id) === String(formData.employeeId)) : undefined);
     const selectedType = shiftTypes.find(type => type.id === formData.shiftTypeId);
 
+    // Construir payload robusto para el backend:
+    // - El campo `employee` que espera el backend es el USER_ID (no el employee_db_id)
+    // - `formData.employeeId` contiene el USER_ID seleccionado en el formulario
+    const resolvedUserId = Number.isFinite(Number(formData.employeeId)) ? parseInt(formData.employeeId) : (selectedEmp?.id ? parseInt(selectedEmp.id) : undefined);
+    const resolvedDbEmployeeId = selectedEmp?.employee_id ? parseInt(selectedEmp.employee_id) : undefined;
+
     const shiftData = {
       date: formData.date,
       start_time: formData.startTime,
       end_time: formData.endTime,
-      employee: parseInt(selectedEmp?.employee_id),
+      // Preferir USER_ID (formData.employeeId) para el backend; si no existe usar selectedEmp.id; último recurso usar employee_db_id
+      employee: resolvedUserId || resolvedDbEmployeeId,
       shift_type: parseInt(formData.shiftTypeId),
       notes: formData.notes.trim(),
-      
+
       ...(shift?.id && { 
         id: shift.id,
         employeeId: shift.employeeId,
       }),
-      
-      employeeId: shift?.employeeId || parseInt(selectedEmp?.employee_id),
-      employeeUserId: parseInt(formData.employeeId),
+
+      // Campos auxiliares para uso en frontend
+      employeeId: shift?.employeeId || (resolvedDbEmployeeId || undefined),
+      employeeUserId: resolvedUserId,
       employeeName: selectedEmp?.name || '',
       shiftTypeId: parseInt(formData.shiftTypeId),
       shiftTypeName: selectedType?.name || '',
