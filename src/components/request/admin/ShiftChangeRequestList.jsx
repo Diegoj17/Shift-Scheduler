@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MdCheckCircle, MdCancel, MdSchedule, MdVisibility } from 'react-icons/md';
 import shiftChangeService from '../../../services/shiftChangeService';
 import ShiftChangeReviewModal from '../ShiftChangeReviewModal';
-import { formatTime } from '../../../utils/dateUtils';
+import { formatTime, formatDateLocal } from '../../../utils/dateUtils';
 import '../../../styles/components/request/admin/ShiftChangeRequestList.css';
 
 const ShiftChangeRequestList = () => {
@@ -84,15 +84,7 @@ const ShiftChangeRequestList = () => {
     );
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-CO', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric'
-    });
-  };
+  const formatDate = (dateString) => formatDateLocal(dateString);
 
   // Mapear valores de filtro a etiquetas en español
   const getFilterLabel = (f) => {
