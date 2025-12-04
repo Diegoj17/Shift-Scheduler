@@ -467,6 +467,18 @@ const ShiftCalendarPage = () => {
   printWindow.document.close();
 };
 
+  const handleRequestChange = (shift) => {
+    try {
+      // Navegar a la página de solicitud de cambio pasando el turno seleccionado
+      const originalShiftId = shift?.id || (shift && shift.extendedProps && shift.extendedProps.id) || null;
+      navigate('/employee/shift-change-request', { state: { originalShiftId } });
+      // Cerrar detalles
+      setShowDetails(false);
+    } catch (err) {
+      console.error('Error navegando a solicitud de cambio:', err);
+    }
+  };
+
 // getShiftTypeFromData removed from here (now declared at module scope)
 
   // Mostrar siempre las 24 horas (00:00 - 24:00) para que se vea completo
@@ -642,6 +654,7 @@ const ShiftCalendarPage = () => {
         isOpen={showDetails}
         onClose={() => setShowDetails(false)}
         onExport={handleExportCalendar}
+        onRequestChange={handleRequestChange}
       />
     </div>
   );

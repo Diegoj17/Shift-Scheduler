@@ -2,7 +2,7 @@ import { FaTimes, FaSun, FaClock, FaCalendarDay, FaMapMarkerAlt, FaBuilding, FaC
 import { FiSun, FiClock, FiMoon} from 'react-icons/fi';
 import '../../../styles/components/calendar/user/ShiftDetails.css';
 
-const ShiftDetails = ({ shift, isOpen, onClose, onExport }) => {
+const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange }) => {
   if (!isOpen || !shift) return null;
 
   // Función para determinar el tipo de turno basado en el nombre o color
@@ -205,7 +205,14 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport }) => {
             <FaDownload className="shift-btn-icon" aria-hidden="true" />
             Exportar
           </button>
-          <button className="shift-btn shift-btn-secondary">
+          <button
+            className="shift-btn shift-btn-secondary"
+            onClick={() => {
+              if (typeof onRequestChange === 'function') {
+                onRequestChange(shift);
+              }
+            }}
+          >
             <FaExchangeAlt className="shift-btn-icon" aria-hidden="true" />
             Solicitar Cambio
           </button>

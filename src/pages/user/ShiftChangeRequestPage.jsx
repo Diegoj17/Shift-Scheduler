@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import SidebarEmployee from '../../components/common/SidebarEmployee';
 import Header from '../../components/common/Header';
@@ -11,6 +12,8 @@ const ShiftChangeRequestPage = () => {
   const [activeItem, setActiveItem] = useState("solicitudes");
   const [activeTab, setActiveTab] = useState('solicitar'); 
   const navigate = useNavigate();
+  const location = useLocation();
+  const initialOriginalShiftId = location?.state?.originalShiftId || null;
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   const handleItemClick = (itemId) => setActiveItem(itemId);
@@ -47,7 +50,7 @@ const ShiftChangeRequestPage = () => {
 
           {/* Content */}
           <div className="shift-change-tab-content">
-            {activeTab === 'solicitar' && <ShiftChangeRequestForm />}
+            {activeTab === 'solicitar' && <ShiftChangeRequestForm initialOriginalShiftId={initialOriginalShiftId} />}
             {activeTab === 'historial' && <ShiftChangeRequestHistory />}
           </div>
         </div>
