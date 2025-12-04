@@ -5,7 +5,7 @@ import shiftChangeService from '../../../services/shiftChangeService';
 import { formatTime } from '../../../utils/dateUtils';
 import '../../../styles/components/request/user/ShiftChangeRequestForm.css';
 
-const ShiftChangeRequestForm = () => {
+const ShiftChangeRequestForm = ({ initialOriginalShiftId = null }) => {
   const [myShifts, setMyShifts] = useState([]);
   const [employees, setEmployees] = useState([]);
   const [employeeShifts, setEmployeeShifts] = useState([]);
@@ -84,6 +84,15 @@ const ShiftChangeRequestForm = () => {
       }
 
       setMyShifts(shifts);
+
+      // Si se proporcionó un turno inicial desde la navegación, pre-seleccionarlo
+      if (initialOriginalShiftId) {
+        const asString = String(initialOriginalShiftId);
+        const found = shifts.find(s => String(s.id) === asString || String(s.id) === String(parseInt(asString)));
+        if (found) {
+          setFormData(prev => ({ ...prev, originalShiftId: asString }));
+        }
+      }
     } catch (error) {
       console.error('Error cargando mis turnos:', error);
       showNotification('error', 'Error al cargar tus turnos');

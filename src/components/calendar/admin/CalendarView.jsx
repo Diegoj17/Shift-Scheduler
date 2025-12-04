@@ -189,21 +189,41 @@ const CalendarView = ({ events, onEventClick, onEventDrop, onDateClick}) => {
               // Preferir extendedProps.color, fallback a backgroundColor
               const color = ev.extendedProps?.color || ev.backgroundColor || ev.extendedProps?.backgroundColor;
               if (color) {
-                // Queremos que sólo la línea izquierda tenga el color (no todo el fondo)
-                // Dejar el fondo blanco / por defecto y aplicar el borde izquierdo.
-                el.style.backgroundColor = 'transparent';
-                el.style.borderColor = '';
-                el.style.borderLeftStyle = 'solid';
-                el.style.borderLeftColor = color;
-                el.style.borderLeftWidth = '5px';
-                el.style.boxShadow = el.style.boxShadow || '0 2px 8px rgba(0,0,0,0.06)';
+                const viewType = info.view && info.view.type ? info.view.type : '';
 
-                // Aplicar color al título (texto) para que destaque en vez de colorear todo
-                const title = el.querySelector('.calendar-event-title-text');
-                if (title) title.style.color = color;
-                // Mantener el resto del texto más tenue
-                const timeText = el.querySelector('.calendar-event-time-text');
-                if (timeText) timeText.style.color = '#475569';
+                // Si estamos en la vista mes (dayGridMonth) queremos SOLO la línea izquierda de color
+                // y el resto del fondo en blanco/por defecto para mantener el estilo compacto.
+                if (viewType === 'dayGridMonth' || viewType.startsWith('dayGrid')) {
+                  el.style.backgroundColor = 'transparent';
+                  el.style.borderLeftStyle = 'solid';
+                  el.style.borderLeftColor = color;
+                  el.style.borderLeftWidth = '5px';
+                  el.style.boxShadow = el.style.boxShadow || 'none';
+
+                  // Texto en color (para que el título destaque) y el resto más tenue
+                  const title = el.querySelector('.calendar-event-title-text');
+                  if (title) title.style.color = color;
+                  const timeText = el.querySelector('.calendar-event-time-text');
+                  if (timeText) timeText.style.color = '#475569';
+                  const roleText = el.querySelector('.calendar-event-role-text');
+                  if (roleText) roleText.style.color = '#718096';
+                } else {
+                  // Vistas semana/día: rellenar con el color real del turno
+                  el.style.backgroundColor = color;
+                  el.style.borderLeftStyle = 'solid';
+                  el.style.borderLeftColor = color;
+                  el.style.borderLeftWidth = '5px';
+                  el.style.boxShadow = el.style.boxShadow || '0 2px 8px rgba(0,0,0,0.06)';
+
+                  // Ajustar el color del texto según la luminosidad del color de fondo
+                  const textColor = isColorLight(color) ? '#0f172a' : '#ffffff';
+                  const title = el.querySelector('.calendar-event-title-text');
+                  if (title) title.style.color = textColor;
+                  const timeText = el.querySelector('.calendar-event-time-text');
+                  if (timeText) timeText.style.color = textColor;
+                  const roleText = el.querySelector('.calendar-event-role-text');
+                  if (roleText) roleText.style.color = textColor;
+                }
               }
             } catch (err) {
               // ignore
