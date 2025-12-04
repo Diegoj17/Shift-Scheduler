@@ -30,14 +30,19 @@ export const shiftChangeService = {
   getChangeRequests: async (filters = {}) => {
     try {
       console.log('🔄 [shiftChangeService] Obteniendo solicitudes con filtros:', filters);
-      
-      const params = new URLSearchParams();
-      
-      if (filters.status) {
-        params.append('status', filters.status);
-      }
 
-      const response = await shiftsApi.get(`/change-requests/?${params.toString()}`);
+      const params = new URLSearchParams();
+
+      // Agregar cualquier filtro disponible dinámicamente
+      Object.keys(filters).forEach(key => {
+        const val = filters[key];
+        if (val !== undefined && val !== null && String(val).trim() !== '') {
+          params.append(key, String(val));
+        }
+      });
+
+      const query = params.toString() ? `?${params.toString()}` : '';
+      const response = await shiftsApi.get(`/change-requests/${query}`);
       console.log('✅ [shiftChangeService] Solicitudes obtenidas:', response.data);
       return response.data.results || [];
     } catch (error) {

@@ -12,6 +12,8 @@ const ShiftChangeRequestForm = ({ initialOriginalShiftId = null }) => {
   const [loading, setLoading] = useState(false);
   const [loadingEmployeeShifts, setLoadingEmployeeShifts] = useState(false);
   const [notification, setNotification] = useState(null);
+  const [selectedShiftHasApprovedRequest, setSelectedShiftHasApprovedRequest] = useState(false);
+  const [selectedShiftWarningMessage, setSelectedShiftWarningMessage] = useState('');
 
   const [formData, setFormData] = useState({
     originalShiftId: '',
@@ -50,7 +52,39 @@ const ShiftChangeRequestForm = ({ initialOriginalShiftId = null }) => {
   useEffect(() => {
     loadMyShifts();
     loadEmployees();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Cuando cambie el turno seleccionado, verificar si ya existe una solicitud aprobada para ese turno
+  useEffect(() => {
+    const checkSelectedShift = async () => {
+      const shiftId = formData.originalShiftId;
+      if (!shiftId) {
+        setSelectedShiftHasApprovedRequest(false);
+        setSelectedShiftWarningMessage('');
+        return;
+      }
+
+      try {
+        const approved = await shiftChangeService.getChangeRequests({ status: 'approved', original_shift: shiftId });
+        if (approved && approved.length > 0) {
+          setSelectedShiftHasApprovedRequest(true);
+          setSelectedShiftWarningMessage('En este turno ya solicitaste un cambio y fue aprobado. No puedes solicitar otro intercambio para el mismo turno.');
+          // Limpiar selecciones relacionadas al intercambio ya que el turno no es elegible
+          setFormData(prev => ({ ...prev, proposedEmployeeId: '', proposedShiftId: '' }));
+        } else {
+          setSelectedShiftHasApprovedRequest(false);
+          setSelectedShiftWarningMessage('');
+        }
+      } catch (err) {
+        console.error('Error verificando solicitudes aprobadas para el turno:', err);
+        setSelectedShiftHasApprovedRequest(false);
+        setSelectedShiftWarningMessage('');
+      }
+    };
+
+    checkSelectedShift();
+  }, [formData.originalShiftId]);
 
   const loadMyShifts = async () => {
     try {
@@ -262,6 +296,16 @@ const ShiftChangeRequestForm = ({ initialOriginalShiftId = null }) => {
         </div>
       </div>
 
+      {selectedShiftHasApprovedRequest && (
+        <div className="shift-change-warning-box">
+          <MdError size={20} />
+          <div>
+            <strong>No puedes crear esta solicitud</strong>
+            <p style={{ margin: 0 }}>{selectedShiftWarningMessage}</p>
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="shift-change-form">
         {/* Turno a cambiar */}
         <div className="shift-change-form-section">
@@ -281,6 +325,7 @@ const ShiftChangeRequestForm = ({ initialOriginalShiftId = null }) => {
               onChange={handleInputChange}
               className="shift-change-select"
               required
+              disabled={loading}
             >
               <option value="">-- Selecciona un turno --</option>
               {myShifts.map(shift => (
@@ -335,6 +380,7 @@ const ShiftChangeRequestForm = ({ initialOriginalShiftId = null }) => {
               onChange={handleInputChange}
               className="shift-change-select"
               required
+              disabled={loading || selectedShiftHasApprovedRequest}
             >
               <option value="">-- Selecciona un compañero --</option>
               {employees.map(emp => (
@@ -368,6 +414,7 @@ const ShiftChangeRequestForm = ({ initialOriginalShiftId = null }) => {
                     onChange={handleInputChange}
                     className="shift-change-select"
                     required
+                    disabled={loadingEmployeeShifts || loading || selectedShiftHasApprovedRequest}
                   >
                     <option value="">-- Selecciona el turno --</option>
                     {employeeShifts.map(shift => (
@@ -434,6 +481,7 @@ const ShiftChangeRequestForm = ({ initialOriginalShiftId = null }) => {
               required
               minLength={10}
               maxLength={500}
+              disabled={loading || selectedShiftHasApprovedRequest}
             />
             <p className="shift-change-help-text">
               {formData.reason.length}/500 caracteres {formData.reason.length < 10 && `(mínimo 10)`}
@@ -462,7 +510,7 @@ const ShiftChangeRequestForm = ({ initialOriginalShiftId = null }) => {
           <button
             type="submit"
             className="shift-change-btn-primary"
-            disabled={loading || myShifts.length === 0}
+            disabled={loading || myShifts.length === 0 || selectedShiftHasApprovedRequest}
           >
             {loading ? 'Enviando...' : 'Enviar Solicitud de Intercambio'}
           </button>

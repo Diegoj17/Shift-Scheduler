@@ -261,6 +261,39 @@
   color: #856404;
 }
 
+/* Advertencia / bloqueo de solicitud aprobada */
+.shift-change-warning-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff5f5;
+  border: 1px solid #ffd6d6;
+  border-left: 6px solid #e74c3c;
+  padding: 12px 16px;
+  border-radius: 8px;
+  color: #5a2a24;
+  margin: 12px 0;
+}
+
+.shift-change-warning-box svg {
+  flex-shrink: 0;
+  color: #e74c3c;
+  width: 22px;
+  height: 22px;
+}
+
+.shift-change-warning-box strong {
+  display: block;
+  font-weight: 700;
+  color: #c0392b;
+}
+
+.shift-change-warning-box p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #5a2a24;
+}
+
 /* Mejorar estilos de campos obligatorios */
 .shift-change-label:after {
   content: " *";
