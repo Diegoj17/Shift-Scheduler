@@ -144,7 +144,10 @@ const ShiftChangeRequestForm = ({ initialOriginalShiftId = null }) => {
     }));
 
     if (name === 'proposedEmployeeId') {
-      loadEmployeeShifts(value);
+      // value is `id` (user_id). Prefer pasar `employee_id` si está disponible
+      const emp = employees.find(em => String(em.id) === String(value));
+      const employeeIdForShifts = emp?.employee_id ? emp.employee_id : value;
+      loadEmployeeShifts(employeeIdForShifts);
       setFormData(prev => ({
         ...prev,
         proposedShiftId: '' // Reset turno propuesto
@@ -183,9 +186,15 @@ const ShiftChangeRequestForm = ({ initialOriginalShiftId = null }) => {
     setLoading(true);
 
     try {
+      // Asegurar que enviamos el ID de empleado que el backend espera.
+      // `getEmployees()` mapea `employee_id` y `id` (user_id). El backend suele esperar `employee_id`.
+      const proposedEmployeeValue = selectedEmployee?.employee_id
+        ? parseInt(selectedEmployee.employee_id)
+        : (formData.proposedEmployeeId ? parseInt(formData.proposedEmployeeId) : null);
+
       const payload = {
         originalShiftId: parseInt(formData.originalShiftId),
-        proposedEmployeeId: parseInt(formData.proposedEmployeeId),
+        proposedEmployeeId: proposedEmployeeValue,
         proposedShiftId: parseInt(formData.proposedShiftId),
         reason: formData.reason.trim()
       };

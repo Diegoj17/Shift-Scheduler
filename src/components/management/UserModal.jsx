@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { FaTimes, FaUser, FaEnvelope, FaPhone, FaBuilding, FaIdCard, FaCalendarAlt, FaLock, FaUnlock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import '../../styles/components/management/UserModal.css';
 import Modal from '../common/Modal';
-import { shiftAPI } from '../../api/Axios';
 import { departments, positionsByDepartment, jobPositions } from '../../utils/departments';
 
 const UserModal = ({ user, action, onSave, onClose }) => {
@@ -189,29 +188,7 @@ const UserModal = ({ user, action, onSave, onClose }) => {
       };
 
       // Llamar al onSave (que ahora devuelve el usuario creado/actualizado)
-      const result = await onSave(payload);
-
-      // Si se creó un usuario, intentar crear el registro en shifts_employee
-      if (action === 'create') {
-        try {
-          const created = result || {};
-          const createdUserId = created.id || created.user?.id || created.user_id || created.pk || created.userId || null;
-          if (createdUserId) {
-            console.log('🔁 Creando registro shifts_employee para user_id:', createdUserId);
-            const empPayload = { user_id: createdUserId, position: puestoFinal || 'Sin especificar', is_active: true };
-            try {
-              const empRes = await shiftAPI.createEmployee(empPayload);
-              console.log('✅ shifts_employee creado:', empRes);
-            } catch (err) {
-              console.warn('⚠️ No se pudo crear shifts_employee automáticamente:', err.message || err);
-            }
-          } else {
-            console.warn('⚠️ No se pudo determinar user id del registro recién creado:', created);
-          }
-        } catch (err) {
-          console.warn('⚠️ Error creando shifts_employee tras creación de usuario:', err);
-        }
-      }
+      await onSave(payload);
 
       // Mostrar modal de resultado exitoso
       setResultModal({ isOpen: true, type: 'success', title: 'Cambio exitoso', message: action === 'create' ? 'Usuario creado correctamente.' : 'Cambios guardados correctamente.' });
