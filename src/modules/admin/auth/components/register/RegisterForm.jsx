@@ -2,6 +2,7 @@ import { useMemo, useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '/src/hooks/useAuth.js';
 import { FaUser, FaEnvelope, FaPhone } from 'react-icons/fa';
+import { shiftAPI } from '/src/api/Axios';
 import RegisterPasswordInput from './RegisterPasswordInput';
 import '/src/styles/components/auth/register/RegisterForm.css';
 import Modal from '/src/components/common/Modal';
@@ -110,6 +111,27 @@ const RegisterForm = ({ onRegisterSuccess, onRegisterError }) => {
         setModalOpen(true);
 
         onRegisterSuccess();
+        // Intentar crear el registro en shifts_employee para este usuario
+        try {
+          // Intentar obtener el ID del usuario creado en varias formas posibles
+          const created = result.data || {};
+          const createdUserId = created.id || created.user?.id || created.user_id || created.pk || created.userId || null;
+          if (createdUserId) {
+            console.log('🔁 Creando registro shifts_employee para user_id:', createdUserId);
+            // payload mínimo esperado por backend
+            const payload = { user_id: createdUserId, position: 'Sin especificar', is_active: true };
+            try {
+              const empRes = await shiftAPI.createEmployee(payload);
+              console.log('✅ shifts_employee creado:', empRes);
+            } catch (err) {
+              console.warn('⚠️ No se pudo crear shifts_employee automáticamente:', err.message || err);
+            }
+          } else {
+            console.warn('⚠️ No se pudo determinar user id del registro recién creado:', created);
+          }
+        } catch (err) {
+          console.warn('⚠️ Error al intentar crear shifts_employee tras registro:', err);
+        }
         // Redirigir al login después de registro exitoso (mantenemos el delay)
         setTimeout(() => {
           navigate('/login');

@@ -131,13 +131,18 @@ const ManagementPage = () => {
   const handleSaveUser = async (userData) => {
     try {
       if (modalAction === 'create') {
-        await userService.createUser(userData);
+        const created = await userService.createUser(userData);
+        // Devolver al caller información del usuario creado
+        await loadUsers();
+        setIsUserModalOpen(false);
+        return created;
       } else if (modalAction === 'edit') {
-        await userService.updateUser(selectedUser.id, userData);
+        const updated = await userService.updateUser(selectedUser.id, userData);
+        await loadUsers();
+        setIsUserModalOpen(false);
+        return updated;
       }
-
-      await loadUsers();
-      setIsUserModalOpen(false);
+      
     } catch (err) {
       console.error('Error saving user:', err);
       throw err;

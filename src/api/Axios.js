@@ -322,6 +322,25 @@ export const shiftAPI = {
     }
   },
 
+  // EMPLEADOS (shifts_employee)
+  createEmployee: async (employeeData) => {
+    try {
+      // Intentar endpoint con /new/ por consistencia con otros recursos
+      try {
+        const response = await shiftsApi.post('/employees/new/', employeeData);
+        return response.data;
+      } catch (err) {
+        // Fallback a ruta sin /new/
+        const response2 = await shiftsApi.post('/employees/', employeeData);
+        return response2.data;
+      }
+    } catch (error) {
+      console.error('❌ Error creando registro de empleado (shifts_employee):', error.response?.data || error.message);
+      const message = error.response?.data?.detail || error.response?.data?.message || 'Error al crear empleado interno';
+      throw new Error(message);
+    }
+  },
+
   getShiftType: async (shiftTypeId) => {
     try {
       const response = await shiftsApi.get(`/shift-types/${shiftTypeId}/`);
