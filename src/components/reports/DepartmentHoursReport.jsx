@@ -25,6 +25,8 @@ const DepartmentHoursReport = () => {
   const [employees, setEmployees] = useState([]);
   const [isLoadingEmployees, setIsLoadingEmployees] = useState(true);
   const [employeeError, setEmployeeError] = useState(null);
+  const [filterWarning, setFilterWarning] = useState('');
+  
 
   useEffect(() => {
     const fetchEmployees = async () => {
@@ -61,8 +63,9 @@ const DepartmentHoursReport = () => {
     try {
       // Obtener todos los turnos y filtrar por departamento + rango
       const shiftsRaw = await shiftService.getShifts();
-      const start = new Date(filters.startDate);
-      const end = new Date(filters.endDate);
+      // Normalizar rangos a formato YYYY-MM-DD para evitar discrepancias por timezone
+      const startISO = String(filters.startDate);
+      const endISO = String(filters.endDate);
 
       // Encontrar el departamento seleccionado (objeto con id/name)
       const selectedDept = departmentsOptions.find(d => d.id === filters.department);
@@ -98,10 +101,18 @@ const DepartmentHoursReport = () => {
       const selectedNameNorm = norm(selectedDept.name);
 
       const filtered = (shiftsRaw || []).filter(s => {
-        const dateStr = s.date || s.shift_date || (s.start && s.start.split ? s.start.split('T')[0] : null) || s.start_date;
+        // Obtener fecha del turno y normalizar a YYYY-MM-DD (evitar timezone al convertir a Date)
+        let dateStr = s.date || s.shift_date || s.start_date || null;
+        if (!dateStr && s.start && typeof s.start === 'string' && s.start.includes('T')) {
+          dateStr = s.start.split('T')[0];
+        }
         if (!dateStr) return false;
-        const d = new Date(dateStr);
-        if (d < start || d > end) return false;
+
+        // Si la cadena incluye hora/ISO, recortar a la parte de fecha
+        const shiftDateOnly = dateStr.indexOf('T') !== -1 ? dateStr.split('T')[0] : String(dateStr).slice(0,10);
+
+        // Comparar como strings YYYY-MM-DD para evitar efectos de zona horaria
+        if (shiftDateOnly < startISO || shiftDateOnly > endISO) return false;
 
         // Determinar departamento del turno (varias claves posibles)
         let deptRaw = s.department || s.employee_department || s.dept || s.department_name || s.departmentId || s.department_id || null;
@@ -130,6 +141,21 @@ const DepartmentHoursReport = () => {
         // Comparar normalizado: igualdad exacta (más confiable que includes con acentos)
         return deptNorm === selectedNameNorm;
       });
+
+      console.log('[DepartmentHoursReport] Turnos obtenidos:', (shiftsRaw || []).length, ' - Filtrados por departamento/rango:', filtered.length);
+      if ((shiftsRaw || []).length > 0 && filtered.length === 0) {
+        console.log('[DepartmentHoursReport] Ejemplo primer turno (raw):', shiftsRaw[0]);
+        try {
+          const first = shiftsRaw[0];
+          const firstDate = (first.date || first.start || first.start_date || '').toString().slice(0,10);
+          const firstDept = first.department || first.employee_department || first.dept || first.department_name || '';
+          setFilterWarning(`Se obtuvieron ${ (shiftsRaw || []).length } turnos pero ninguno coincide con el rango seleccionado. Ejemplo primer turno: fecha ${firstDate || 'N/A'} ${ firstDept ? '- depto: ' + firstDept : '' }`);
+        } catch {
+          setFilterWarning('Se obtuvieron turnos pero ninguno coincide con el rango seleccionado.');
+        }
+      } else {
+        setFilterWarning('');
+      }
 
       // Agrupar por empleado
       const grouped = {};
@@ -466,6 +492,11 @@ const DepartmentHoursReport = () => {
           <FaSearch />
           {isLoading ? 'Generando...' : 'Generar Reporte'}
         </button>
+        {filterWarning && (
+          <div className="reports-time-filter-warning" style={{ marginTop: '12px', color: '#b91c1c' }}>
+            {filterWarning}
+          </div>
+        )}
       </div>
 
       {/* Resultados */}
