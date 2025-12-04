@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { FaTimes, FaCheck, FaExclamationTriangle, FaUser, FaClock, FaSave, FaLock,FaBriefcase, FaTrash, FaInfoCircle } from 'react-icons/fa';
 import { detectShiftConflicts, calculateShiftDuration } from '../../../utils/shiftValidation';
-import { formatDateForInput, formatTimeForInput, combineDateAndTime, timeStringToMinutes, formatTime } from '../../../utils/dateUtils';
+import { formatDateForInput, formatTimeForInput, combineDateAndTime, timeStringToMinutes, minutesToTimeString, formatTime } from '../../../utils/dateUtils';
 import '../../../styles/components/calendar/admin/ShiftModal.css';
 
 const TIMEZONE_OFFSET = -5 * 60; // UTC-05:00 (Bogotá, Lima, Quito)
@@ -69,9 +69,28 @@ const ShiftModal = ({
   const formatDisplayTime = (timeValue) => (timeValue ? formatTime(timeValue) : '--');
   const getTypeTimeWindow = (type) => {
     if (!type) return '-- - --';
-    const start = type.startTime || type.start_time || type.start || '';
-    const end = type.endTime || type.end_time || type.end || '';
-    return `${formatDisplayTime(start)} - ${formatDisplayTime(end)}`;
+    const startRaw = type.startTime || type.start_time || type.start || '';
+    const endRaw = type.endTime || type.end_time || type.end || '';
+
+    const fmt = (val) => {
+      if (val === null || val === undefined || val === '') return '--';
+      // Si el valor es numérico corto, tratarlo como minutos y convertir a HH:MM
+      if (typeof val === 'number' && !Number.isNaN(val)) {
+        const hhmm = minutesToTimeString(val);
+        return formatTime(hhmm);
+      }
+      // Si viene como string con solo minutos (ej. '480') intentar parsear a número
+      if (/^\d+$/.test(String(val))) {
+        const n = Number(val);
+        if (!Number.isNaN(n)) {
+          const hhmm = minutesToTimeString(n);
+          return formatTime(hhmm);
+        }
+      }
+      return formatTime(val);
+    };
+
+    return `${fmt(startRaw)} - ${fmt(endRaw)}`;
   };
 
   const formatDateDisplay = (dateInput) => {
@@ -362,6 +381,16 @@ const ShiftModal = ({
       }
       // indicar que sí existen registros de disponibilidad para este empleado
       map._hasAvail = true;
+
+      // Si estamos en modo edición y el formulario ya tiene un tipo asignado (el original),
+      // forzamos que ese tipo esté disponible para permitir su selección/actualización.
+      // Usamos formData.shiftTypeId como fuente directa del tipo asignado al cargar el turno.
+      if (shift && shift.id && formData.shiftTypeId) {
+        const origKey = String(formData.shiftTypeId);
+        map[origKey] = true;
+        reasonsMap[origKey] = reasonsMap[origKey] || 'Asignado al turno (edición)';
+      }
+
       console.log('✅ [ShiftModal] Mapa de disponibilidad calculado:', map);
       setTypeAvailabilityMap({ ...map, _reasons: reasonsMap, _hasAvail: map._hasAvail });
     } catch (err) {
@@ -375,7 +404,7 @@ const ShiftModal = ({
       fallback._reasons = {};
       setTypeAvailabilityMap(fallback);
     }
-  }, [formData.employeeId, formData.date, shiftTypes, unavailabilities, employees]);
+  }, [formData.employeeId, formData.date, shiftTypes, unavailabilities, employees, formData.shiftTypeId, shift]);
 
   // Detección de tipos por tiempo (modificada para no detectar tipos que ya pasaron)
   const detectShiftTypeByTime = useCallback((startTimeStr, endTimeStr) => {
@@ -495,8 +524,14 @@ const ShiftModal = ({
     
     if (!formData.shiftTypeId) {
       newErrors.shiftTypeId = 'Selecciona un tipo de turno';
-    } else if (pastShiftTypes.includes(formData.shiftTypeId)) {
-      newErrors.shiftTypeId = 'No puedes seleccionar un tipo de turno que ya pasó';
+    } else {
+      const selTypeIdStr = String(formData.shiftTypeId);
+      const isPast = pastShiftTypes.includes(selTypeIdStr);
+      const isOriginal = shift && shift.id && originalShiftTypeId && selTypeIdStr === String(originalShiftTypeId);
+      // Permitir el tipo original cuando estamos editando incluso si ya pasó
+      if (isPast && !isOriginal) {
+        newErrors.shiftTypeId = 'No puedes seleccionar un tipo de turno que ya pasó';
+      }
     }
     
     if (!formData.date) {
@@ -633,9 +668,39 @@ const ShiftModal = ({
     };
 
     try {
-      const res = onSave ? await onSave(shiftData) : null;
-      onClose();
-      return res;
+        const res = onSave ? await onSave(shiftData) : null;
+        const isEditing = !!shift?.id;
+
+        if (isEditing) {
+          // En edición: cerrar modal tras actualizar
+          onClose();
+          return res;
+        }
+
+        // En creación: resetear formulario a estado inicial para poder crear otro turno
+        setFormData({
+          employeeId: '',
+          shiftTypeId: '',
+          date: formatDateForInput(new Date()),
+          startTime: '',
+          endTime: '',
+          notes: ''
+        });
+        setErrors({});
+        setConflicts([]);
+        setDuration(0);
+        setShowDeleteConfirm(false);
+        setAutoDetectedType(false);
+        setTypeAvailabilityMap({});
+        setAvailabilityMessage('');
+        setSelectedEmployee(null);
+        setGeneralAlert({ type: 'success', message: 'Turno creado correctamente' });
+        setPastShiftTypes([]);
+
+        // dejar el modal abierto para crear otro, pero limpiar la alerta después
+        setTimeout(() => setGeneralAlert(null), 3000);
+
+        return res;
     } catch (err) {
       console.error('❌ [ShiftModal] Error en onSave:', err);
 
@@ -689,7 +754,11 @@ const ShiftModal = ({
   // ✅ MEJORA: Manejar click en tipo no disponible
   const handleTypeClick = (type) => {
     const key = String(type.id);
-    const isAvailable = typeAvailabilityMap[key] !== false;
+    // Determinar disponibilidad real (si estamos editando, solo el tipo asignado debe ser disponible)
+    let isAvailable = typeAvailabilityMap[key] !== false;
+    if (shift && shift.id) {
+      isAvailable = String(type.id) === String(formData.shiftTypeId);
+    }
     // reason read from _reasons when needed below
 
     // Mensajes más amigables según la causa
@@ -714,11 +783,26 @@ const ShiftModal = ({
 
   const selectedShiftType = shiftTypes.find(type => type.id === formData.shiftTypeId);
   const hasAvailabilityData = unavailabilities && unavailabilities.length > 0;
+  // Determinar el tipo original asignado al turno: preferir id, sino intentar emparejar por nombre
+  let originalShiftTypeId = null;
+  if (shift) {
+    const idCandidate = shift.extendedProps?.shiftTypeId ?? shift.shiftTypeId ?? null;
+    if (idCandidate) {
+      originalShiftTypeId = String(idCandidate);
+    } else {
+      const nameCandidate = (shift.extendedProps?.shiftTypeName ?? shift.shiftTypeName ?? shift.extendedProps?.shiftType ?? shift.shiftType ?? '').toString().trim();
+      if (nameCandidate && Array.isArray(shiftTypes)) {
+        const match = shiftTypes.find(t => (t.name || '').toString().trim() === nameCandidate);
+        if (match) originalShiftTypeId = String(match.id);
+      }
+    }
+  }
 
-  // Filtrar tipos de turno para mostrar solo los que no han pasado
-  const availableShiftTypes = shiftTypes.filter(type => 
-    !pastShiftTypes.includes(String(type.id))
-  );
+  // Filtrar tipos de turno: en modo creación ocultamos los que ya pasaron,
+  // pero en modo edición queremos mostrar todos los tipos (marcados como no disponibles cuando aplique)
+  const availableShiftTypes = Array.isArray(shiftTypes)
+    ? (shift && shift.id ? shiftTypes : shiftTypes.filter(type => !pastShiftTypes.includes(String(type.id))))
+    : [];
 
   return (
     <div className="calendar-modal-overlay" onClick={onClose}>
@@ -797,7 +881,7 @@ const ShiftModal = ({
                   Basado en disponibilidad del empleado
                 </span>
               )}
-              {pastShiftTypes.length > 0 && (
+              {!shift?.id && pastShiftTypes.length > 0 && (
                 <span style={{ marginLeft: '10px', fontSize: '12px', color: '#dc2626', fontWeight: 'normal' }}>
                   ({pastShiftTypes.length} tipo(s) oculto(s) porque ya pasaron)
                 </span>
@@ -806,8 +890,13 @@ const ShiftModal = ({
             <div className="calendar-shift-type-selector">
               {availableShiftTypes.map(type => {
                 const key = String(type.id);
-                const isAvailable = typeAvailabilityMap[key] !== false;
+                // Por defecto usar el mapa de disponibilidad calculado
+                let isAvailable = typeAvailabilityMap[key] !== false;
                 const reason = typeAvailabilityMap._reasons?.[key] || '';
+                // Si estamos editando un turno, sólo permitir disponible el tipo asignado al turno
+                if (shift && shift.id) {
+                  isAvailable = String(type.id) === String(formData.shiftTypeId);
+                }
                 
                 return (
                   <div
@@ -835,7 +924,7 @@ const ShiftModal = ({
                   </div>
                 );
               })}
-              {availableShiftTypes.length === 0 && (
+              {!shift?.id && availableShiftTypes.length === 0 && (
                 <div className="calendar-no-types-available">
                   <FaExclamationTriangle />
                   <p>No hay tipos de turno disponibles para esta fecha/hora</p>
@@ -1008,7 +1097,7 @@ const ShiftModal = ({
               <button 
                 type="submit" 
                 className="calendar-btn-primary" 
-                disabled={isLocked || pastShiftTypes.includes(formData.shiftTypeId)}
+                disabled={isLocked || (pastShiftTypes.includes(String(formData.shiftTypeId)) && !(shift && shift.id && String(formData.shiftTypeId) === String(originalShiftTypeId)))}
                 >
                 <FaSave /> {shift?.id ? 'Actualizar' : 'Crear'} Turno
               </button>
