@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { MdClose, MdCheckCircle, MdCancel, MdPerson, MdCalendarToday, MdNotes } from 'react-icons/md';
 import shiftChangeService from '../../services/shiftChangeService';
-import { formatTime } from '../../utils/dateUtils';
+import { formatTime, formatDateLocal } from '../../utils/dateUtils';
 import '../../styles/components/request/ShiftChangeReviewModal.css';
 
 const ShiftChangeReviewModal = ({ request, onClose, onSuccess }) => {
@@ -42,16 +42,7 @@ const ShiftChangeReviewModal = ({ request, onClose, onSuccess }) => {
     setTimeout(() => setNotification(null), 5000);
   };
 
-  const formatDate = (dateString) => {
-    if (!dateString) return '-';
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-CO', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
+  const formatDate = (dateString) => formatDateLocal(dateString, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   // Usamos formatTime importado desde utils (muestra AM/PM)
 

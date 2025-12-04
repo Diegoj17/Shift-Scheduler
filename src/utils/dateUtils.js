@@ -163,6 +163,64 @@ export const formatTime = (dateStr) => {
 };
 
 /**
+ * Parsea una fecha/fecha-hora y la devuelve como objeto Date en hora local,
+ * evitando que cadenas tipo 'YYYY-MM-DD' se interpreten como UTC y generen
+ * un desplazamiento de un día en zonas horarias negativas.
+ * Acepta formats comunes: Date, timestamp, 'YYYY-MM-DD', 'YYYY-MM-DD HH:MM:SS',
+ * 'YYYY-MM-DDTHH:MM:SS' y también cadenas con zona ('Z' o +HH:MM) —
+ * en ese último caso se usa el parseo nativo que respeta la zona.
+ */
+export const parseDateAsLocal = (input) => {
+  if (!input && input !== 0) return null;
+  if (input instanceof Date) return new Date(input.getTime());
+  if (typeof input === 'number') return new Date(input);
+
+  const s = String(input).trim();
+  // Fecha solo YYYY-MM-DD -> crear Date local
+  const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(s);
+  if (dateOnly) {
+    const [y, m, d] = s.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  // Fecha + hora sin zona: 'YYYY-MM-DD HH:MM:SS' or 'YYYY-MM-DDTHH:MM:SS'
+  const localDateTime = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(:\d{2})?$/.test(s);
+  if (localDateTime) {
+    // separar fecha y tiempo
+    const [datePart, timePart] = s.split(/[ T]/);
+    const [y, m, d] = datePart.split('-').map(Number);
+    const timeParts = (timePart || '').split(':').map(Number);
+    const hh = timeParts[0] || 0;
+    const mm = timeParts[1] || 0;
+    const ss = timeParts[2] || 0;
+    return new Date(y, m - 1, d, hh, mm, ss);
+  }
+
+  // Si contiene indicador de zona ('Z' o +HH) dejar al parser nativo
+  if (/[zZ]|[+-]\d{2}:?\d{2}$/.test(s)) {
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  // Fallback: intentar parseo nativo
+  const d = new Date(s);
+  return isNaN(d.getTime()) ? null : d;
+};
+
+/**
+ * Formatea una fecha para mostrar en local: usa `parseDateAsLocal` internamente
+ * y luego `toLocaleDateString` con opciones por defecto (día mes año corto).
+ */
+export const formatDateLocal = (dateInput, options = {}) => {
+  const date = parseDateAsLocal(dateInput);
+  if (!date) return '-';
+  const opts = Object.keys(options).length === 0 ? {
+    year: 'numeric', month: 'short', day: 'numeric'
+  } : options;
+  return date.toLocaleDateString('es-CO', opts);
+};
+
+/**
  * Formatea una fecha para inputs tipo date (YYYY-MM-DD)
  */
 export const formatDateForInput = (date) => {
@@ -271,5 +329,6 @@ export default {
   detectDuplicationConflicts,
   calculateShiftDuration,
   formatTime,
+  formatDateLocal,
   validateShiftData
 };
