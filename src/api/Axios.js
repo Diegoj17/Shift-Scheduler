@@ -111,19 +111,21 @@ export const userAPI = {
   },
   
   createUser: async (userData) => {
+  try {
+    // Intento directo al endpoint que el backend expone para creación
+    const response = await authApi.post('/users/create/', userData);
+    return response.data;
+  } catch  {
+    // Si por alguna razón falla, intentar el path alternativo /users/
     try {
-      const response = await authApi.post('/users/', userData);
-      return response.data;
-    } catch {
-      try {
-        const response2 = await authApi.post('/users/create/', userData);
-        return response2.data;
-      } catch (err) {
-        const message = err.response?.data?.detail || err.response?.data?.message || 'Error al crear usuario';
-        throw new Error(message);
-      }
+      const response2 = await authApi.post('/users/', userData);
+      return response2.data;
+    } catch (err2) {
+      const message = err2.response?.data?.detail || err2.response?.data?.message || 'Error al crear usuario';
+      throw new Error(message);
     }
-  },
+  }
+},
   
   updateUser: async (userId, userData) => {
     try {
@@ -318,25 +320,6 @@ export const shiftAPI = {
       return response.data;
     } catch (error) {
       const message = error.response?.data?.detail || error.response?.data?.message || 'Error al crear tipo de turno';
-      throw new Error(message);
-    }
-  },
-
-  // EMPLEADOS (shifts_employee)
-  createEmployee: async (employeeData) => {
-    try {
-      // Intentar endpoint con /new/ por consistencia con otros recursos
-      try {
-        const response = await shiftsApi.post('/employees/new/', employeeData);
-        return response.data;
-      } catch (err) {
-        // Fallback a ruta sin /new/
-        const response2 = await shiftsApi.post('/employees/', employeeData);
-        return response2.data;
-      }
-    } catch (error) {
-      console.error('❌ Error creando registro de empleado (shifts_employee):', error.response?.data || error.message);
-      const message = error.response?.data?.detail || error.response?.data?.message || 'Error al crear empleado interno';
       throw new Error(message);
     }
   },
