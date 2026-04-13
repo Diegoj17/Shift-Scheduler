@@ -120,7 +120,6 @@ const ChangePassword = () => {
     setIsChanging(false);
     
     if (result.success) {
-      console.log('Contraseña cambiada exitosamente');
       navigate('/profile');
     } else {
       console.error('Error al cambiar contraseña:', result.error);

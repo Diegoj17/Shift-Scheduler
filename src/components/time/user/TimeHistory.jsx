@@ -12,7 +12,6 @@ const TimeHistory = forwardRef((props, ref) => {
 
   useImperativeHandle(ref, () => ({
     refreshHistory: () => {
-      console.log('🔄 [TimeHistory] Refresh solicitado');
       // loadHistory definida más abajo
       loadHistory();
     }
@@ -22,7 +21,6 @@ const TimeHistory = forwardRef((props, ref) => {
   const loadHistory = useCallback(async () => {
     try {
       setLoading(true);
-      console.log('🔄 [TimeHistory] Cargando historial con filtro:', filter);
 
       let filters = {};
 
@@ -57,7 +55,6 @@ const TimeHistory = forwardRef((props, ref) => {
       }
 
       const entries = await timeEntryService.getMyTimeEntries(filters);
-      console.log('✅ [TimeHistory] Registros obtenidos:', entries);
 
       // Agrupar por fecha
       const groupedByDate = {};
@@ -111,7 +108,6 @@ const TimeHistory = forwardRef((props, ref) => {
       // Ordenar por fecha descendente
       history.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-      console.log('📊 Historial formateado:', history);
       setHistoryData(history);
 
     } catch (error) {
@@ -125,7 +121,6 @@ const TimeHistory = forwardRef((props, ref) => {
   // Exponer método imperativo y disparar carga al montar / cambiar filtro
   useImperativeHandle(ref, () => ({
     refreshHistory: () => {
-      console.log('🔄 [TimeHistory] Refresh solicitado');
       loadHistory();
     }
   }), [loadHistory]);

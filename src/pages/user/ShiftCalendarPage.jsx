@@ -66,20 +66,10 @@ const ShiftCalendarPage = () => {
   const loadMyShifts = useCallback(async () => {
     setLoading(true);
     try {
-      console.log('🔄 Cargando turnos iniciales...');
       const myShifts = await shiftService.getMyShiftsForCalendar();
       
       // Debug detallado de los datos crudos
-      console.log('📦 Datos crudos recibidos:', myShifts);
       myShifts.forEach((shift, index) => {
-        console.log(`📊 Turno ${index + 1}:`, {
-          id: shift.id,
-          title: shift.title,
-          start: shift.start,
-          end: shift.end,
-          isDate: shift.start instanceof Date,
-          startHour: shift.start instanceof Date ? shift.start.getHours() : 'N/A'
-        });
       });
       
       // Procesar los turnos
@@ -98,7 +88,6 @@ const ShiftCalendarPage = () => {
         };
       });
       
-      console.log('✅ Turnos procesados:', processedShifts);
       setShifts(processedShifts);
       setCalendarKey(prev => prev + 1);
     } catch (error) {
@@ -223,7 +212,6 @@ const ShiftCalendarPage = () => {
   };
 
   const handleDateRangeChange = async (start, end) => {
-  console.log('📅 Filtrando turnos del', start.toLocaleDateString(), 'al', end.toLocaleDateString());
   
   setDateRange({ start, end });
   setLoading(true);
@@ -249,7 +237,6 @@ const ShiftCalendarPage = () => {
       };
     });
     
-    console.log('✅ Turnos filtrados procesados:', processedShifts.length);
     setShifts(processedShifts);
     setCalendarKey(prev => prev + 1);
     
@@ -265,12 +252,6 @@ const ShiftCalendarPage = () => {
   const event = clickInfo.event;
   const eventData = event.extendedProps;
   
-  console.log('🖱️ Evento clickeado:', {
-    id: event.id,
-    title: event.title,
-    backgroundColor: event.backgroundColor,
-    extendedProps: eventData
-  });
   
   setSelectedEvent({
     ...eventData,
@@ -290,7 +271,6 @@ const ShiftCalendarPage = () => {
 };
 
   const handleResetFilters = async () => {
-    console.log('🔄 Restableciendo filtros...');
     const start = new Date();
     const end = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
     setDateRange({ start, end });
@@ -605,11 +585,6 @@ const ShiftCalendarPage = () => {
                       dayHeaderFormat={{ weekday: 'short' }}
                       eventDisplay="block"
                       eventDidMount={(info) => {
-                        console.log('✅ Evento montado:', {
-                          title: info.event.title,
-                          start: info.event.start,
-                          view: info.view.type
-                        });
                       }}
                       eventContent={(eventInfo) => (
                         <div className="shift-event-content">

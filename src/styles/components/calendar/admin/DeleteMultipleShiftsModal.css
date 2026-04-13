@@ -1,0 +1,272 @@
+.calendar-delete-modal-overlay {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10010;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.5);
+  padding: 20px;
+}
+
+.calendar-delete-modal {
+  width: 100%;
+  max-width: 540px;
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.28);
+  overflow: hidden;
+}
+
+.calendar-delete-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 22px;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: #ffffff;
+}
+
+.calendar-delete-modal-header-title {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.7rem;
+  font-weight: 800;
+}
+
+.calendar-delete-modal-header-icon {
+  font-size: 1.4rem;
+}
+
+.calendar-delete-modal-close {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: none;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.calendar-delete-modal-close:hover {
+  background: none;
+  transform: scale(1.08);
+  opacity: 0.95;
+}
+
+.calendar-delete-modal-close:active {
+  transform: scale(0.98);
+}
+
+.calendar-delete-modal-close-x {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+  transition: text-shadow 0.22s ease;
+}
+
+
+.calendar-delete-modal-content {
+  padding: 30px 32px;
+  text-align: center;
+}
+
+.calendar-delete-warning {
+  text-align: center;
+  padding: 4px 0 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.calendar-delete-modal-icon-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+
+.calendar-delete-modal-icon {
+  width: 64px;
+  height: 64px;
+  padding: 14px;
+  border-radius: 999px;
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+.calendar-delete-modal-title {
+  margin: 0 0 10px;
+  font-size: 2rem;
+  line-height: 1.2;
+  color: #1f2937;
+  font-weight: 700;
+}
+
+.calendar-delete-modal-message {
+  margin: 0;
+  font-size: 1.5rem;
+  line-height: 1.45;
+  color: #111827;
+  font-weight: 800;
+}
+
+.calendar-delete-modal-details {
+  margin-top: 20px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 14px 16px;
+  text-align: left;
+}
+
+.calendar-delete-modal-details p {
+  margin: 8px 0;
+  color: #1f2937;
+  font-size: 1rem;
+}
+
+.calendar-delete-modal-employee-list {
+  margin-top: 14px;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  max-height: 170px;
+  overflow-y: auto;
+}
+
+.calendar-delete-modal-employee-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #eef2f7;
+  text-align: left;
+}
+
+.calendar-delete-modal-employee-item:last-child {
+  border-bottom: none;
+}
+
+.calendar-delete-modal-employee-name {
+  font-weight: 700;
+  color: #111827;
+}
+
+.calendar-delete-modal-employee-count {
+  color: #475569;
+  font-weight: 600;
+}
+
+.calendar-delete-modal-preview {
+  margin-top: 12px;
+  text-align: left;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.calendar-delete-modal-preview p {
+  margin: 6px 0;
+  color: #334155;
+}
+
+.calendar-delete-modal-more {
+  color: #2563eb;
+  font-weight: 700;
+}
+
+.calendar-delete-modal-warning {
+  margin: 18px 0 0;
+  color: #c2410c;
+  font-style: italic;
+  font-weight: 700;
+}
+
+.calendar-delete-modal-actions {
+  margin-top: 0;
+  padding: 20px 32px 26px;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  gap: 14px;
+  justify-content: flex-end;
+}
+
+.calendar-delete-modal-btn {
+  min-width: 128px;
+  padding: 12px 20px;
+  border-radius: 12px;
+  border: none;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calendar-delete-modal-btn-cancel {
+  background: #f8fafc;
+  color: #111827;
+  border: 1px solid #e5e7eb;
+}
+
+.calendar-delete-modal-btn-cancel:hover:not(:disabled) {
+  background: #f1f5f9;
+}
+
+.calendar-delete-modal-btn-confirm {
+  color: #ffffff;
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  box-shadow: 0 8px 18px rgba(220, 38, 38, 0.3);
+}
+
+.calendar-delete-modal-btn-confirm:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 24px rgba(220, 38, 38, 0.35);
+}
+
+.calendar-delete-modal-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+@media (max-width: 520px) {
+  .calendar-delete-modal-header-title {
+    font-size: 1.5rem;
+  }
+
+  .calendar-delete-modal-content {
+    padding: 24px 20px;
+  }
+
+  .calendar-delete-modal-title {
+    font-size: 1.6rem;
+  }
+
+  .calendar-delete-modal-message {
+    font-size: 1.08rem;
+  }
+
+  .calendar-delete-modal-actions {
+    padding: 16px 20px 22px;
+  }
+
+  .calendar-delete-modal-actions {
+    flex-direction: column;
+  }
+
+  .calendar-delete-modal-btn {
+    width: 100%;
+  }
+}

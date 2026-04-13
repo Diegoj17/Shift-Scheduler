@@ -39,7 +39,6 @@ export const useNotificationToasts = () => {
   const showToast = useCallback((notification) => {
     // ✅ Verificar si debe mostrarse según el rol
     if (!shouldShowToast(notification)) {
-      console.log(`🔕 Toast filtrado por rol ${currentUser?.role}:`, notification.type);
       return null;
     }
 

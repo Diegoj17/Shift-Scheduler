@@ -142,9 +142,7 @@ const DepartmentHoursReport = () => {
         return deptNorm === selectedNameNorm;
       });
 
-      console.log('[DepartmentHoursReport] Turnos obtenidos:', (shiftsRaw || []).length, ' - Filtrados por departamento/rango:', filtered.length);
       if ((shiftsRaw || []).length > 0 && filtered.length === 0) {
-        console.log('[DepartmentHoursReport] Ejemplo primer turno (raw):', shiftsRaw[0]);
         try {
           const first = shiftsRaw[0];
           const firstDate = (first.date || first.start || first.start_date || '').toString().slice(0,10);

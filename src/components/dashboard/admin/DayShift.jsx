@@ -1,11 +1,47 @@
 import React, { useEffect, useState } from 'react';
 import { FaClock, FaMapMarkerAlt, FaPhone, FaEdit, FaTrash } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import '../../../styles/components/dashboard/admin/DayShift.css';
 import { shiftService } from '../../../services/shiftService';
 
 const DayShift = ({ filtroArea, searchTerm = '' }) => {
   const [turnos, setTurnos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [estadoFiltro, setEstadoFiltro] = useState('todas');
+  const navigate = useNavigate();
+
+  const getEstadoDesdeBackend = (raw) => {
+    const v = String(raw || '').toLowerCase();
+    if (['active', 'activo', 'activa', 'en_curso', 'in_progress'].includes(v)) {
+      return { status: 'activo', label: 'Activo' };
+    }
+    if (['pending', 'pendiente', 'scheduled', 'programado'].includes(v)) {
+      return { status: 'pendiente', label: 'Pendiente' };
+    }
+    if (['absent', 'ausente', 'missed', 'cancelled', 'canceled'].includes(v)) {
+      return { status: 'ausente', label: 'Ausente' };
+    }
+    return null;
+  };
+
+  const deriveEstado = (start, end) => {
+    try {
+      const now = new Date();
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+      if (now < startDate) return { status: 'pendiente', label: 'Pendiente' };
+      if (now > endDate) return { status: 'ausente', label: 'Ausente' };
+      return { status: 'activo', label: 'Activo' };
+    } catch {
+      return { status: 'activo', label: 'Activo' };
+    }
+  };
+
+  const formatTimeRange = (start, end) => {
+    if (!start || !end) return '';
+    const fmt = { hour: '2-digit', minute: '2-digit' };
+    return `${new Date(start).toLocaleTimeString([], fmt)} - ${new Date(end).toLocaleTimeString([], fmt)}`;
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -23,14 +59,25 @@ const DayShift = ({ filtroArea, searchTerm = '' }) => {
           } catch {
             return false;
           }
-        }).map((s, idx) => ({
-          id: s.id || idx,
-          empleado: s.extendedProps?.employeeName || s.title || 'Sin nombre',
-          horario: s.start && s.end ? `${new Date(s.start).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})} - ${new Date(s.end).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}` : '',
-          estado: 'activo',
-          area: s.extendedProps?.role || '',
-          telefono: ''
-        }));
+        }).map((s, idx) => {
+          const backendEstado = getEstadoDesdeBackend(s.extendedProps?.status || s.status || s.extendedProps?.attendance_status);
+          const estado = backendEstado || deriveEstado(s.start, s.end);
+          return {
+            id: s.id || idx,
+            empleado: s.extendedProps?.employeeName || s.title || 'Sin nombre',
+            horario: formatTimeRange(s.start, s.end),
+            estado: estado.status,
+            estadoLabel: estado.label,
+            area: s.extendedProps?.role || '',
+            telefono: s.extendedProps?.phone || '',
+            start: s.start,
+            end: s.end,
+            shiftTypeId: s.extendedProps?.shiftTypeId || '',
+            shiftTypeName: s.extendedProps?.shiftTypeName || '',
+            notes: s.extendedProps?.notes || '',
+            backgroundColor: s.backgroundColor || s.extendedProps?.color || '#667eea'
+          };
+        });
 
         setTurnos(todays);
       } catch (err) {
@@ -55,8 +102,48 @@ const DayShift = ({ filtroArea, searchTerm = '' }) => {
     const matchArea = !filtroArea || filtroArea === 'todas' || turno.area === filtroArea;
     const empleado = (turno.empleado || '').toLowerCase();
     const matchSearch = empleado.includes(search);
-    return matchArea && matchSearch;
+    const matchEstado = estadoFiltro === 'todas' || turno.estado === estadoFiltro;
+    return matchArea && matchSearch && matchEstado;
   });
+
+  const handleEditTurno = (turno) => {
+    navigate('/admin/calendar', {
+      state: {
+        openShiftModal: true,
+        prefillShift: {
+          id: turno.id,
+          employeeName: turno.empleado,
+          start: turno.start,
+          end: turno.end,
+          shiftTypeId: turno.shiftTypeId,
+          shiftTypeName: turno.shiftTypeName,
+          role: turno.area,
+          notes: turno.notes,
+          backgroundColor: turno.backgroundColor,
+        },
+      },
+    });
+  };
+
+  const requestDeleteTurno = (turno) => {
+    navigate('/admin/calendar', {
+      state: {
+        openShiftModal: true,
+        openShiftDeleteConfirm: true,
+        prefillShift: {
+          id: turno.id,
+          employeeName: turno.empleado,
+          start: turno.start,
+          end: turno.end,
+          shiftTypeId: turno.shiftTypeId,
+          shiftTypeName: turno.shiftTypeName,
+          role: turno.area,
+          notes: turno.notes,
+          backgroundColor: turno.backgroundColor,
+        },
+      },
+    });
+  };
 
   return (
     <div className="turnos-del-dia">
@@ -66,9 +153,10 @@ const DayShift = ({ filtroArea, searchTerm = '' }) => {
           Turnos del Día ({loading ? '...' : turnosFiltrados.length})
         </h2>
         <div className="status-legend">
-          <span className="legend-item activo">Activo</span>
-          <span className="legend-item pendiente">Pendiente</span>
-          <span className="legend-item ausente">Ausente</span>
+          <button className={`legend-item activo ${estadoFiltro === 'activo' ? 'active' : ''}`} onClick={() => setEstadoFiltro('activo')}>Activo</button>
+          <button className={`legend-item pendiente ${estadoFiltro === 'pendiente' ? 'active' : ''}`} onClick={() => setEstadoFiltro('pendiente')}>Pendiente</button>
+          <button className={`legend-item ausente ${estadoFiltro === 'ausente' ? 'active' : ''}`} onClick={() => setEstadoFiltro('ausente')}>Ausente</button>
+          <button className={`legend-item ${estadoFiltro === 'todas' ? 'active neutral' : 'neutral'}`} onClick={() => setEstadoFiltro('todas')}>Todas</button>
         </div>
       </div>
 
@@ -88,9 +176,11 @@ const DayShift = ({ filtroArea, searchTerm = '' }) => {
                     <span className="meta-item">
                       <FaMapMarkerAlt /> {turno.area}
                     </span>
-                    <span className="meta-item">
-                      <FaPhone /> {turno.telefono}
-                    </span>
+                    {turno.telefono ? (
+                      <span className="meta-item">
+                        <FaPhone /> {turno.telefono}
+                      </span>
+                    ) : null}
                   </div>
                 </div>
               </div>
@@ -100,12 +190,15 @@ const DayShift = ({ filtroArea, searchTerm = '' }) => {
                   <p className="turno-tipo">{turno.area || '—'}</p>
                   <p className="turno-horario">{turno.horario}</p>
                 </div>
-                <div className={`status-indicator ${turno.estado}`}></div>
+                <div className="status-wrap">
+                  <div className={`status-indicator ${turno.estado}`}></div>
+                  <span className={`status-pill ${turno.estado}`}>{turno.estadoLabel}</span>
+                </div>
                 <div className="turno-actions">
-                  <button className="action-btn edit-btn">
+                  <button className="action-btn edit-btn" onClick={() => handleEditTurno(turno)} title="Editar turno" aria-label="Editar turno">
                     <FaEdit />
                   </button>
-                  <button className="action-btn delete-btn">
+                  <button className="action-btn delete-btn" onClick={() => requestDeleteTurno(turno)} title="Eliminar turno" aria-label="Eliminar turno">
                     <FaTrash />
                   </button>
                 </div>

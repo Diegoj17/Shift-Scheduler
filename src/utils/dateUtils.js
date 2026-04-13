@@ -137,8 +137,25 @@ export const detectDuplicationConflicts = (shiftsToClone, targetDate, existingSh
 export const formatTime = (dateStr) => {
   if (!dateStr && dateStr !== 0) return '-';
   try {
-    let date;
     const s = String(dateStr);
+
+    const formatAmPm = (hours24, minutes) => {
+      const hour = Number(hours24);
+      const mins = String(minutes).padStart(2, '0');
+      if (Number.isNaN(hour)) return '-';
+      const hour12 = ((hour + 11) % 12) + 1;
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      return `${hour12}:${mins} ${ampm}`;
+    };
+
+    // Si encontramos un segmento HH:MM (con o sin segundos), priorizarlo
+    // para evitar perder AM/PM en cadenas no parseables por Date.
+    const timeMatch = s.match(/(?:^|T|\s)(\d{1,2}):(\d{2})(?::(\d{2}))?/);
+    if (timeMatch) {
+      return formatAmPm(timeMatch[1], timeMatch[2]);
+    }
+
+    let date;
     if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(s)) {
       // hora local sin fecha -> usar fecha actual para formatear
       const now = new Date();
@@ -151,12 +168,7 @@ export const formatTime = (dateStr) => {
       date = new Date(dateStr);
     }
     if (isNaN(date.getTime())) return s.slice(0,5);
-    // Forzar formato 12h con AM/PM (ej. 1:00 PM)
-    const hours = date.getHours();
-    const minutes = String(date.getMinutes()).padStart(2, '0');
-    const hour12 = ((hours + 11) % 12) + 1;
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    return `${hour12}:${minutes} ${ampm}`;
+    return formatAmPm(date.getHours(), date.getMinutes());
   } catch {
     return String(dateStr).slice(0,5);
   }

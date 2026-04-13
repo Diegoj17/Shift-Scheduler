@@ -71,9 +71,11 @@
 }
 
 .calendar-btn-nav svg {
-  width: 18px;
-  height: 18px;
+  width: 24px;
+  height: 24px;
+  color: currentColor;
   fill: currentColor;
+  display: block;
 }
 
 .calendar-btn-today {
@@ -109,12 +111,21 @@
    ============================================ */
 
 .calendar-current-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
   margin: 0 0 0 12px;
   font-size: 1.5rem;
   font-weight: 700;
   color: white;
   text-transform: capitalize;
   letter-spacing: -0.5px;
+}
+
+.calendar-current-title-icon {
+  width: 20px;
+  height: 20px;
+  opacity: 0.95;
 }
 
 /* ============================================
@@ -274,6 +285,29 @@
   opacity: 1;
 }
 
+.fc-event.calendar-event-selected {
+  outline: 2px solid #1d4ed8;
+  box-shadow: 0 0 0 2px #bfdbfe, 0 8px 22px rgba(29, 78, 216, 0.3);
+  transform: translateY(-2px);
+}
+
+.fc-event.calendar-event-selected::after {
+  content: '\2713';
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1d4ed8;
+  color: #ffffff;
+  font-size: 0.72rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
 .calendar-custom-event-content {
   padding: 2px 0;
   position: relative;
@@ -306,6 +340,15 @@
   opacity: 0.9;
   margin-top: 2px;
   font-style: italic;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.calendar-event-meta-icon {
+  width: 12px;
+  height: 12px;
+  flex-shrink: 0;
 }
 
 /* Vista de cuadrícula de tiempo */

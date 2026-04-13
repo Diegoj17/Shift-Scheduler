@@ -1,8 +1,22 @@
-import { FaTimes, FaSun, FaClock, FaCalendarDay, FaMapMarkerAlt, FaBuilding, FaCheckCircle, FaDownload, FaExchangeAlt } from 'react-icons/fa';
+import { useEffect } from 'react';
+import { FaSun, FaClock, FaCalendarDay, FaMapMarkerAlt, FaBuilding, FaCheckCircle, FaDownload, FaExchangeAlt } from 'react-icons/fa';
 import { FiSun, FiClock, FiMoon} from 'react-icons/fi';
 import '../../../styles/components/calendar/user/ShiftDetails.css';
 
 const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscKey = (event) => {
+      if (event.key === 'Escape') {
+        onClose?.();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscKey);
+    return () => document.removeEventListener('keydown', handleEscKey);
+  }, [isOpen, onClose]);
+
   if (!isOpen || !shift) return null;
 
   // Función para determinar el tipo de turno basado en el nombre o color
@@ -10,7 +24,6 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange }) => 
     // Si tenemos el color de la BD, usarlo para determinar el tipo
     const color = shift.extendedProps?.color || shift.backgroundColor;
     
-    console.log('🎨 ShiftDetails - Color desde BD:', color);
     
     // Mapear colores de la BD a tipos
     if (color === '#4caf50') return 'morning';     // Verde - Mañana
@@ -20,7 +33,6 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange }) => 
     // ✅ LÓGICA MEJORADA: determinar por hora de inicio
     if (shift.start) {
       const startHour = new Date(shift.start).getHours();
-      console.log('⏰ ShiftDetails - Hora de inicio:', startHour);
       
       if (startHour >= 6 && startHour < 12) return 'morning';
       if (startHour >= 12 && startHour < 18) return 'afternoon';
@@ -81,15 +93,6 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange }) => 
   const duration = Math.round((new Date(shift.end) - new Date(shift.start)) / (1000 * 60 * 60));
 
   // Debug para verificar
-  console.log('📊 ShiftDetails - Información del turno:', {
-    horaInicio: new Date(shift.start).getHours(),
-    tipo: correctShiftType,
-    colorBD: shift.extendedProps?.color,
-    backgroundColor: shift.backgroundColor,
-    colorUsado: actualColor,
-    nombreTipo: shift.extendedProps?.shiftTypeName,
-    extendedProps: shift.extendedProps // Ver todos los extendedProps
-  });
 
   return (
     <div className="shift-modal-overlay" onClick={onClose}>
@@ -102,7 +105,7 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange }) => 
         }}
       >
         <button className="shift-close-btn" onClick={onClose} aria-label="Cerrar">
-          <FaTimes aria-hidden="true" />
+          <span aria-hidden="true">X</span>
         </button>
         
         <div className="shift-details-header">

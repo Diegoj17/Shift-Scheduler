@@ -26,7 +26,6 @@ export const shiftService = {
   // ========================================
   createShift: async (shiftData) => {
     try {
-      console.log('🔄 [shiftService] createShift - Data recibida:', shiftData);
       
       // ✅ Payload - employee es USER_ID
       const payload = {
@@ -55,15 +54,10 @@ export const shiftService = {
         throw new Error('end_time is required');
       }
 
-      console.log('📤 [shiftService] createShift - Payload final:', payload);
       
       const response = await shiftAPI.createShift(payload);
-      console.log('✅ [shiftService] createShift - Response:', response);
       
       // ✅ NUEVO: Mostrar información de recordatorios programados
-      console.log('⏰ [shiftService] Recordatorios programados automáticamente para este turno');
-      console.log('   - 1 hora antes del turno');
-      console.log('   - 30 minutos antes del turno');
       
       return response;
       
@@ -97,20 +91,11 @@ export const shiftService = {
   // ========================================
   updateShift: async (shiftId, shiftData) => {
     try {
-      console.log('🔄 [shiftService] updateShift - Data recibida:', shiftData);
       
       const employeeValue = shiftData.employeeId || 
                            shiftData.employee_id || 
                            shiftData.employee;
 
-      console.log('🔍 [shiftService] updateShift - IDs disponibles:', {
-        employeeId: shiftData.employeeId,
-        employee_id: shiftData.employee_id,
-        employee: shiftData.employee,
-        employee_user_id: shiftData.employee_user_id,
-        employeeUserId: shiftData.employeeUserId,
-        employeeValueSelected: employeeValue
-      });
 
       const payload = {
         date: shiftData.date,
@@ -121,13 +106,10 @@ export const shiftService = {
         notes: shiftData.notes || ''
       };
 
-      console.log('📤 [shiftService] updateShift - Payload final:', payload);
       
       const response = await shiftAPI.updateShift(shiftId, payload);
-      console.log('✅ [shiftService] updateShift - Response:', response);
       
       // ✅ NUEVO: Informar sobre reprogramación de recordatorios
-      console.log('🔄 [shiftService] Recordatorios reprogramados automáticamente');
       
       return response;
       
@@ -171,7 +153,6 @@ export const shiftService = {
   // ========================================
   getShiftsForCalendar: async () => {
     try {
-      console.log('🔄 [shiftService] Obteniendo turnos para calendario...');
       const response = await shiftAPI.getShifts();
 
       if (!response) {
@@ -180,10 +161,8 @@ export const shiftService = {
       }
 
       const shiftsData = Array.isArray(response) ? response : (response.results || response.data || []);
-      console.log(`✅ [shiftService] Se obtuvieron ${shiftsData.length} turnos`);
 
       if (shiftsData.length > 0) {
-        console.log('📊 [shiftService] Primer turno RAW del backend:', shiftsData[0]);
       }
 
       const shifts = shiftsData.map(shift => {
@@ -200,12 +179,6 @@ export const shiftService = {
         const employee_db_id = shift.employee_id;           // Employee ID en BD
         const employee_user_id = shift.employee_user_id || shift.employeeUserId;  // ✅ USER_ID
         
-        console.log(`📋 [shiftService] Turno ${shift.id} - IDs:`, {
-          employee_db_id,    // ✅ Este es el que usa el backend
-          employee_user_id,  // Este es para el frontend
-          employee_name: shift.employee_name,
-          shift_data: shift
-        });
 
         const employeeName = shift.employee || shift.employee_name || '';
         const role = shift.role || '';
@@ -218,11 +191,6 @@ export const shiftService = {
         const lockReason = shift.lock_reason || shift.lockReason || '';
         const lockedAt = shift.locked_at || shift.lockedAt || null;
 
-        console.log(`🔒 [shiftService] Turno ${shift.id} - Bloqueo:`, {
-          isLocked,
-          lockReason,
-          lockedAt
-        });
 
         // ✅ ESTRUCTURA CORRECTA PARA FULLCALENDAR
         return {
@@ -273,10 +241,7 @@ export const shiftService = {
         };
       }).filter(Boolean);
 
-      console.log('✅ [shiftService] Turnos formateados:', shifts.length);
       if (shifts.length > 0) {
-        console.log('📊 [shiftService] Primer turno FORMATEADO:', shifts[0]);
-        console.log('📊 [shiftService] extendedProps del primer turno:', shifts[0].extendedProps);
       }
 
       return shifts;
@@ -291,12 +256,10 @@ export const shiftService = {
   // ========================================
   deleteShift: async (shiftId) => {
     try {
-      console.log(`🗑️ [shiftService] Eliminando turno ${shiftId}...`);
       
       const response = await shiftAPI.deleteShift(shiftId);
       
       // ✅ NUEVO: Informar sobre cancelación de recordatorios
-      console.log(`⏰ [shiftService] Recordatorios cancelados automáticamente para el turno ${shiftId}`);
       
       return response;
     } catch (error) {
@@ -314,10 +277,8 @@ export const shiftService = {
    */
   testReminders: async () => {
     try {
-      console.log('🧪 [shiftService] Probando sistema de recordatorios...');
       
       const response = await shiftAPI.testReminders();
-      console.log('✅ [shiftService] Test de recordatorios completado:', response);
       
       return response;
     } catch (error) {
@@ -331,10 +292,8 @@ export const shiftService = {
    */
   scheduleAllReminders: async () => {
     try {
-      console.log('🔄 [shiftService] Reprogramando todos los recordatorios...');
       
       const response = await shiftAPI.scheduleAllReminders();
-      console.log('✅ [shiftService] Recordatorios reprogramados:', response);
       
       return response;
     } catch (error) {
@@ -348,7 +307,6 @@ export const shiftService = {
    */
   getRemindersInfo: async () => {
     try {
-      console.log('📊 [shiftService] Obteniendo información de recordatorios...');
       
       // Esta sería una nueva endpoint que podrías crear en el backend
       const response = await shiftAPI.getRemindersInfo();
@@ -390,7 +348,6 @@ export const shiftService = {
 
   duplicateShifts: async (duplicateData) => {
     try {
-      console.log('🔄 [shiftService] duplicateShifts - Datos recibidos:', duplicateData);
       
       // ✅ CRÍTICO: Validar que TODOS los campos existan ANTES de construir payload
       const requiredFields = ['sourceStartDate', 'sourceEndDate', 'targetStartDate', 'targetEndDate'];
@@ -410,7 +367,6 @@ export const shiftService = {
         target_end_date: duplicateData.targetEndDate
       };
 
-      console.log('📤 [shiftService] Payload construido:', payload);
       
       // ✅ Validar payload antes de enviar
       if (!payload.start_date || !payload.end_date || !payload.target_start_date || !payload.target_end_date) {
@@ -424,13 +380,10 @@ export const shiftService = {
         throw new Error(error);
       }
 
-      console.log('✅ [shiftService] Enviando request al backend...');
       const response = await shiftAPI.duplicateShifts(payload);
       
-      console.log('✅ [shiftService] duplicateShifts - Response:', response);
       
       // ✅ NUEVO: Informar sobre recordatorios programados para turnos duplicados
-      console.log('⏰ [shiftService] Recordatorios programados automáticamente para los turnos duplicados');
       
       return response;
       
@@ -447,7 +400,6 @@ export const shiftService = {
   
   getShiftTypes: async () => {
     try {
-      console.log('🔄 [shiftService] Obteniendo tipos de turno...');
       const response = await shiftAPI.getShiftTypes();
       
       if (!response) {
@@ -456,7 +408,6 @@ export const shiftService = {
       }
       
       const shiftTypes = Array.isArray(response) ? response : response.results || response.data || [];
-      console.log(`✅ [shiftService] Se obtuvieron ${shiftTypes.length} tipos de turno`);
       return shiftTypes;
     } catch (error) {
       console.error('❌ [shiftService] Error fetching shift types:', error);
@@ -466,7 +417,6 @@ export const shiftService = {
 
   createShiftType: async (shiftTypeData) => {
     try {
-      console.log('🔄 [shiftService] Creando tipo de turno...', shiftTypeData);
       
       if (!shiftTypeData.name?.trim()) {
         throw new Error('El nombre es requerido');
@@ -485,7 +435,6 @@ export const shiftService = {
         color: shiftTypeData.color || '#3788d8'
       };
 
-      console.log('📤 [shiftService] Payload para crear tipo de turno:', payload);
       
       const timeRegex = /^([0-1]?[0-9]|2[0-3]):[0-5][0-9](:[0-5][0-9])?$/;
       if (!timeRegex.test(payload.start_time) || !timeRegex.test(payload.end_time)) {
@@ -503,7 +452,6 @@ export const shiftService = {
       }
 
       const response = await shiftAPI.createShiftType(payload);
-      console.log('✅ [shiftService] Tipo de turno creado exitosamente:', response);
       
       return response;
     } catch (error) {
@@ -534,7 +482,6 @@ export const shiftService = {
         color: shiftTypeData.color || shiftTypeData.colorHex 
       };
 
-      console.log('[shiftService] updateShiftType payload:', payload);
 
       const response = await shiftAPI.updateShiftType(shiftTypeId, payload);
       return response;
@@ -560,13 +507,11 @@ export const shiftService = {
   
   getEmployees: async () => {
     try {
-      console.log('🔄 [shiftService] Obteniendo usuarios para turnos...');
       
       const resp = await authApi.get('/users/for-shifts/');
       
       if (resp && resp.data) {
         const users = resp.data;
-        console.log(`✅ [shiftService] Se obtuvieron ${users.length} usuarios`);
         
         // ✅ Mapear a formato esperado - id es USER_ID pero incluir employee_id
         const employees = users.map(user => ({
@@ -578,7 +523,6 @@ export const shiftService = {
           has_employee: user.has_employee
         }));
         
-        console.log('✅ [ShiftModal] Usuarios mapeados (primeros 3):', employees.slice(0, 3));
         return employees;
       }
       
@@ -595,7 +539,6 @@ export const shiftService = {
   
   getMyShifts: async (params = {}) => {
     try {
-      console.log('🔄 [shiftService] Obteniendo mis turnos...');
       
       const token = localStorage.getItem('token');
       if (!token) {
@@ -611,7 +554,6 @@ export const shiftService = {
       }
       
       const shiftsData = Array.isArray(response) ? response : (response.results || response.data || []);
-      console.log(`✅ [shiftService] Se obtuvieron ${shiftsData.length} turnos propios`);
       
       return shiftsData;
     } catch (error) {
@@ -622,15 +564,12 @@ export const shiftService = {
   
   getMyShiftsForCalendar: async (params = {}) => {
     try {
-      console.log('🔄 [shiftService] Obteniendo mis turnos para calendario con params:', params);
       const shiftsData = await shiftService.getMyShifts(params);
       
       if (!Array.isArray(shiftsData) || shiftsData.length === 0) {
-        console.log('📭 [shiftService] No hay turnos para mostrar');
         return [];
       }
       
-      console.log('📊 Turnos raw recibidos:', shiftsData.length);
       
       const shifts = shiftsData.map(shift => {
         const startISO = shift.start || (shift.date && shift.start_time ? `${shift.date}T${shift.start_time}` : null);
@@ -676,7 +615,6 @@ export const shiftService = {
         };
       }).filter(Boolean);
       
-      console.log('✅ [shiftService] Turnos formateados para calendario:', shifts.length);
       return shifts;
     } catch (error) {
       console.error('❌ [shiftService] Error fetching my shifts for calendar:', error);
@@ -686,7 +624,6 @@ export const shiftService = {
 
   getEmployeeShifts: async (employeeId) => {
     try {
-      console.log('🔄 [shiftService] Obteniendo turnos del empleado:', employeeId);
       
       if (!employeeId) {
         console.warn('⚠️ [shiftService] getEmployeeShifts llamado sin employeeId');
@@ -696,23 +633,11 @@ export const shiftService = {
       // ✅ CORRECCIÓN: Usar ruta absoluta con /api/shifts/
       const response = await authApi.get(`https://shift-scheduler-main-production.up.railway.app/api/shifts/employees/${employeeId}/shifts/`);
       
-      console.log('📦 [shiftService] Respuesta completa:', response);
       
       const shiftsData = response.data?.results || response.data || [];
-      console.log(`✅ [shiftService] Turnos del empleado obtenidos:`, shiftsData.length);
       
       // Debug: ver estructura completa
       if (shiftsData.length > 0) {
-        console.log('🔍 Estructura del primer turno del empleado:', {
-          id: shiftsData[0].id,
-          date: shiftsData[0].date,
-          start_time: shiftsData[0].start_time,
-          end_time: shiftsData[0].end_time,
-          shift_type_name: shiftsData[0].shift_type_name,
-          shift_type_id: shiftsData[0].shift_type_id,
-          shift_type: shiftsData[0].shift_type,
-          all_fields: Object.keys(shiftsData[0])
-        });
       }
 
       // Si algunos turnos vienen con shift_type_id (o shift_type) pero sin nombre,

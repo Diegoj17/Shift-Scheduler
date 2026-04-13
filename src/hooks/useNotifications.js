@@ -66,12 +66,6 @@ export const useNotifications = (autoRefresh = true, refreshInterval = 30000) =>
           allowedTypes.includes(notification.type)
         );
         
-        console.log(`🔔 [DEBUG] Notificaciones para rol ${currentUser?.role}:`, {
-          total: allNotifications.length,
-          filtradas: filteredNotifications.length,
-          tiposPermitidos: allowedTypes,
-          tiposEncontrados: [...new Set(allNotifications.map(n => n.type))]
-        });
       }
       
       setNotifications(filteredNotifications);

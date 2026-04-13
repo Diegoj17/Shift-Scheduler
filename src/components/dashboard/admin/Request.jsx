@@ -27,7 +27,6 @@ const SolicitudesPendientes = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        console.log('🔄 [SolicitudesPendientes] Iniciando carga de datos...');
         
         // Obtener solicitudes primero
         const dataSolicitudes = await shiftChangeService.getChangeRequests();
@@ -41,11 +40,6 @@ const SolicitudesPendientes = () => {
           fetchEmpleados()
         ]);
 
-        console.log('📊 [SolicitudesPendientes] Datos cargados:', {
-          solicitudes: dataSolicitudes.length,
-          turnos: Object.keys(dataTurnos).length,
-          empleados: Object.keys(dataEmpleados).length
-        });
 
         setTurnos(dataTurnos);
         setEmpleados(dataEmpleados);
@@ -69,7 +63,6 @@ const SolicitudesPendientes = () => {
   // Función para obtener información de turnos individuales
   const fetchTurnosIndividuales = async (solicitudesData) => {
     try {
-      console.log('🔄 [SolicitudesPendientes] Obteniendo información de turnos individuales...');
       
       const turnosIds = new Set();
       
@@ -79,14 +72,12 @@ const SolicitudesPendientes = () => {
         if (solicitud.proposed_shift_id) turnosIds.add(solicitud.proposed_shift_id);
       });
 
-      console.log('📋 [SolicitudesPendientes] IDs de turnos a buscar:', Array.from(turnosIds));
 
       const turnosMap = {};
       
       // Buscar información de cada turno individual usando getShifts
       try {
         const todosLosTurnos = await shiftService.getShifts();
-        console.log('📦 [SolicitudesPendientes] Todos los turnos obtenidos:', todosLosTurnos);
 
         // Procesar la respuesta según la estructura
         const turnosData = Array.isArray(todosLosTurnos) ? todosLosTurnos : 
@@ -100,7 +91,6 @@ const SolicitudesPendientes = () => {
           }
         });
 
-        console.log('🗺️ [SolicitudesPendientes] Mapa de todos los turnos:', mapaTodosTurnos);
 
         // Buscar los turnos específicos que necesitamos
         for (let turnoId of turnosIds) {
@@ -114,7 +104,6 @@ const SolicitudesPendientes = () => {
               employee_name: turno.employee_name || turno.employeeName,
               shift_type_id: turno.shift_type_id || turno.shiftTypeId
             };
-            console.log(`✅ [SolicitudesPendientes] Turno ${turnoId} encontrado:`, turnosMap[turnoId]);
           } else {
             console.warn(`⚠️ [SolicitudesPendientes] Turno ${turnoId} no encontrado en la lista`);
             turnosMap[turnoId] = {
@@ -141,7 +130,6 @@ const SolicitudesPendientes = () => {
         }
       }
 
-      console.log('✅ [SolicitudesPendientes] Turnos individuales cargados:', turnosMap);
       return turnosMap;
     } catch (error) {
       console.error('❌ [SolicitudesPendientes] Error cargando turnos individuales:', error);
@@ -152,7 +140,6 @@ const SolicitudesPendientes = () => {
   // Función para obtener información real de empleados
   const fetchEmpleados = async () => {
     try {
-      console.log('🔄 [SolicitudesPendientes] Obteniendo empleados...');
       const empleadosData = await shiftService.getEmployees();
       
       const empleadosMap = {};
@@ -166,7 +153,6 @@ const SolicitudesPendientes = () => {
         };
       });
 
-      console.log('✅ [SolicitudesPendientes] Empleados cargados:', Object.keys(empleadosMap));
       return empleadosMap;
     } catch (error) {
       console.error('❌ [SolicitudesPendientes] Error cargando empleados:', error);
@@ -241,14 +227,12 @@ const SolicitudesPendientes = () => {
 
   // Obtener información básica usando los nombres reales
   const getInformacionBasica = (solicitud) => {
-    console.log('📋 [getInformacionBasica] Procesando solicitud completa:', solicitud);
 
     // Buscar nombre del empleado solicitante
     let nombreEmpleado = 'Empleado no especificado';
     const empleadoSolicitanteId = solicitud.requesting_employee_id || 
                                  solicitud.requesting_employee;
     
-    console.log('👤 [getInformacionBasica] ID empleado solicitante:', empleadoSolicitanteId);
     
     if (empleadoSolicitanteId) {
       const nombreEncontrado = getNombreEmpleado(empleadoSolicitanteId);
@@ -293,7 +277,6 @@ const SolicitudesPendientes = () => {
       } : null
     };
 
-    console.log('🔄 [getInformacionBasica] Información de turnos procesada:', infoTurnos);
 
     // Información del compañero con nombre real
     const compañero = solicitud.proposed_employee_id ? {
@@ -369,7 +352,6 @@ const SolicitudesPendientes = () => {
             const info = getInformacionBasica(solicitud);
             const fechaFormateada = formatearFecha(info.fecha);
 
-            console.log(`📄 [Render] Solicitud ${index} procesada:`, info);
 
             return (
               <div

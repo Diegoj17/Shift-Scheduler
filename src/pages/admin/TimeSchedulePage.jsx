@@ -88,7 +88,6 @@ const TimeSchedulePage = () => {
 
   const loadAvailabilities = async () => {
     try {
-      console.log('🔄 Cargando disponibilidades con filtros:', filters);
       
       // Construir parámetros de consulta
       const params = {};
@@ -99,7 +98,6 @@ const TimeSchedulePage = () => {
 
       const data = await availabilityService.getAvailabilities(params);
       
-      console.log('✅ Disponibilidades cargadas:', data.length);
       setAvailabilities(data);
     } catch (error) {
       console.error('❌ Error al cargar disponibilidades:', error);
@@ -144,15 +142,12 @@ const TimeSchedulePage = () => {
   // En TimeSchedulePage.jsx - función handleAssignFromDetails
 
 const handleAssignFromDetails = async (availability) => {
-  console.log('🔍 [TimeSchedulePage] Disponibilidad recibida:', availability);
   
   setShowDetails(false);
 
   // ✅ CRÍTICO: Usar employee_id del backend (NO employee ni user_id)
   const employeeId = availability.employee_id;
   
-  console.log('✅ [TimeSchedulePage] Employee ID a usar:', employeeId);
-  console.log('📋 [TimeSchedulePage] Lista de empleados disponibles:', employees);
 
   const shift = {
     start: `${availability.date}T${availability.start_time}`,
@@ -165,7 +160,6 @@ const handleAssignFromDetails = async (availability) => {
     date: availability.date
   };
 
-  console.log('📤 [TimeSchedulePage] Shift data preparado:', shift);
 
   setShiftToEdit(shift);
 
@@ -180,13 +174,11 @@ const handleAssignFromDetails = async (availability) => {
   }
 
   setTimeout(() => {
-    console.log('🚀 [TimeSchedulePage] Abriendo ShiftModal con:', shift);
     setShowShiftModal(true);
   }, 160);
 };
 
   const handleSaveShift = (shiftData) => {
-    console.log('✅ Turno guardado:', shiftData);
     setShowShiftModal(false);
     // Aquí llamarías a shiftService.createShift(shiftData)
   };

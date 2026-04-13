@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { MdClose, MdCheckCircle, MdCancel, MdPerson, MdCalendarToday, MdNotes } from 'react-icons/md';
+import React, { useEffect, useState } from 'react';
+import { MdCheckCircle, MdCancel, MdPerson, MdCalendarToday, MdNotes } from 'react-icons/md';
 import shiftChangeService from '../../services/shiftChangeService';
 import { formatTime, formatDateLocal } from '../../utils/dateUtils';
 import '../../styles/components/request/ShiftChangeReviewModal.css';
@@ -42,6 +42,17 @@ const ShiftChangeReviewModal = ({ request, onClose, onSuccess }) => {
     setTimeout(() => setNotification(null), 5000);
   };
 
+  useEffect(() => {
+    const handleEscKey = (event) => {
+      if (event.key === 'Escape' && !loading) {
+        onClose?.();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscKey);
+    return () => document.removeEventListener('keydown', handleEscKey);
+  }, [loading, onClose]);
+
   const formatDate = (dateString) => formatDateLocal(dateString, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
   // Usamos formatTime importado desde utils (muestra AM/PM)
@@ -55,7 +66,7 @@ const ShiftChangeReviewModal = ({ request, onClose, onSuccess }) => {
             Revisar Solicitud #{request.id}
           </h2>
           <button className="shift-review-modal-close" onClick={onClose}>
-            <MdClose size={24} />
+            <span aria-hidden="true">X</span>
           </button>
         </div>
 

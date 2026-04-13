@@ -144,11 +144,9 @@ const ResetConfirmForm = () => {
       new_password_confirm: String(formData.new_password_confirm).trim()
     };
 
-    console.log('📤 Enviando payload:', { ...payload, new_password: '***', new_password_confirm: '***' });
 
     const result = await confirmPasswordReset(payload);
     
-    console.log('✅ Resultado:', result);
 
     if (result && result.success) {
       setModalType('success');

@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { FaClock, FaPlus, FaEdit, FaTrash, FaTimes, FaCheck } from 'react-icons/fa';
+import { FaClock, FaPlus, FaTimes, FaCheck, FaTag, FaPalette, FaExclamationTriangle } from 'react-icons/fa';
+import { MdEdit, MdDelete } from 'react-icons/md';
 import { validateShiftTypeRange, validateShiftTypeName } from '../../../utils/shiftValidation';
 import { formatTime } from '../../../utils/dateUtils';
 import '../../../styles/components/calendar/admin/ShiftTypeManager.css';
@@ -92,7 +93,6 @@ const ShiftTypeManager = ({ shiftTypes, onSave, onUpdate, onDelete }) => {
     color: formData.color
   };
 
-  console.log('📤 Enviando datos al servicio:', shiftTypeData);
 
   if (editingType) {
     onUpdate(editingType.id, shiftTypeData); // Pasar ID y datos
@@ -153,17 +153,20 @@ const ShiftTypeManager = ({ shiftTypes, onSave, onUpdate, onDelete }) => {
               </div>
               <div className="calendar-type-actions">
                 <button className="calendar-btn-icon calendar-btn-edit" onClick={() => handleOpenModal(type)} title="Editar">
-                  <FaEdit aria-hidden="true" />
+                  <MdEdit aria-hidden="true" />
                 </button>
                 <button className="calendar-btn-icon calendar-btn-delete" onClick={() => setShowDeleteConfirm(type.id)} title="Eliminar">
-                  <FaTrash aria-hidden="true" />
+                  <MdDelete aria-hidden="true" />
                 </button>
               </div>
 
               {showDeleteConfirm === type.id && (
                 <div className="calendar-delete-confirm-overlay">
                   <div className="calendar-delete-confirm-box">
-                    <p>¿Eliminar este tipo de turno?</p>
+                    <p className="calendar-delete-confirm-text">
+                      <FaExclamationTriangle aria-hidden="true" />
+                      <span>¿Eliminar este tipo de turno?</span>
+                    </p>
                     <div className="calendar-confirm-actions">
                       <button className="calendar-btn-confirm-yes" onClick={() => handleDelete(type.id)}>
                         <FaCheck /> Sí
@@ -184,15 +187,21 @@ const ShiftTypeManager = ({ shiftTypes, onSave, onUpdate, onDelete }) => {
         <div className="calendar-modal-overlay" onClick={handleCloseModal}>
           <div className="calendar-modal-content calendar-shift-type-modal" onClick={(e) => e.stopPropagation()}>
             <div className="calendar-modal-header">
-              <h3>{editingType ? 'Editar Tipo de Turno' : 'Crear Tipo de Turno'}</h3>
+              <h3 className="calendar-modal-title-with-icon">
+                {editingType ? <MdEdit aria-hidden="true" /> : <FaPlus aria-hidden="true" />}
+                <span>{editingType ? 'Editar Tipo de Turno' : 'Crear Tipo de Turno'}</span>
+              </h3>
               <button className="calendar-btn-close-modal" onClick={handleCloseModal}>
-                <FaTimes />
+                <span className="calendar-close-x" aria-hidden="true">X</span>
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="calendar-shift-type-form">
               <div className="calendar-form-group">
-                <label htmlFor="name">Nombre del Tipo de Turno *</label>
+                <label htmlFor="name" className="calendar-label-with-icon">
+                  <FaTag aria-hidden="true" />
+                  <span>Nombre del Tipo de Turno *</span>
+                </label>
                 <input
                   type="text"
                   id="name"
@@ -206,7 +215,10 @@ const ShiftTypeManager = ({ shiftTypes, onSave, onUpdate, onDelete }) => {
 
               <div className="calendar-form-row">
                 <div className="calendar-form-group">
-                  <label htmlFor="startTime">Hora de Inicio *</label>
+                  <label htmlFor="startTime" className="calendar-label-with-icon">
+                    <FaClock aria-hidden="true" />
+                    <span>Hora de Inicio *</span>
+                  </label>
                   <input
                     type="time"
                     id="startTime"
@@ -217,7 +229,10 @@ const ShiftTypeManager = ({ shiftTypes, onSave, onUpdate, onDelete }) => {
                 </div>
 
                 <div className="calendar-form-group">
-                  <label htmlFor="endTime">Hora de Fin *</label>
+                  <label htmlFor="endTime" className="calendar-label-with-icon">
+                    <FaClock aria-hidden="true" />
+                    <span>Hora de Fin *</span>
+                  </label>
                   <input
                     type="time"
                     id="endTime"
@@ -231,7 +246,10 @@ const ShiftTypeManager = ({ shiftTypes, onSave, onUpdate, onDelete }) => {
               {errors.time && <span className="calendar-error-message">{errors.time}</span>}
 
               <div className="calendar-form-group">
-                <label>Color Identificador *</label>
+                <label className="calendar-label-with-icon">
+                  <FaPalette aria-hidden="true" />
+                  <span>Color Identificador *</span>
+                </label>
                 <div className="calendar-color-picker-grid">
                   {colorOptions.map(color => (
                     <div

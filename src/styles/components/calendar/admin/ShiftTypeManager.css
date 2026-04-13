@@ -183,9 +183,11 @@
 }
 
 .calendar-btn-icon svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
+  color: currentColor;
   fill: currentColor;
+  display: block;
 }
 
 .calendar-btn-edit {
@@ -307,6 +309,16 @@
   line-height: 1.5;
 }
 
+.calendar-delete-confirm-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendar-delete-confirm-text svg {
+  color: #d97706;
+}
+
 .calendar-confirm-actions {
   display: flex;
   gap: 14px;
@@ -357,6 +369,22 @@
 
 .calendar-shift-type-form {
   padding: 28px;
+}
+
+.calendar-modal-title-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.calendar-label-with-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.calendar-label-with-icon svg {
+  color: #3b82f6;
 }
 
 .calendar-shift-type-form .calendar-form-group {

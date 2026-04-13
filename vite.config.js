@@ -24,8 +24,9 @@ export default defineConfig(async () => {
   return {
     plugins,
     server: {
-      host: '127.0.0.1',
+      host: 'localhost',
       port: 4000,
+      strictPort: true,
     },
     resolve: {
       alias: {

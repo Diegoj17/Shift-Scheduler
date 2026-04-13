@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { FaTimes, FaUser, FaEnvelope, FaPhone, FaBuilding, FaIdCard, FaCalendarAlt, FaLock, FaUnlock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaPhone, FaBuilding, FaIdCard, FaCalendarAlt, FaLock, FaUnlock, FaEye, FaEyeSlash } from 'react-icons/fa';
 import '../../styles/components/management/UserModal.css';
 import Modal from '../common/Modal';
 import { departments, positionsByDepartment, jobPositions } from '../../utils/departments';
@@ -88,6 +88,19 @@ const UserModal = ({ user, action, onSave, onClose }) => {
     };
   }, [showRules]);
 
+  useEffect(() => {
+    const handleEscKey = (event) => {
+      if (event.key === 'Escape' && !isSubmitting) {
+        onClose?.();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscKey);
+    return () => {
+      document.removeEventListener('keydown', handleEscKey);
+    };
+  }, [isSubmitting, onClose]);
+
   // Validación del formulario (sin cambios)
   const validateForm = () => {
     const newErrors = {};
@@ -169,7 +182,6 @@ const UserModal = ({ user, action, onSave, onClose }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log('🔍 Datos del formulario antes de validar:', formData);
     
     if (!validateForm()) {
       return;
@@ -286,7 +298,7 @@ const UserModal = ({ user, action, onSave, onClose }) => {
             aria-label="Cerrar modal"
             disabled={isSubmitting}
           >
-            <FaTimes />
+            <span aria-hidden="true">X</span>
           </button>
         </div>
 

@@ -3,10 +3,17 @@ import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { FaCalendarAlt, FaChevronLeft, FaChevronRight, FaCalendarDay, FaCalendarWeek } from "react-icons/fa";
+import { FaCalendarAlt, FaCalendarDay, FaCalendarWeek, FaRegCalendarAlt, FaClock, FaUserTag } from "react-icons/fa";
+import { MdChevronLeft, MdChevronRight } from 'react-icons/md';
 import '../../../styles/components/calendar/admin/CalendarView.css';
 
-const CalendarView = ({ events, onEventClick, onEventDrop, onDateClick}) => {
+const CalendarView = ({
+  events,
+  onEventClick,
+  onEventDrop,
+  onDateClick,
+  selectedShiftIds = []
+}) => {
   const calendarRef = useRef(null);
   const [currentView, setCurrentView] = useState('dayGridMonth');
   const [currentTitle, setCurrentTitle] = useState('');
@@ -97,13 +104,6 @@ const CalendarView = ({ events, onEventClick, onEventDrop, onDateClick}) => {
 
   // ✅ CORREGIDO: Handler de click en eventos
   const handleEventClick = (info) => {
-    console.log('🎯 [CalendarView] Event clicked:', {
-      id: info.event.id,
-      title: info.event.title,
-      start: info.event.start,
-      end: info.event.end,
-      extendedProps: info.event.extendedProps
-    });
     
     // Prevenir comportamiento por defecto
     if (info.jsEvent) {
@@ -114,7 +114,7 @@ const CalendarView = ({ events, onEventClick, onEventDrop, onDateClick}) => {
     // Pasar el evento completo al padre
     if (onEventClick) {
       // ✅ Pasar el objeto event de FullCalendar directamente
-      onEventClick(info.event);
+      onEventClick(info.event, { isShiftPressed: Boolean(info.jsEvent?.shiftKey) });
     }
   };
 
@@ -123,16 +123,19 @@ const CalendarView = ({ events, onEventClick, onEventDrop, onDateClick}) => {
       <div className="calendar-custom-header">
         <div className="calendar-header-left">
           <button className="calendar-btn-nav" onClick={handlePrev} title="Anterior" aria-label="Anterior">
-            <FaChevronLeft />
+            <MdChevronLeft />
           </button>
           <button className="calendar-btn-nav" onClick={handleNext} title="Siguiente" aria-label="Siguiente">
-            <FaChevronRight />
+            <MdChevronRight />
           </button>
           <button className="calendar-btn-today" onClick={handleToday}>
             <FaCalendarDay />
             <span>Hoy</span>
           </button>
-          <h2 className="calendar-current-title">{currentTitle}</h2>
+          <h2 className="calendar-current-title">
+            <FaRegCalendarAlt className="calendar-current-title-icon" aria-hidden="true" />
+            <span>{currentTitle}</span>
+          </h2>
         </div>
 
         <div className="calendar-header-right">
@@ -181,6 +184,13 @@ const CalendarView = ({ events, onEventClick, onEventDrop, onDateClick}) => {
           selectable={true}
           selectMirror={true}
           eventClick={handleEventClick}
+          eventClassNames={(arg) => {
+            const eventId = String(arg.event.id);
+            if (selectedShiftIds.includes(eventId)) {
+              return ['calendar-event-selected'];
+            }
+            return [];
+          }}
           // Aplicar color personalizado por tipo de turno cuando el evento se monta
           eventDidMount={(info) => {
             try {
@@ -320,10 +330,16 @@ function renderEventContent(eventInfo) {
     <div className="calendar-custom-event-content" style={{ pointerEvents: 'none' }}>
       <div className="calendar-event-title-text">{event.title}</div>
       {view !== 'dayGridMonth' && (
-        <div className="calendar-event-time-text">{eventInfo.timeText}</div>
+        <div className="calendar-event-time-text">
+          <FaClock className="calendar-event-meta-icon" aria-hidden="true" />
+          <span>{eventInfo.timeText}</span>
+        </div>
       )}
       {event.extendedProps.role && view === 'timeGridDay' && (
-        <div className="calendar-event-role-text">{event.extendedProps.role}</div>
+        <div className="calendar-event-role-text">
+          <FaUserTag className="calendar-event-meta-icon" aria-hidden="true" />
+          <span>{event.extendedProps.role}</span>
+        </div>
       )}
     </div>
   );

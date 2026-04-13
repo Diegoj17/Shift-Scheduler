@@ -22,8 +22,19 @@ const createApiInstance = (baseURL) => {
 
   // Interceptor para token
   instance.interceptors.request.use((config) => {
+    const requestPath = String(config.url || '');
+    const isPublicAuthEndpoint =
+      requestPath.includes('/login/') ||
+      requestPath.includes('/register/') ||
+      requestPath.includes('/password/reset/') ||
+      requestPath.includes('/password/reset/confirm/');
+
+    if (isPublicAuthEndpoint && config.headers?.Authorization) {
+      delete config.headers.Authorization;
+    }
+
     const token = localStorage.getItem('token');
-    if (token) {
+    if (token && !isPublicAuthEndpoint) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
@@ -180,9 +191,7 @@ export const shiftAPI = {
   // TURNOS
   getShifts: async (params = {}) => {
     try {
-      console.log('🔄 Obteniendo turnos...');
       const response = await shiftsApi.get('/shifts/', { params });
-      console.log('✅ Turnos obtenidos:', response.data?.length || 0);
       return response.data;
     } catch (error) {
       console.error('❌ Error obteniendo turnos:', error.response?.status, error.response?.data);
@@ -192,9 +201,7 @@ export const shiftAPI = {
 
   getMyShifts: async (params = {}) => {
     try {
-      console.log('🔄 Obteniendo mis turnos...');
       const response = await shiftsApi.get('/shifts/my/', { params });
-      console.log('✅ Mis turnos obtenidos:', response.data?.results?.length || response.data?.length || 0);
       return response.data;
     } catch (error) {
       console.error('❌ Error obteniendo mis turnos:', error.response?.status, error.response?.data);
@@ -255,9 +262,7 @@ export const shiftAPI = {
   // ✅ NUEVO: SISTEMA DE RECORDATORIOS
   testReminders: async () => {
     try {
-      console.log('🧪 Probando sistema de recordatorios...');
       const response = await shiftsApi.post('/shifts/test-reminders/');
-      console.log('✅ Test de recordatorios completado:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Error probando recordatorios:', error.response?.status, error.response?.data);
@@ -268,9 +273,7 @@ export const shiftAPI = {
 
   scheduleAllReminders: async () => {
     try {
-      console.log('🔄 Reprogramando todos los recordatorios...');
       const response = await shiftsApi.post('/shifts/schedule-reminders/');
-      console.log('✅ Recordatorios reprogramados:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ Error reprogramando recordatorios:', error.response?.status, error.response?.data);
@@ -281,7 +284,6 @@ export const shiftAPI = {
 
   getRemindersInfo: async () => {
     try {
-      console.log('📊 Obteniendo información de recordatorios...');
       // Este endpoint podría crearse en el backend para obtener estadísticas
       const response = await shiftsApi.get('/shifts/reminders-info/');
       return response.data;
@@ -300,9 +302,7 @@ export const shiftAPI = {
   // TIPOS DE TURNO
   getShiftTypes: async () => {
     try {
-      console.log('🔄 Solicitando tipos de turno...');
       const response = await shiftsApi.get('/shift-types/');
-      console.log('✅ Tipos de turno recibidos:', response.data?.length || 0);
       return response.data;
     } catch (error) {
       console.error('❌ Error fetching shift types:', error.response?.status, error.response?.data);
@@ -388,9 +388,7 @@ export const notificationAPI = {
   // NOTIFICACIONES
   getNotifications: async (params = {}) => {
     try {
-      console.log('🔄 Obteniendo notificaciones...');
       const response = await notificationsApi.get('/notifications/', { params });
-      console.log('✅ Notificaciones obtenidas:', response.data?.notifications?.length || 0);
       return response.data;
     } catch (error) {
       console.error('❌ Error obteniendo notificaciones:', error.response?.status, error.response?.data);
@@ -462,7 +460,6 @@ export const notificationAPI = {
   // ✅ NUEVO: MÉTODOS ESPECÍFICOS PARA RECORDATORIOS
   getReminderNotifications: async (limit = 20) => {
     try {
-      console.log('⏰ Obteniendo notificaciones de recordatorios...');
       const response = await notificationsApi.get('/notifications/', {
         params: { 
           type: 'shift_reminder',
@@ -470,7 +467,6 @@ export const notificationAPI = {
           ordering: '-created_at'
         }
       });
-      console.log('✅ Notificaciones de recordatorios obtenidas:', response.data?.notifications?.length || 0);
       return response.data;
     } catch (error) {
       console.error('❌ Error obteniendo notificaciones de recordatorios:', error.response?.status, error.response?.data);
@@ -480,7 +476,6 @@ export const notificationAPI = {
 
   getNotificationsByType: async (type, limit = 20) => {
     try {
-      console.log(`🔔 Obteniendo notificaciones de tipo: ${type}`);
       const response = await notificationsApi.get('/notifications/', {
         params: { 
           type,
@@ -488,7 +483,6 @@ export const notificationAPI = {
           ordering: '-created_at'
         }
       });
-      console.log(`✅ Notificaciones de tipo ${type} obtenidas:`, response.data?.notifications?.length || 0);
       return response.data;
     } catch (error) {
       console.error(`❌ Error obteniendo notificaciones de tipo ${type}:`, error.response?.status, error.response?.data);
@@ -499,9 +493,7 @@ export const notificationAPI = {
   // PREFERENCIAS DE NOTIFICACIÓN
   getPreferences: async () => {
     try {
-      console.log('🔄 Obteniendo preferencias de notificación...');
       const response = await notificationsApi.get('/preferences/');
-      console.log('✅ Preferencias obtenidas');
       return response.data;
     } catch (error) {
       console.error('❌ Error obteniendo preferencias:', error.response?.status, error.response?.data);
@@ -511,9 +503,7 @@ export const notificationAPI = {
 
   updatePreferences: async (preferences) => {
     try {
-      console.log('🔄 Actualizando preferencias...');
       const response = await notificationsApi.put('/preferences/update_preferences/', preferences);
-      console.log('✅ Preferencias actualizadas');
       return response.data;
     } catch (error) {
       console.error('❌ Error actualizando preferencias:', error.response?.status, error.response?.data);
@@ -524,9 +514,7 @@ export const notificationAPI = {
 
   updatePreferencesPartial: async (preferences) => {
     try {
-      console.log('🔄 Actualizando preferencias (PATCH)...');
       const response = await notificationsApi.patch('/preferences/update_preferences/', preferences);
-      console.log('✅ Preferencias actualizadas');
       return response.data;
     } catch (error) {
       console.error('❌ Error actualizando preferencias:', error.response?.status, error.response?.data);
