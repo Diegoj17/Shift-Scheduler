@@ -29,6 +29,7 @@ export default defineConfig(async () => {
       strictPort: true,
     },
     resolve: {
+      dedupe: ['react', 'react-dom', 'scheduler'],
       alias: {
         '@': '/src',
         '@services': '/src/services',

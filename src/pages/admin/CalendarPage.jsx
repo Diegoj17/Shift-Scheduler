@@ -7,6 +7,7 @@ import CalendarView from '../../components/calendar/admin/CalendarView';
 import ShiftTypeManager from '../../components/calendar/admin/ShiftTypeManager';
 import ShiftModal from '../../components/calendar/admin/ShiftModal';
 import ShiftDuplicateModal from '../../components/calendar/admin/ShiftDuplicateModal';
+import DeleteMultipleShiftsModal from '../../components/calendar/admin/DeleteMultipleShiftsModal';
 // timeStringToMinutes removed (not needed here)
 import { userService } from '../../services/userService';
 import { shiftService } from '../../services/shiftService'; 
@@ -26,6 +27,8 @@ const CalendarPage = () => {
   const [isTypeManagerOpen, setIsTypeManagerOpen] = useState(false);
   const [editingShift, setEditingShift] = useState(null);
   const [selectedShiftIds, setSelectedShiftIds] = useState([]);
+  const [isDeleteSelectedModalOpen, setIsDeleteSelectedModalOpen] = useState(false);
+  const [isDeletingSelected, setIsDeletingSelected] = useState(false);
   const [notification, setNotification] = useState(null);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
@@ -365,12 +368,29 @@ const initializeData = async () => {
     return () => clearTimeout(timer);
   }, [sidebarOpen]);
 
+  // Permite limpiar la selección múltiple con Escape cuando no hay modales abiertos.
+  useEffect(() => {
+    const handleEscapeClearSelection = (event) => {
+      if (event.key !== 'Escape') return;
+      if (selectedShiftIds.length === 0) return;
+      if (isShiftModalOpen || isDuplicateModalOpen || isDeleteSelectedModalOpen || isDeletingSelected) return;
+      setSelectedShiftIds([]);
+    };
+
+    window.addEventListener('keydown', handleEscapeClearSelection);
+    return () => window.removeEventListener('keydown', handleEscapeClearSelection);
+  }, [selectedShiftIds, isShiftModalOpen, isDuplicateModalOpen, isDeleteSelectedModalOpen, isDeletingSelected]);
+
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
   const handleItemClick = (itemId) => {
     setActiveItem(itemId);
+  };
+
+  const handleClearSelection = () => {
+    setSelectedShiftIds([]);
   };
 
   const showNotification = (type, message) => {
@@ -687,27 +707,28 @@ const initializeData = async () => {
       return;
     }
 
-    const shouldDelete = window.confirm(
-      `¿Eliminar ${selectedShiftIds.length} turno(s) seleccionado(s)? Esta acción no se puede deshacer.`
-    );
+    setIsDeleteSelectedModalOpen(true);
+  };
 
-    if (!shouldDelete) return;
+  const confirmDeleteSelectedShifts = async () => {
+    if (selectedShiftIds.length === 0) {
+      setIsDeleteSelectedModalOpen(false);
+      return;
+    }
 
     try {
-      const deleteResults = await Promise.allSettled(
-        selectedShiftIds.map((id) => shiftService.deleteShift(id))
-      );
-
+      setIsDeletingSelected(true);
       const deletedIds = [];
       let failedCount = 0;
 
-      deleteResults.forEach((result, index) => {
-        if (result.status === 'fulfilled') {
-          deletedIds.push(selectedShiftIds[index]);
-        } else {
+      for (const id of selectedShiftIds) {
+        try {
+          await shiftService.deleteShift(id);
+          deletedIds.push(id);
+        } catch {
           failedCount += 1;
         }
-      });
+      }
 
       if (deletedIds.length > 0) {
         setShifts((prev) => prev.filter((shift) => !deletedIds.includes(String(shift.id))));
@@ -725,6 +746,9 @@ const initializeData = async () => {
     } catch (error) {
       console.error('Error deleting selected shifts:', error);
       showNotification('error', 'Error al eliminar turnos seleccionados');
+    } finally {
+      setIsDeletingSelected(false);
+      setIsDeleteSelectedModalOpen(false);
     }
   };
 
@@ -883,6 +907,17 @@ const initializeData = async () => {
                   <FaTrash className="calendar-icon" aria-hidden="true" />
                   <span>Eliminar Seleccionados ({selectedShiftIds.length})</span>
                 </button>
+                {selectedShiftIds.length > 0 && (
+                  <button
+                    className="calendar-btn-action calendar-btn-neutral"
+                    onClick={handleClearSelection}
+                    aria-label="Cancelar selección"
+                    title="Cancelar selección (Esc)"
+                  >
+                    <FaTimes className="calendar-icon" aria-hidden="true" />
+                    <span>Cancelar selección</span>
+                  </button>
+                )}
               </div>
 
               {isTypeManagerOpen && (
@@ -924,6 +959,17 @@ const initializeData = async () => {
                 shifts={shifts}
                 employees={employees}
                 unavailabilities={unavailabilities}
+              />
+
+              <DeleteMultipleShiftsModal
+                isOpen={isDeleteSelectedModalOpen}
+                selectedCount={selectedShiftIds.length}
+                selectedShifts={shifts.filter((shift) => selectedShiftIds.includes(String(shift.id)))}
+                isDeleting={isDeletingSelected}
+                onCancel={() => {
+                  if (!isDeletingSelected) setIsDeleteSelectedModalOpen(false);
+                }}
+                onConfirm={confirmDeleteSelectedShifts}
               />
             </div>
           )}

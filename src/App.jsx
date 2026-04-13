@@ -1,26 +1,36 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import './App.css'
-import LoginPage from './pages/LoginPage.jsx';
-import RegisterPage from '../src/pages/RegisterPage.jsx';
-import PasswordReset from './pages/PasswordResetPage.jsx';
-import PasswordResetConfirmPage from './pages/PasswordResetConfirmPage.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import { NotificationToastProvider } from './contexts/NotificationToastContext.jsx';
-import ProfileView from './components/profile/ProfileView.jsx';
-import EditProfile from './components/profile/EditProfile.jsx';
-import ChangePassword from './components/profile/ChangePassword.jsx';
 import { AuthProvider } from './contexts/AuthContext.jsx';
-import Dashboard from './pages/admin/DashboardPage.jsx';
-import MainPage from './pages/user/MainPage.jsx';
-import ManagementPage from './pages/admin/ManagementPage.jsx';
-import CalendarPage from './pages/admin/CalendarPage.jsx';
-import ShiftCalendarPage from './pages/user/ShiftCalendarPage.jsx';
-import TimeClockPage from './pages/user/TimeClockPage.jsx';
-import TimeAvailabilityPage from './pages/user/TimeAvailabilityPage.jsx';
-import TimeSchedulePage from './pages/admin/TimeSchedulePage.jsx';
-import ShiftChangeRequestPage from './pages/user/ShiftChangeRequestPage.jsx';
-import ShiftChangeReviewPage from './pages/admin/ShiftChangeReviewPage.jsx';
-import ReportsPage from './pages/admin/ReportsPage.jsx';
+const LoginPage = lazy(() => import('./pages/LoginPage.jsx'));
+const RegisterPage = lazy(() => import('./pages/RegisterPage.jsx'));
+const PasswordReset = lazy(() => import('./pages/PasswordResetPage.jsx'));
+const PasswordResetConfirmPage = lazy(() => import('./pages/PasswordResetConfirmPage.jsx'));
+const Dashboard = lazy(() => import('./pages/admin/DashboardPage.jsx'));
+const MainPage = lazy(() => import('./pages/user/MainPage.jsx'));
+const ManagementPage = lazy(() => import('./pages/admin/ManagementPage.jsx'));
+const CalendarPage = lazy(() => import('./pages/admin/CalendarPage.jsx'));
+const ShiftCalendarPage = lazy(() => import('./pages/user/ShiftCalendarPage.jsx'));
+const TimeClockPage = lazy(() => import('./pages/user/TimeClockPage.jsx'));
+const TimeAvailabilityPage = lazy(() => import('./pages/user/TimeAvailabilityPage.jsx'));
+const TimeSchedulePage = lazy(() => import('./pages/admin/TimeSchedulePage.jsx'));
+const ShiftChangeRequestPage = lazy(() => import('./pages/user/ShiftChangeRequestPage.jsx'));
+const ShiftChangeReviewPage = lazy(() => import('./pages/admin/ShiftChangeReviewPage.jsx'));
+const ReportsPage = lazy(() => import('./pages/admin/ReportsPage.jsx'));
+const ProfileView = lazy(() => import('./components/profile/ProfileView.jsx'));
+const EditProfile = lazy(() => import('./components/profile/EditProfile.jsx'));
+const ChangePassword = lazy(() => import('./components/profile/ChangePassword.jsx'));
+
+const appLoadingStyle = {
+  minHeight: '40vh',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontSize: '1rem',
+  color: '#334155',
+};
 
 
 function App() {
@@ -29,6 +39,7 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <NotificationToastProvider>
+        <Suspense fallback={<div style={appLoadingStyle}>Cargando aplicación...</div>}>
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -109,6 +120,7 @@ function App() {
             </ProtectedRoute>
           } />
         </Routes>
+        </Suspense>
         </NotificationToastProvider>
       </BrowserRouter>
     </AuthProvider>

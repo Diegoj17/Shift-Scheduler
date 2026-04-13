@@ -3,7 +3,13 @@ import { AuthContext } from '../contexts/AuthContext';
 import authService from '../services/authService';
 
 export const useAuth = () => {
-  const { currentUser, setCurrentUser, updateUser, logout: contextLogout, loading: contextLoading } = useContext(AuthContext);
+  const {
+    currentUser,
+    loading: contextLoading,
+    login: contextLogin,
+    logout: contextLogout,
+    updateProfile: contextUpdateProfile,
+  } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -12,8 +18,7 @@ export const useAuth = () => {
     setError(null);
     
     try {
-      const response = await authService.login(email, password);
-      setCurrentUser(response.user);
+      const response = await contextLogin(email, password);
       setLoading(false);
       return { success: true, data: response };
     } catch (err) {
@@ -163,8 +168,7 @@ export const useAuth = () => {
     setError(null);
     
     try {
-      const response = await authService.updateProfile(userData);
-      updateUser(response.user);
+      const response = await contextUpdateProfile(userData);
       setLoading(false);
       return { success: true, data: response };
     } catch (err) {
