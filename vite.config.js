@@ -45,9 +45,10 @@ export default defineConfig(async () => {
           manualChunks(id) {
             if (!id || !id.includes) return undefined;
             if (id.includes('node_modules')) {
+              // Mantener React, React DOM y Scheduler juntos para evitar problemas de inicialización.
+              if (/node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) return 'vendor_react';
               // FullCalendar separado
               if (id.includes('@fullcalendar') || id.includes('fullcalendar')) return 'vendor_fullcalendar';
-              if (id.includes('react-dom')) return 'vendor_react_dom';
               if (id.includes('react-router')) return 'vendor_router';
               if (id.includes('react-icons')) return 'vendor_icons';
               if (id.includes('axios')) return 'vendor_axios';
