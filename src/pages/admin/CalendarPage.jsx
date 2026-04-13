@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { FaPlus, FaCopy, FaClock, FaCheck, FaTimes, FaExclamationTriangle } from 'react-icons/fa';
+import { FaPlus, FaCopy, FaClock, FaCheck, FaTimes, FaExclamationTriangle, FaTrash } from 'react-icons/fa';
 import Header from '../../components/common/Header';
 import Sidebar from '../../components/common/Sidebar';
 import CalendarView from '../../components/calendar/admin/CalendarView';
@@ -25,6 +25,7 @@ const CalendarPage = () => {
   const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
   const [isTypeManagerOpen, setIsTypeManagerOpen] = useState(false);
   const [editingShift, setEditingShift] = useState(null);
+  const [selectedShiftIds, setSelectedShiftIds] = useState([]);
   const [notification, setNotification] = useState(null);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
@@ -112,7 +113,6 @@ const CalendarPage = () => {
 const initializeData = async () => {
   try {
     setLoading(true);
-    console.log('🔄 Inicializando datos del calendario...');
     
     const token = localStorage.getItem('token');
     if (!token) {
@@ -125,7 +125,6 @@ const initializeData = async () => {
     let shiftTypesData = [];
     try {
       shiftTypesData = await shiftService.getShiftTypes();
-      console.log('✅ Tipos de turno recibidos:', shiftTypesData?.length);
       
       // Normalizar tipos de turno
       const normalizedTypes = (
@@ -134,7 +133,6 @@ const initializeData = async () => {
           : (shiftTypesData.results || shiftTypesData.data || [])
       ).map(normalizeShiftType);
       
-      console.log('✅ Tipos de turno normalizados:', normalizedTypes.length);
       setShiftTypes(normalizedTypes);
     } catch (err) {
       console.error('❌ Error cargando tipos de turno:', err);
@@ -146,11 +144,9 @@ const initializeData = async () => {
     // ==========================================
     try {
       const shiftsData = await shiftService.getShiftsForCalendar();
-      console.log('✅ Turnos cargados desde backend:', shiftsData?.length);
       
       // Verificar muestra del primer turno
       if (shiftsData && shiftsData.length > 0) {
-        console.log('📊 Muestra de turno raw del backend:', shiftsData[0]);
       }
 
       // ✅ Formatear turnos para FullCalendar con TODOS los campos
@@ -175,8 +171,6 @@ const initializeData = async () => {
         const isLocked = shift.is_locked || shift.isLocked || false;
         const lockReason = shift.lock_reason || shift.lockReason || '';
         const lockedAt = shift.locked_at || shift.lockedAt || null;
-
-        console.log(`📝 Turno ${shiftId} - Notes:`, notes); // ✅ Log individual
 
         return {
           id: shiftId,
@@ -211,10 +205,7 @@ const initializeData = async () => {
         };
       });
 
-      console.log('✅ Turnos formateados para calendario:', formattedShifts.length);
       if (formattedShifts.length > 0) {
-        console.log('📊 Muestra de turno formateado:', formattedShifts[0]);
-        console.log('📝 ExtendedProps del primer turno:', formattedShifts[0].extendedProps);
       }
       
       setShifts(formattedShifts);
@@ -227,13 +218,11 @@ const initializeData = async () => {
     // ==========================================
     // 3️⃣ CARGAR EMPLEADOS
     // ==========================================
-    console.log('👥 Cargando empleados...');
     let employeesData = [];
     
     // Intento 1: shiftService.getEmployees()
     try {
       employeesData = await shiftService.getEmployees();
-      console.log('✅ Empleados cargados con shiftService.getEmployees():', employeesData?.length);
     } catch (err) {
       console.warn('⚠️ shiftService.getEmployees() falló:', err.message);
       employeesData = [];
@@ -242,9 +231,7 @@ const initializeData = async () => {
     // Intento 2: userService.getUsers() (fallback)
     if (!employeesData || employeesData.length === 0) {
       try {
-        console.log('👥 Intentando fallback con userService.getUsers()...');
         const users = await userService.getUsers();
-        console.log('✅ Usuarios cargados con userService:', users?.length || 0);
         employeesData = Array.isArray(users) ? users : (users.results || users.data || []);
       } catch (err) {
         console.error('❌ Error al cargar empleados con userService (fallback):', err);
@@ -276,10 +263,7 @@ const initializeData = async () => {
       ...emp
     }));
 
-    console.log('👥 Empleados normalizados (final):', normalizedEmployees.length);
-    
     if (normalizedEmployees.length > 0) {
-      console.log('📊 Muestra de empleado:', normalizedEmployees[0]);
       setEmployees(normalizedEmployees);
     } else {
       console.warn('⚠️ No se encontraron empleados');
@@ -290,13 +274,11 @@ const initializeData = async () => {
     // ==========================================
     // 4️⃣ CARGAR DISPONIBILIDADES
     // ==========================================
-    console.log('📅 Cargando disponibilidades...');
     let unavailabilitiesData = [];
 
     try {
       // ✅ Usar availabilityService
       unavailabilitiesData = await availabilityService.getAvailabilities();
-      console.log('✅ Disponibilidades cargadas desde API:', unavailabilitiesData);
       
       // Normalizar disponibilidades
       const normalizedAvailabilities = (
@@ -304,15 +286,6 @@ const initializeData = async () => {
           ? unavailabilitiesData 
           : (unavailabilitiesData.results || unavailabilitiesData.data || [])
       ).map(avail => {
-        console.log('🔍 Procesando disponibilidad:', {
-          id: avail.id,
-          employee_id: avail.employee_id,
-          date: avail.date,
-          type: avail.type,
-          start_time: avail.start_time,
-          end_time: avail.end_time
-        });
-        
         return {
           id: avail.id,
           employee_id: avail.employee_id,
@@ -327,11 +300,7 @@ const initializeData = async () => {
         };
       });
       
-      console.log('✅ Disponibilidades normalizadas:', normalizedAvailabilities.length);
-      
       if (normalizedAvailabilities.length > 0) {
-        console.log('📊 Primera disponibilidad normalizada:', normalizedAvailabilities[0]);
-        
         // ✅ Verificar mapeo de IDs
         const firstAvail = normalizedAvailabilities[0];
         const matchingEmployee = normalizedEmployees.find(emp => 
@@ -340,12 +309,6 @@ const initializeData = async () => {
         );
         
         if (matchingEmployee) {
-          console.log('✅ Mapeo correcto - Empleado encontrado:', {
-            avail_employee_id: firstAvail.employee_id,
-            employee_user_id: matchingEmployee.id,
-            employee_db_id: matchingEmployee.employee_id,
-            employee_name: matchingEmployee.name
-          });
         } else {
           console.warn('⚠️ No se encontró empleado para disponibilidad:', {
             avail_employee_id: firstAvail.employee_id,
@@ -425,9 +388,6 @@ const initializeData = async () => {
       return;
     }
 
-    console.log('🔐 Token antes de crear tipo de turno:', token);
-    console.log('📝 Datos del tipo de turno (original):', shiftType);
-
     // Mapear explícitamente el objeto al payload que espera el backend
     const padSeconds = (t) => {
       if (!t) return undefined;
@@ -444,8 +404,6 @@ const initializeData = async () => {
       end_time: padSeconds(shiftType.endTime || shiftType.end_time),
       color: shiftType.color
     };
-
-    console.log('🟢 Payload enviado al backend (mappeado):', payload);
 
   const newType = await shiftService.createShiftType(payload);
   // Normalizar antes de agregar al estado
@@ -520,11 +478,8 @@ const initializeData = async () => {
   // Manejo de Turnos
   const handleSaveShift = async (shiftData) => {
   try {
-    console.log('💾 [CalendarPage] Guardando turno - Data recibida:', shiftData);
-    
     // ✅ CORRECCIÓN: Usar shiftData.id directamente (viene de ShiftModal)
     const shiftId = shiftData.id;
-    console.log('🔍 [CalendarPage] ID del turno a guardar:', shiftId);
     
     // ✅ CORRECCIÓN: Usar los nombres de campo correctos que espera el backend
     const backendPayload = {
@@ -536,13 +491,9 @@ const initializeData = async () => {
       notes: shiftData.notes || '',
       role: shiftData.role || ''
     };
-
-    console.log('📤 [CalendarPage] Payload para backend:', backendPayload);
     
     // ✅ CORRECCIÓN: Verificar explícitamente si hay ID para determinar si es edición
     if (shiftId) {
-      console.log('🔄 [CalendarPage] Actualizando turno:', shiftId, backendPayload);
-      
       await shiftService.updateShift(shiftId, backendPayload);
       
       // Actualizar en el estado local
@@ -573,7 +524,6 @@ const initializeData = async () => {
       
     } else {
       // ✅ Crear nuevo turno
-      console.log('➕ [CalendarPage] Creando turno:', backendPayload);
       
       // Verificar que los datos sean válidos
       if (!backendPayload.employee || isNaN(backendPayload.employee)) {
@@ -584,8 +534,6 @@ const initializeData = async () => {
       }
       
       const newShift = await shiftService.createShift(backendPayload);
-      
-      console.log('✅ [CalendarPage] Turno creado:', newShift);
       
       // Agregar al estado local
       const calendarShift = {
@@ -644,14 +592,24 @@ const initializeData = async () => {
   }
 };
 
-  const handleEventClick = (event) => {
-  console.log('🔓 [CalendarPage] Abriendo modal con evento:', {
-    id: event.id,
-    title: event.title,
-    start: event.start,
-    end: event.end,
-    extendedProps: event.extendedProps
-  });
+  const handleEventClick = (event, options = {}) => {
+  const eventId = String(event.id);
+  const isShiftPressed = Boolean(options?.isShiftPressed);
+
+  if (isShiftPressed) {
+    setSelectedShiftIds((prev) => {
+      if (prev.includes(eventId)) {
+        return prev.filter((id) => id !== eventId);
+      }
+      return [...prev, eventId];
+    });
+    return;
+  }
+
+  // Si hay selección múltiple activa y se hace click normal, limpiar selección.
+  if (selectedShiftIds.length > 0) {
+    setSelectedShiftIds([]);
+  }
 
   // ✅ Buscar el shift completo
   const shift = shifts.find(s => String(s.id) === String(event.id));
@@ -666,17 +624,11 @@ const initializeData = async () => {
     console.warn('🔒 Turno bloqueado:', shift.lock_reason || shift.lockReason);
   }
 
-  console.log('✅ Shift encontrado completo:', shift);
-  console.log('📝 ExtendedProps del shift:', shift.extendedProps);
-
   // ✅ Extraer todos los datos correctamente
   const employeeId = shift.extendedProps?.employeeId || event.extendedProps?.employeeId;
   const shiftTypeId = shift.extendedProps?.shiftTypeId || event.extendedProps?.shiftTypeId;
   const notes = shift.extendedProps?.notes || event.extendedProps?.notes || '';
   const role = shift.extendedProps?.role || event.extendedProps?.role || '';
-  
-  console.log('📝 Notas extraídas:', notes);
-  console.log('👔 Rol extraído:', role);
   
   // ✅ Si no encontramos el employeeId, intentar buscarlo por nombre
   let finalEmployeeId = employeeId;
@@ -687,7 +639,6 @@ const initializeData = async () => {
     );
     if (foundEmployee) {
       finalEmployeeId = foundEmployee.id;
-      console.log('✅ EmployeeId encontrado por nombre:', finalEmployeeId);
     }
   }
 
@@ -699,7 +650,6 @@ const initializeData = async () => {
     );
     if (foundShiftType) {
       finalShiftTypeId = foundShiftType.id;
-      console.log('✅ ShiftTypeId encontrado por nombre:', finalShiftTypeId);
     }
   }
 
@@ -720,9 +670,6 @@ const initializeData = async () => {
     locked_at: shift.locked_at || shift.lockedAt || null
   };
 
-  console.log('📤 Datos completos para modal:', shiftForModal);
-  console.log('🔑 ID del turno que se va a editar:', shiftForModal.id); // ✅ Verificar que no sea null
-
   // ✅ CRÍTICO: Verificar que tenemos el ID antes de abrir el modal
   if (!shiftForModal.id) {
     console.error('❌ ERROR: No se pudo determinar el ID del turno');
@@ -733,6 +680,53 @@ const initializeData = async () => {
   setEditingShift(shiftForModal);
   setIsShiftModalOpen(true);
 };
+
+  const handleDeleteSelectedShifts = async () => {
+    if (selectedShiftIds.length === 0) {
+      showNotification('warning', 'No hay turnos seleccionados');
+      return;
+    }
+
+    const shouldDelete = window.confirm(
+      `¿Eliminar ${selectedShiftIds.length} turno(s) seleccionado(s)? Esta acción no se puede deshacer.`
+    );
+
+    if (!shouldDelete) return;
+
+    try {
+      const deleteResults = await Promise.allSettled(
+        selectedShiftIds.map((id) => shiftService.deleteShift(id))
+      );
+
+      const deletedIds = [];
+      let failedCount = 0;
+
+      deleteResults.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          deletedIds.push(selectedShiftIds[index]);
+        } else {
+          failedCount += 1;
+        }
+      });
+
+      if (deletedIds.length > 0) {
+        setShifts((prev) => prev.filter((shift) => !deletedIds.includes(String(shift.id))));
+      }
+
+      setSelectedShiftIds([]);
+
+      if (failedCount === 0) {
+        showNotification('success', `${deletedIds.length} turno(s) eliminado(s)`);
+      } else if (deletedIds.length > 0) {
+        showNotification('warning', `${deletedIds.length} eliminado(s), ${failedCount} no se pudo/pudieron eliminar`);
+      } else {
+        showNotification('error', 'No se pudo eliminar ninguno de los turnos seleccionados');
+      }
+    } catch (error) {
+      console.error('Error deleting selected shifts:', error);
+      showNotification('error', 'Error al eliminar turnos seleccionados');
+    }
+  };
 
   const handleDeleteShift = async (shiftId) => {
     try {
@@ -747,8 +741,6 @@ const initializeData = async () => {
 
   const handleDuplicateShifts = async (duplicateData) => {
   try {
-    console.log('🔄 [CalendarPage] Duplicando turnos - Data recibida:', duplicateData);
-
     // ✅ Validar que todos los campos existan
     if (!duplicateData.sourceStartDate) {
       throw new Error('sourceStartDate es requerido');
@@ -764,11 +756,7 @@ const initializeData = async () => {
     }
 
     // ✅ CORRECCIÓN: Enviar datos sin mapear - shiftService lo hará
-    console.log('📤 [CalendarPage] Enviando a shiftService (sin mapear):', duplicateData);
-
     const result = await shiftService.duplicateShifts(duplicateData);
-    
-    console.log('✅ [CalendarPage] Resultado de duplicación:', result);
     
     // Recargar los turnos completos
     await initializeData();
@@ -885,6 +873,16 @@ const initializeData = async () => {
                 <button className="calendar-btn-action calendar-btn-secondary" onClick={() => setIsTypeManagerOpen(!isTypeManagerOpen)} aria-label="Gestionar tipos de turno">
                   <FaClock className="calendar-icon" aria-hidden="true" /> <span>{isTypeManagerOpen ? 'Ocultar' : 'Gestionar'} Tipos de Turno</span>
                 </button>
+                <button
+                  className="calendar-btn-action calendar-btn-danger"
+                  onClick={handleDeleteSelectedShifts}
+                  aria-label="Eliminar turnos seleccionados"
+                  disabled={selectedShiftIds.length === 0}
+                  title={selectedShiftIds.length === 0 ? 'Selecciona turnos con Shift + click' : `Eliminar ${selectedShiftIds.length} turnos`}
+                >
+                  <FaTrash className="calendar-icon" aria-hidden="true" />
+                  <span>Eliminar Seleccionados ({selectedShiftIds.length})</span>
+                </button>
               </div>
 
               {isTypeManagerOpen && (
@@ -903,6 +901,7 @@ const initializeData = async () => {
                   events={shifts}
                   onEventClick={handleEventClick}
                   onEventDrop={handleEventDrop}
+                  selectedShiftIds={selectedShiftIds}
                 />
               </div>
 

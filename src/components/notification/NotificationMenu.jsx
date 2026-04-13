@@ -102,7 +102,6 @@ const NotificationMenu = ({
     }
   };
 
-  console.log('🔔 Notificaciones en el menú:', notifications);
 
   return (
     <div className="notification-menu">

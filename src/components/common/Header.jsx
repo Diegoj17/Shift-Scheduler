@@ -40,7 +40,6 @@ const Header = ({ onToggleSidebar, pageTitle = 'Dashboard' }) => {
     if (newState) {
       try {
         await refresh();
-        console.log('🔔 Notificaciones actualizadas al abrir menú:', notifications.length);
       } catch (error) {
         console.error('Error cargando notificaciones:', error);
       }

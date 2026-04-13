@@ -50,13 +50,11 @@ const loadInitialData = useCallback(async (silent = false) => {
   try {
     if (!silent) setLoading(true);
     
-    console.log('🔄 [TimeClockPage] Cargando datos iniciales...');
     
     // ✅ Fecha actual en hora local Colombia
     const today = new Date();
     const todayStr = getLocalDateString(today);
     
-    console.log('📅 [DEBUG] Fecha de hoy:', todayStr);
 
     // 1. Obtener SOLO turnos de HOY
     const shiftsData = await shiftService.getMyShifts({
@@ -64,18 +62,15 @@ const loadInitialData = useCallback(async (silent = false) => {
       end_date: todayStr
     });
 
-    console.log('📊 Turnos encontrados para HOY:', shiftsData);
 
     // 2. Obtener registros de hoy
     const todayEntries = await timeEntryService.getTodayEntries();
-    console.log('📝 Registros de hoy:', todayEntries);
 
     // ✅ Verificar registros
     const hasCheckIn = !!todayEntries.check_in;
     const hasCheckOut = !!todayEntries.check_out;
     const bothRegistered = hasCheckIn && hasCheckOut;
 
-    console.log('✅ Estado de registros:', { hasCheckIn, hasCheckOut, bothRegistered });
 
     // Dejar timestamps crudos en todayEntries; el formateo se hace en los componentes
 
@@ -103,8 +98,6 @@ const loadInitialData = useCallback(async (silent = false) => {
       }
     }
 
-    console.log('🎯 ¿Hay turnos para hoy?:', hasShiftsForToday);
-    console.log('🎯 Turno activo/encontrado:', activeShift);
 
     // ✅ ESTADO FINAL - LIMPIAR CUANDO NO HAY TURNOS
     const finalState = {
@@ -131,7 +124,6 @@ const loadInitialData = useCallback(async (silent = false) => {
       hasShiftsForToday: hasShiftsForToday
     };
 
-    console.log('🎛️ ESTADO FINAL CONFIGURADO:', finalState);
     setShiftData(finalState);
 
   } catch (error) {
@@ -150,7 +142,6 @@ const loadInitialData = useCallback(async (silent = false) => {
 
   const handleEntryRegister = async () => {
     try {
-      console.log('📝 [TimeClockPage] Registrando entrada...');
 
       if (!shiftData.hasActiveShift) {
         showNotification('error', 'No tienes un turno activo para hoy');
@@ -170,11 +161,9 @@ const loadInitialData = useCallback(async (silent = false) => {
         shiftData.currentShift?.id
       );
 
-      console.log('✅ Entrada registrada (raw):', entry);
 
       // ✅ Convertir timestamp a formato 12h (AM/PM)
       entry.time_local = formatTime(entry.timestamp || entry.time);
-      console.log('✅ Hora local de entrada:', entry.time_local);
 
       // Actualizar estado
       setShiftData(prev => ({
@@ -190,7 +179,6 @@ const loadInitialData = useCallback(async (silent = false) => {
 
       // ✅ Actualizar historial automáticamente
       if (historyRef.current?.refreshHistory) {
-        console.log('🔄 Actualizando historial...');
         historyRef.current.refreshHistory();
       }
 
@@ -202,7 +190,6 @@ const loadInitialData = useCallback(async (silent = false) => {
 
   const handleExitRegister = async () => {
     try {
-      console.log('📝 [TimeClockPage] Registrando salida...');
 
       if (!shiftData.entryRegistered) {
         showNotification('error', 'Debes registrar tu entrada primero');
@@ -222,11 +209,9 @@ const loadInitialData = useCallback(async (silent = false) => {
         shiftData.currentShift?.id
       );
 
-      console.log('✅ Salida registrada (raw):', exit);
 
       // ✅ Convertir timestamp a formato 12h (AM/PM)
       exit.time_local = formatTime(exit.timestamp || exit.time);
-      console.log('✅ Hora local de salida:', exit.time_local);
 
       // Actualizar estado
       setShiftData(prev => ({
@@ -242,7 +227,6 @@ const loadInitialData = useCallback(async (silent = false) => {
 
       // ✅ Actualizar historial automáticamente
       if (historyRef.current?.refreshHistory) {
-        console.log('🔄 Actualizando historial...');
         historyRef.current.refreshHistory();
       }
 

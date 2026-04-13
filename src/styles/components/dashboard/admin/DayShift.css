@@ -54,7 +54,19 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: default;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.legend-item.active {
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.28);
+  transform: translateY(-1px);
+}
+
+.legend-item.neutral {
+  background: #f8fafc;
+  color: #334155;
+  border-color: #cbd5e1;
 }
 
 .legend-item.activo {
@@ -161,7 +173,7 @@
   width: 56px;
   height: 56px;
   border-radius: 14px;
-  background: linear-gradient(135deg, #4f8cff 0%, #8b5cf6 100%);
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -172,28 +184,18 @@
   box-shadow: 0 4px 12px rgba(79, 140, 255, 0.25);
   transition: all 0.3s ease;
   position: relative;
+  isolation: isolate;
 }
 
 .avatar-large::after {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: 16px;
-  padding: 2px;
-  background: linear-gradient(135deg, #4f8cff, #8b5cf6);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0;
-  transition: all 0.3s ease;
+  content: none;
 }
 
 .turno-card:hover .avatar-large {
-  transform: scale(1.05) rotate(5deg);
+  transform: scale(1.03);
 }
 
-.turno-card:hover .avatar-large::after {
-  opacity: 1;
-}
+/* Eliminado overlay para evitar que se oculten iniciales en algunos navegadores */
 
 .empleado-details {
   flex: 1;
@@ -237,7 +239,13 @@
 .turno-info {
   display: flex;
   align-items: center;
-  gap: 1.5rem;
+  gap: 1rem;
+}
+
+.status-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .horario-info {
@@ -316,8 +324,8 @@
 .turno-actions {
   display: flex;
   gap: 0.5rem;
-  opacity: 0;
-  transform: translateX(-10px);
+  opacity: 1;
+  transform: translateX(0);
   transition: all 0.3s ease;
 }
 
@@ -445,4 +453,31 @@
   .turno-card {
     padding: 1rem;
   }
+}
+
+.status-pill {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.status-pill.activo {
+  background: rgba(16, 185, 129, 0.14);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.status-pill.pendiente {
+  background: rgba(245, 158, 11, 0.14);
+  color: #b45309;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.status-pill.ausente {
+  background: rgba(239, 68, 68, 0.14);
+  color: #b91c1c;
+  border: 1px solid rgba(239, 68, 68, 0.35);
 }

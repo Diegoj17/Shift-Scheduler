@@ -32,7 +32,6 @@ const ShiftFilters = ({ onDateRangeChange, loading }) => {
       return;
     }
 
-    console.log('🔍 Ejecutando búsqueda de turnos...');
     onDateRangeChange(startDate, endDate);
   };
 
@@ -42,7 +41,6 @@ const ShiftFilters = ({ onDateRangeChange, loading }) => {
       start: '',
       end: ''
     });
-    console.log('🧹 Filtros limpiados');
   };
 
   const setQuickRange = (e) => {

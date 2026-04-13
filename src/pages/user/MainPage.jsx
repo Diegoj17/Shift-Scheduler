@@ -70,7 +70,6 @@ const MainPage = () => {
   useEffect(() => {
     // Este efecto se ejecutará cuando el componente se monte
     // y mostrará toasts si hay notificaciones pendientes
-    console.log('🏠 MainPage montada - Sistema de toasts activo');
   }, []);
 
   // Polling: refrescar turno de hoy y próximos turnos cada X minutos

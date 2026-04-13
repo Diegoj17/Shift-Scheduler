@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { FaTimes, FaCopy, FaCheck, FaExclamationTriangle, FaCalendarAlt } from 'react-icons/fa';
+import { useState, useEffect, useRef } from 'react';
+import { FaCopy, FaCheck, FaExclamationTriangle, FaCalendarAlt } from 'react-icons/fa';
 import { formatDateForInput } from '../../../utils/dateUtils';
 import '../../../styles/components/calendar/admin/ShiftDuplicateModal.css';
 
@@ -10,6 +10,18 @@ const ShiftDuplicateModal = ({
   shifts,
   employees
 }) => {
+  const backdropMouseDownRef = useRef(false);
+
+  const handleBackdropMouseDown = (event) => {
+    backdropMouseDownRef.current = event.target === event.currentTarget;
+  };
+
+  const handleBackdropClick = (event) => {
+    if (event.target !== event.currentTarget) return;
+    if (!backdropMouseDownRef.current) return;
+    onClose?.();
+  };
+
   const [formData, setFormData] = useState({
     sourceStartDate: formatDateForInput(new Date()),
     sourceEndDate: formatDateForInput(new Date()),
@@ -51,6 +63,19 @@ const ShiftDuplicateModal = ({
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscKey = (event) => {
+      if (event.key === 'Escape') {
+        onClose?.();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscKey);
+    return () => document.removeEventListener('keydown', handleEscKey);
+  }, [isOpen, onClose]);
+
   // ✅ Calcular turnos en el rango de origen
   useEffect(() => {
     if (formData.sourceStartDate && formData.sourceEndDate) {
@@ -63,7 +88,6 @@ const ShiftDuplicateModal = ({
         return shiftDate >= start && shiftDate <= end;
       });
       
-      console.log('📊 [ShiftDuplicateModal] Turnos en rango origen:', shiftsToShow.length);
       setShiftsInRange(shiftsToShow);
     } else {
       setShiftsInRange([]);
@@ -118,13 +142,6 @@ const ShiftDuplicateModal = ({
         shiftsPerPattern: shiftsInRange.length
       });
       
-      console.log('📊 Stats calculados:', { 
-        sourceDays, 
-        targetDays, 
-        repetitions, 
-        totalShifts,
-        shiftsInPattern: shiftsInRange.length
-      });
     } else {
       // ✅ Si no hay rango destino completo, solo actualizar sourceDays
       setDuplicationStats(prev => ({ 
@@ -201,12 +218,6 @@ const ShiftDuplicateModal = ({
     targetEndDate: formData.targetEndDate || formData.targetStartDate  // ✅ Fallback
   };
 
-  console.log('📤 [ShiftDuplicateModal] Datos a enviar:', duplicateData);
-  console.log('✅ Verificación de campos:');
-  console.log('  - sourceStartDate:', duplicateData.sourceStartDate);
-  console.log('  - sourceEndDate:', duplicateData.sourceEndDate);
-  console.log('  - targetStartDate:', duplicateData.targetStartDate);
-  console.log('  - targetEndDate:', duplicateData.targetEndDate);
 
   // ✅ Validar que ningún campo sea undefined
   if (!duplicateData.sourceStartDate || !duplicateData.sourceEndDate || 
@@ -221,14 +232,14 @@ const ShiftDuplicateModal = ({
   if (!isOpen) return null;
 
   return (
-    <div className="calendar-modal-overlay" onClick={onClose}>
+    <div className="calendar-modal-overlay" onMouseDown={handleBackdropMouseDown} onClick={handleBackdropClick}>
       <div className="calendar-modal-content calendar-shift-duplicate-modal" onClick={(e) => e.stopPropagation()}>
         <div className="calendar-modal-header">
           <h3>
             <FaCopy className="calendar-modal-header-icon" /> Duplicar Horarios
           </h3>
           <button className="calendar-btn-close-modal" onClick={onClose} aria-label="Cerrar modal">
-            <FaTimes aria-hidden="true" />
+            <span className="calendar-close-x" aria-hidden="true">X</span>
           </button>
         </div>
 

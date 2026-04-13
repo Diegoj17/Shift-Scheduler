@@ -21,11 +21,6 @@ export const useNotificationWatcher = (checkInterval = 15000) => {
         
         // Si encontramos una notificación nueva y no leída
         if (latestNotification.id !== lastNotificationId.current && !latestNotification.is_read) {
-          console.log('🔔 Nueva notificación detectada:', {
-            id: latestNotification.id,
-            type: latestNotification.type,
-            title: latestNotification.title
-          });
           
           // ✅ showToast ya filtra por rol automáticamente
           showToast({

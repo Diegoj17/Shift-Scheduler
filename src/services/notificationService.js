@@ -6,9 +6,7 @@ const notificationService = {
    */
   async getNotifications(params = {}) {
     try {
-      console.log('🔔 [notificationService] Obteniendo notificaciones con params:', params);
       const response = await notificationsApi.get('/notifications/', { params });
-      console.log('✅ [notificationService] Notificaciones obtenidas:', response.data?.notifications?.length || response.data?.results?.length || 0);
       return response.data;
     } catch (error) {
       console.error('❌ [notificationService] Error obteniendo notificaciones:', error);
@@ -21,13 +19,11 @@ const notificationService = {
    */
   async getUnreadNotifications(limit = 10) {
     try {
-      console.log('🔔 [notificationService] Obteniendo notificaciones no leídas, límite:', limit);
       const response = await notificationsApi.get('/notifications/', {
         params: { is_read: false, limit }
       });
       const unreadCount = response.data?.notifications?.filter(n => !n.is_read).length || 
                           response.data?.results?.filter(n => !n.is_read).length || 0;
-      console.log(`✅ [notificationService] ${unreadCount} notificaciones no leídas obtenidas`);
       return response.data;
     } catch (error) {
       console.error('❌ [notificationService] Error obteniendo notificaciones no leídas:', error);
@@ -40,10 +36,8 @@ const notificationService = {
    */
   async getUnreadCount() {
     try {
-      console.log('🔔 [notificationService] Obteniendo conteo de no leídas...');
       const response = await notificationsApi.get('/notifications/unread_count/');
       const count = response.data.unread_count || 0;
-      console.log(`✅ [notificationService] Conteo de no leídas: ${count}`);
       return count;
     } catch (error) {
       console.error('❌ [notificationService] Error obteniendo conteo de no leídas:', error);
@@ -56,9 +50,7 @@ const notificationService = {
    */
   async markAsRead(notificationId) {
     try {
-      console.log(`🔔 [notificationService] Marcando notificación ${notificationId} como leída`);
       const response = await notificationsApi.post(`/notifications/${notificationId}/mark_as_read/`);
-      console.log(`✅ [notificationService] Notificación ${notificationId} marcada como leída`);
       return response.data;
     } catch (error) {
       console.error(`❌ [notificationService] Error marcando notificación ${notificationId} como leída:`, error);
@@ -71,10 +63,8 @@ const notificationService = {
    */
   async markAllAsRead() {
     try {
-      console.log('🔔 [notificationService] Marcando todas las notificaciones como leídas');
       const response = await notificationsApi.post('/notifications/mark_all_as_read/');
       const updatedCount = response.data?.updated_count || 0;
-      console.log(`✅ [notificationService] ${updatedCount} notificaciones marcadas como leídas`);
       return response.data;
     } catch (error) {
       console.error('❌ [notificationService] Error marcando todas como leídas:', error);
@@ -87,9 +77,7 @@ const notificationService = {
    */
   async deleteNotification(notificationId) {
     try {
-      console.log(`🔔 [notificationService] Eliminando notificación ${notificationId}`);
       await notificationsApi.delete(`/notifications/${notificationId}/`);
-      console.log(`✅ [notificationService] Notificación ${notificationId} eliminada`);
       return true;
     } catch (error) {
       console.error(`❌ [notificationService] Error eliminando notificación ${notificationId}:`, error);
@@ -102,10 +90,8 @@ const notificationService = {
    */
   async deleteAllRead() {
     try {
-      console.log('🔔 [notificationService] Eliminando todas las notificaciones leídas');
       const response = await notificationsApi.delete('/notifications/delete_all_read/');
       const deletedCount = response.data?.deleted_count || 0;
-      console.log(`✅ [notificationService] ${deletedCount} notificaciones leídas eliminadas`);
       return response.data;
     } catch (error) {
       console.error('❌ [notificationService] Error eliminando notificaciones leídas:', error);
@@ -118,9 +104,7 @@ const notificationService = {
    */
   async getPreferences() {
     try {
-      console.log('🔔 [notificationService] Obteniendo preferencias de notificación');
       const response = await notificationsApi.get('/preferences/');
-      console.log('✅ [notificationService] Preferencias obtenidas:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ [notificationService] Error obteniendo preferencias:', error);
@@ -133,9 +117,7 @@ const notificationService = {
    */
   async updatePreferences(preferences) {
     try {
-      console.log('🔔 [notificationService] Actualizando preferencias:', preferences);
       const response = await notificationsApi.put('/preferences/update_preferences/', preferences);
-      console.log('✅ [notificationService] Preferencias actualizadas correctamente');
       return response.data;
     } catch (error) {
       console.error('❌ [notificationService] Error actualizando preferencias:', error);
@@ -148,9 +130,7 @@ const notificationService = {
    */
   async updatePreferencesPartial(preferences) {
     try {
-      console.log('🔔 [notificationService] Actualizando preferencias parcialmente:', preferences);
       const response = await notificationsApi.patch('/preferences/update_preferences/', preferences);
-      console.log('✅ [notificationService] Preferencias actualizadas parcialmente');
       return response.data;
     } catch (error) {
       console.error('❌ [notificationService] Error actualizando preferencias (PATCH):', error);
@@ -167,7 +147,6 @@ const notificationService = {
    */
   async getReminderNotifications(limit = 20) {
     try {
-      console.log('⏰ [notificationService] Obteniendo notificaciones de recordatorios');
       const response = await notificationsApi.get('/notifications/', {
         params: { 
           type: 'shift_reminder',
@@ -177,7 +156,6 @@ const notificationService = {
       });
       
       const reminders = response.data?.notifications || response.data?.results || [];
-      console.log(`✅ [notificationService] ${reminders.length} notificaciones de recordatorios obtenidas`);
       
       return {
         ...response.data,
@@ -194,7 +172,6 @@ const notificationService = {
    */
   async getRecentReminders(hours = 24) {
     try {
-      console.log(`⏰ [notificationService] Obteniendo recordatorios recientes (últimas ${hours}h)`);
       
       // Obtener todas las notificaciones y filtrar por fecha
       const allNotifications = await this.getNotifications({ limit: 100 });
@@ -210,7 +187,6 @@ const notificationService = {
         return notificationTime >= cutoffTime;
       });
       
-      console.log(`✅ [notificationService] ${recentReminders.length} recordatorios recientes encontrados`);
       return recentReminders;
     } catch (error) {
       console.error('❌ [notificationService] Error obteniendo recordatorios recientes:', error);
@@ -223,7 +199,6 @@ const notificationService = {
    */
   async getNotificationsByType(type, limit = 20) {
     try {
-      console.log(`🔔 [notificationService] Obteniendo notificaciones de tipo: ${type}`);
       const response = await notificationsApi.get('/notifications/', {
         params: { 
           type,
@@ -233,7 +208,6 @@ const notificationService = {
       });
       
       const filtered = response.data?.notifications || response.data?.results || [];
-      console.log(`✅ [notificationService] ${filtered.length} notificaciones de tipo ${type} obtenidas`);
       
       return {
         ...response.data,
@@ -250,7 +224,6 @@ const notificationService = {
    */
   async getNotificationStats() {
     try {
-      console.log('📊 [notificationService] Obteniendo estadísticas de notificaciones');
       const allNotifications = await this.getNotifications({ limit: 1000 });
       const notifications = allNotifications.notifications || allNotifications.results || [];
       
@@ -306,7 +279,6 @@ const notificationService = {
           is_read: n.is_read
         }));
 
-      console.log('📊 [notificationService] Estadísticas calculadas:', stats);
       return stats;
     } catch (error) {
       console.error('❌ [notificationService] Error obteniendo estadísticas de notificaciones:', error);
@@ -331,7 +303,6 @@ const notificationService = {
    */
   async getRemindersSummary() {
     try {
-      console.log('📋 [notificationService] Obteniendo resumen de recordatorios');
       
       const stats = await this.getNotificationStats();
       const recentReminders = await this.getRecentReminders(24);
@@ -344,7 +315,6 @@ const notificationService = {
         reminder_coverage: this.calculateReminderCoverage(recentReminders)
       };
       
-      console.log('📋 [notificationService] Resumen de recordatorios:', summary);
       return summary;
     } catch (error) {
       console.error('❌ [notificationService] Error obteniendo resumen de recordatorios:', error);
@@ -410,7 +380,6 @@ const notificationService = {
    */
   async checkSystemHealth() {
     try {
-      console.log('🏥 [notificationService] Verificando salud del sistema');
       
       const [stats, preferences, unreadCount] = await Promise.all([
         this.getNotificationStats(),
@@ -453,7 +422,6 @@ const notificationService = {
         health.recommendations.push('Configurar preferencias de notificación');
       }
       
-      console.log('🏥 [notificationService] Salud del sistema:', health);
       return health;
     } catch (error) {
       console.error('❌ [notificationService] Error verificando salud del sistema:', error);

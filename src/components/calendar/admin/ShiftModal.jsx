@@ -1,8 +1,12 @@
-import { useState, useEffect, useCallback } from 'react';
-import { FaTimes, FaCheck, FaExclamationTriangle, FaUser, FaClock, FaSave, FaLock,FaBriefcase, FaTrash, FaInfoCircle } from 'react-icons/fa';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import DatePicker from 'react-datepicker';
+import { FaTimes, FaCheck, FaExclamationTriangle, FaUser, FaClock, FaSave, FaLock,FaBriefcase, FaTrash, FaInfoCircle, FaCalendarAlt } from 'react-icons/fa';
+import { es } from 'date-fns/locale';
 import { detectShiftConflicts, calculateShiftDuration } from '../../../utils/shiftValidation';
 import { formatDateForInput, formatTimeForInput, combineDateAndTime, timeStringToMinutes, minutesToTimeString, formatTime } from '../../../utils/dateUtils';
 import '../../../styles/components/calendar/admin/ShiftModal.css';
+import '../../../styles/components/calendar/admin/DeleteMultipleShiftsModal.css';
+import 'react-datepicker/dist/react-datepicker.css';
 
 const TIMEZONE_OFFSET = -5 * 60; // UTC-05:00 (Bogotá, Lima, Quito)
 const TIMEZONE_ISO_SUFFIX = getTimezoneIsoSuffix(TIMEZONE_OFFSET);
@@ -53,11 +57,43 @@ function isShiftTypeInPast(type, selectedDate) {
   return isTimeInPast(selectedDate, typeStartTime);
 }
 
+function parseManualDateInput(value) {
+  if (!value) return null;
+  const raw = String(value).trim();
+
+  // Formato dd/MM/yyyy
+  const slashMatch = raw.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  if (slashMatch) {
+    const day = Number(slashMatch[1]);
+    const month = Number(slashMatch[2]);
+    const year = Number(slashMatch[3]);
+    const d = new Date(year, month - 1, day);
+    if (d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day) {
+      return d;
+    }
+  }
+
+  // Formato yyyy-MM-dd
+  const isoMatch = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  if (isoMatch) {
+    const year = Number(isoMatch[1]);
+    const month = Number(isoMatch[2]);
+    const day = Number(isoMatch[3]);
+    const d = new Date(year, month - 1, day);
+    if (d.getFullYear() === year && d.getMonth() === month - 1 && d.getDate() === day) {
+      return d;
+    }
+  }
+
+  return null;
+}
+
 const ShiftModal = ({ 
   isOpen, 
   onClose, 
   onSave, 
   onDelete,
+  openDeleteConfirmOnOpen = false,
   shift = null,
   employees,
   shiftTypes,
@@ -66,7 +102,24 @@ const ShiftModal = ({
 }) => {
   // Zona horaria fija manejada vía utilidades (UTC-05:00 Bogotá/Lima/Quito)
 
-  const formatDisplayTime = (timeValue) => (timeValue ? formatTime(timeValue) : '--');
+  const formatDisplayTime = (timeValue) => {
+    if (!timeValue) return '--';
+
+    const raw = String(timeValue).trim();
+    const match = raw.match(/(\d{1,2}):(\d{2})/);
+
+    if (match) {
+      const hours = Number(match[1]);
+      const minutes = match[2];
+      if (!Number.isNaN(hours)) {
+        const hour12 = ((hours + 11) % 12) + 1;
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        return `${hour12}:${minutes} ${ampm}`;
+      }
+    }
+
+    return formatTime(timeValue);
+  };
   const getTypeTimeWindow = (type) => {
     if (!type) return '-- - --';
     const startRaw = type.startTime || type.start_time || type.start || '';
@@ -128,15 +181,51 @@ const ShiftModal = ({
   const [pastShiftTypes, setPastShiftTypes] = useState([]); // Tipos de turno que ya pasaron
   const isLocked = shift?.is_locked || shift?.isLocked || false;
   const lockReason = shift?.lock_reason || shift?.lockReason || '';
+  const selectedDateObject = formData.date ? createDateAtTimezone(formData.date, '00:00') : null;
+  const modalBackdropMouseDownRef = useRef(false);
+  const deleteBackdropMouseDownRef = useRef(false);
+
+  const handleModalBackdropMouseDown = (event) => {
+    modalBackdropMouseDownRef.current = event.target === event.currentTarget;
+  };
+
+  const handleModalBackdropClick = (event) => {
+    if (event.target !== event.currentTarget) return;
+    if (!modalBackdropMouseDownRef.current) return;
+    onClose?.();
+  };
+
+  const handleDeleteBackdropMouseDown = (event) => {
+    deleteBackdropMouseDownRef.current = event.target === event.currentTarget;
+  };
+
+  const handleDeleteBackdropClick = (event) => {
+    if (event.target !== event.currentTarget) return;
+    if (!deleteBackdropMouseDownRef.current) return;
+    setShowDeleteConfirm(false);
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscClose = (event) => {
+      if (event.key !== 'Escape') return;
+      if (showDeleteConfirm) {
+        setShowDeleteConfirm(false);
+        return;
+      }
+      onClose?.();
+    };
+
+    window.addEventListener('keydown', handleEscClose);
+    return () => window.removeEventListener('keydown', handleEscClose);
+  }, [isOpen, showDeleteConfirm, onClose]);
 
   // ✅ MEJORA: useEffect para cargar datos del shift
   useEffect(() => {
     if (shift) {
-      console.log('🔍 [ShiftModal] SHIFT COMPLETO:', shift);
-      console.log('🔍 [ShiftModal] shift.extendedProps:', shift.extendedProps);
       
       const employeeNameFromShift = shift.employeeName || shift.extendedProps?.employeeName;
-      console.log('🔍 [ShiftModal] Nombre del empleado en shift:', employeeNameFromShift);
       
       let employeeUserIdToUse = '';
       
@@ -150,7 +239,6 @@ const ShiftModal = ({
         if (matchingEmployee) {
           employeeUserIdToUse = String(matchingEmployee.id);
           setSelectedEmployee(matchingEmployee);
-          console.log('✅ [ShiftModal] Empleado encontrado por nombre:', matchingEmployee);
         }
       }
       
@@ -163,7 +251,6 @@ const ShiftModal = ({
       if (!employeeUserIdToUse && employees && employees.length > 0) {
         employeeUserIdToUse = String(employees[0].id);
         setSelectedEmployee(employees[0]);
-        console.log('🔄 [ShiftModal] Usando primer empleado disponible:', employees[0]);
       }
       
       const startDate = shift.start ? new Date(shift.start) : new Date();
@@ -181,10 +268,8 @@ const ShiftModal = ({
         notes: shift.extendedProps?.notes || shift.notes || ''
       };
       
-      console.log('✅ [ShiftModal] FormData configurado:', newFormData);
       setFormData(newFormData);
     } else if (isOpen) {
-      console.log('📝 [ShiftModal] Modo creación - reseteando formulario');
       setFormData({
         employeeId: '',
         shiftTypeId: '',
@@ -198,10 +283,10 @@ const ShiftModal = ({
     
     setErrors({});
     setConflicts([]);
-    setShowDeleteConfirm(false);
+    setShowDeleteConfirm(Boolean(shift?.id && openDeleteConfirmOnOpen));
     setAutoDetectedType(false);
     setPastShiftTypes([]);
-  }, [shift, isOpen, employees]);
+  }, [shift, isOpen, employees, openDeleteConfirmOnOpen]);
 
   // ✅ NUEVO: useEffect para calcular tipos de turno que ya pasaron
   useEffect(() => {
@@ -257,12 +342,6 @@ const ShiftModal = ({
       const selUserId = selEmp?.id ?? formData.employeeId;
       const empName = selEmp?.name || `${selEmp?.first_name || ''} ${selEmp?.last_name || ''}`.trim();
 
-      console.log('🔍 [ShiftModal] Calculando disponibilidad para:', {
-        empName,
-        empDbId,
-        selUserId,
-        fecha: formData.date
-      });
 
       const sameDay = (aDate, bDateStr) => {
         if (!aDate) return false;
@@ -292,7 +371,6 @@ const ShiftModal = ({
         return matchesEmp && same;
       }) : [];
 
-      console.log(`📊 [ShiftModal] Disponibilidades encontradas para ${empName}:`, empAvails.length);
 
       const ensureSeconds = (t) => {
         if (!t) return null;
@@ -319,7 +397,6 @@ const ShiftModal = ({
       const hasAvailData = empAvailRanges.length > 0;
 
       if (!hasAvailData) {
-        console.log('ℹ️ [ShiftModal] No hay disponibilidades registradas, permitiendo todos los tipos que no hayan pasado');
         shiftTypes.forEach(t => { 
           const isPast = isShiftTypeInPast(t, formData.date);
           map[String(t.id)] = !isPast; // Solo disponible si no ha pasado
@@ -375,23 +452,12 @@ const ShiftModal = ({
           reasonsMap[String(type.id)] = reason;
           
           if (!available) {
-            console.log(`🚫 [ShiftModal] Tipo "${type.name}" no disponible: ${reason}`);
           }
         });
       }
       // indicar que sí existen registros de disponibilidad para este empleado
       map._hasAvail = true;
 
-      // Si estamos en modo edición y el formulario ya tiene un tipo asignado (el original),
-      // forzamos que ese tipo esté disponible para permitir su selección/actualización.
-      // Usamos formData.shiftTypeId como fuente directa del tipo asignado al cargar el turno.
-      if (shift && shift.id && formData.shiftTypeId) {
-        const origKey = String(formData.shiftTypeId);
-        map[origKey] = true;
-        reasonsMap[origKey] = reasonsMap[origKey] || 'Asignado al turno (edición)';
-      }
-
-      console.log('✅ [ShiftModal] Mapa de disponibilidad calculado:', map);
       setTypeAvailabilityMap({ ...map, _reasons: reasonsMap, _hasAvail: map._hasAvail });
     } catch (err) {
       console.error('❌ Error calculando disponibilidad por tipo:', err);
@@ -513,6 +579,19 @@ const ShiftModal = ({
 
   const handleTimeChange = (field, value) => {
     handleChange(field, value);
+  };
+
+  const handleDateChange = (dateValue) => {
+    if (!dateValue) return;
+    handleChange('date', formatDateForInput(dateValue));
+  };
+
+  const handleDateRawInput = (event) => {
+    const typedValue = event?.target?.value;
+    const parsedDate = parseManualDateInput(typedValue);
+    if (parsedDate) {
+      handleChange('date', formatDateForInput(parsedDate));
+    }
   };
 
   const validateForm = () => {
@@ -762,11 +841,8 @@ const ShiftModal = ({
   // ✅ MEJORA: Manejar click en tipo no disponible
   const handleTypeClick = (type) => {
     const key = String(type.id);
-    // Determinar disponibilidad real (si estamos editando, solo el tipo asignado debe ser disponible)
+    // Determinar disponibilidad real para la fecha/empleado seleccionados
     let isAvailable = typeAvailabilityMap[key] !== false;
-    if (shift && shift.id) {
-      isAvailable = String(type.id) === String(formData.shiftTypeId);
-    }
     // reason read from _reasons when needed below
 
     // Mensajes más amigables según la causa
@@ -789,7 +865,12 @@ const ShiftModal = ({
 
   if (!isOpen) return null;
 
-  const selectedShiftType = shiftTypes.find(type => type.id === formData.shiftTypeId);
+  const selectedShiftType = shiftTypes.find(type => String(type.id) === String(formData.shiftTypeId));
+  const deleteModalShiftTypeName =
+    selectedShiftType?.name ||
+    shift?.extendedProps?.shiftTypeName ||
+    shift?.shiftTypeName ||
+    'No especificado';
   const hasAvailabilityData = unavailabilities && unavailabilities.length > 0;
   // Determinar el tipo original asignado al turno: preferir id, sino intentar emparejar por nombre
   let originalShiftTypeId = null;
@@ -813,14 +894,14 @@ const ShiftModal = ({
     : [];
 
   return (
-    <div className="calendar-modal-overlay" onClick={onClose}>
+    <div className="calendar-modal-overlay" onMouseDown={handleModalBackdropMouseDown} onClick={handleModalBackdropClick}>
       <div className="calendar-modal-content calendar-shift-modal" onClick={(e) => e.stopPropagation()}>
         <div className="calendar-modal-header">
           <h3>
             <FaClock className="calendar-modal-header-icon" /> {shift?.id ? 'Editar Turno' : 'Crear Turno'}
           </h3>
           <button className="calendar-btn-close-modal" onClick={onClose} aria-label="Cerrar modal">
-            <FaTimes aria-hidden="true" />
+            <span className="calendar-close-x" aria-hidden="true">X</span>
           </button>
         </div>
 
@@ -901,10 +982,6 @@ const ShiftModal = ({
                 // Por defecto usar el mapa de disponibilidad calculado
                 let isAvailable = typeAvailabilityMap[key] !== false;
                 const reason = typeAvailabilityMap._reasons?.[key] || '';
-                // Si estamos editando un turno, sólo permitir disponible el tipo asignado al turno
-                if (shift && shift.id) {
-                  isAvailable = String(type.id) === String(formData.shiftTypeId);
-                }
                 
                 return (
                   <div
@@ -957,14 +1034,49 @@ const ShiftModal = ({
           <div className="calendar-form-row">
             <div className="calendar-form-group">
               <label htmlFor="date">Fecha *</label>
-              <input
-                type="date"
-                id="date"
-                value={formData.date}
-                onChange={(e) => handleChange('date', e.target.value)}
-                className={errors.time ? 'calendar-input-error' : ''}
-                min={formatDateForInput(new Date())} // No permitir fechas pasadas
-              />
+              <div className="calendar-date-picker-wrapper">
+                <DatePicker
+                  id="date"
+                  selected={selectedDateObject}
+                  onChange={handleDateChange}
+                  onChangeRaw={handleDateRawInput}
+                  className={`calendar-date-picker-input ${errors.time ? 'calendar-input-error' : ''}`}
+                  dateFormat="dd/MM/yyyy"
+                  locale={es}
+                  placeholderText="dd/MM/yyyy"
+                  showPopperArrow={false}
+                  popperPlacement="bottom-start"
+                  autoComplete="off"
+                  shouldCloseOnSelect={true}
+                  renderCustomHeader={({
+                    date,
+                    decreaseMonth,
+                    increaseMonth,
+                  }) => (
+                    <div className="calendar-datepicker-header">
+                      <button
+                        type="button"
+                        className="calendar-datepicker-nav"
+                        onClick={decreaseMonth}
+                        aria-label="Mes anterior"
+                      >
+                        <span className="calendar-datepicker-nav-arrow" aria-hidden="true">‹</span>
+                      </button>
+                      <span className="calendar-datepicker-current-month">
+                        {date.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })}
+                      </span>
+                      <button
+                        type="button"
+                        className="calendar-datepicker-nav"
+                        onClick={increaseMonth}
+                        aria-label="Mes siguiente"
+                      >
+                        <span className="calendar-datepicker-nav-arrow" aria-hidden="true">›</span>
+                      </button>
+                    </div>
+                  )}
+                />
+              </div>
             </div>
 
             <div className="calendar-form-group">
@@ -1115,36 +1227,35 @@ const ShiftModal = ({
 
         {/* MODAL DE CONFIRMACIÓN DE ELIMINACIÓN */}
         {showDeleteConfirm && (
-          <div className="calendar-modal-overlay calendar-delete-confirm-overlay">
-            <div className="calendar-modal-content calendar-delete-confirm-modal" onClick={(e) => e.stopPropagation()}>
-              <div className="calendar-modal-header">
-                <h3>
-                  <FaTrash className="calendar-modal-header-icon" /> Eliminar Turno
+          <div className="calendar-delete-modal-overlay" onMouseDown={handleDeleteBackdropMouseDown} onClick={handleDeleteBackdropClick}>
+            <div className="calendar-delete-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="calendar-delete-modal-header">
+                <h3 className="calendar-delete-modal-header-title">
+                  <FaTrash className="calendar-delete-modal-header-icon" /> Eliminar Turno
                 </h3>
-                <button className="calendar-btn-close-modal" onClick={() => setShowDeleteConfirm(false)}>
-                  <FaTimes />
+                <button className="calendar-delete-modal-close" onClick={() => setShowDeleteConfirm(false)} aria-label="Cerrar confirmación de eliminación">
+                  <span className="calendar-delete-modal-close-x" aria-hidden="true">X</span>
                 </button>
               </div>
-              <div className="calendar-modal-body">
+              <div className="calendar-delete-modal-content">
                 <div className="calendar-delete-warning">
-                  <div className="calendar-delete-accent" aria-hidden="true" />
-                  <p className="calendar-delete-message">
+                  <p className="calendar-delete-modal-message">
                     ¿Estás seguro de que deseas eliminar este turno?
                   </p>
-                  <div className="calendar-shift-details">
+                  <div className="calendar-delete-modal-details">
                     <p><strong>Empleado:</strong> {selectedEmployee?.name || 'Desconocido'}</p>
                     <p><strong>Fecha:</strong> {formatDateDisplay(formData.date)}</p>
                     <p><strong>Horario:</strong> {formatDisplayTime(formData.startTime)} - {formatDisplayTime(formData.endTime)}</p>
-                    <p><strong>Tipo:</strong> {selectedShiftType?.name || 'No especificado'}</p>
+                    <p><strong>Tipo:</strong> {deleteModalShiftTypeName}</p>
                   </div>
-                  <p className="calendar-warning-note">Esta acción no se puede deshacer.</p>
+                  <p className="calendar-delete-modal-warning">Esta acción no se puede deshacer.</p>
                 </div>
               </div>
-              <div className="calendar-modal-footer">
-                <button className="calendar-btn-secondary" onClick={() => setShowDeleteConfirm(false)}>
+              <div className="calendar-delete-modal-actions">
+                <button className="calendar-delete-modal-btn calendar-delete-modal-btn-cancel" onClick={() => setShowDeleteConfirm(false)}>
                   Cancelar
                 </button>
-                <button className="calendar-btn-danger" onClick={handleDelete}>
+                <button className="calendar-delete-modal-btn calendar-delete-modal-btn-confirm" onClick={handleDelete}>
                   <FaTrash /> Eliminar Turno
                 </button>
               </div>

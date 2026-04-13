@@ -98,7 +98,6 @@ const EditProfile = () => {
     setIsSaving(false);
     
     if (result.success) {
-      console.log('Perfil actualizado exitosamente');
       navigate('/profile');
     } else {
       console.error('Error al actualizar perfil:', result.error);

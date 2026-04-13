@@ -1,8 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FaCheckCircle, FaExclamationTriangle, FaInfoCircle } from "react-icons/fa";
 import '../../styles/components/common/Modal.css';
 
 const Modal = ({ isOpen, type = 'success', title, message, onClose }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscKey = (event) => {
+      if (event.key === 'Escape') {
+        onClose?.();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscKey);
+    return () => document.removeEventListener('keydown', handleEscKey);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   const getIcon = () => {

@@ -32,7 +32,6 @@ export const availabilityService = {
    */
   createAvailability: async (availabilityData) => {
     try {
-      console.log('[availabilityService] createAvailability - Data recibida:', availabilityData);
       
       // Validaciones
       if (!availabilityData.date) {
@@ -56,10 +55,8 @@ export const availabilityService = {
         notes: availabilityData.notes || ''
       };
 
-      console.log('[availabilityService] createAvailability - Payload final:', payload);
       
       const response = await shiftAPI.createAvailability(payload);
-      console.log('[availabilityService] createAvailability - Response:', response);
       
       return response;
     } catch (error) {
@@ -94,7 +91,6 @@ export const availabilityService = {
    */
   getAvailabilities: async (params = {}) => {
     try {
-      console.log('[availabilityService] getAvailabilities - Params:', params);
       
       const response = await shiftAPI.getAvailabilities(params);
       
@@ -104,7 +100,6 @@ export const availabilityService = {
       }
 
       const availabilities = Array.isArray(response) ? response : (response.results || response.data || []);
-      console.log(`✅ availabilityService: Se obtuvieron ${availabilities.length} disponibilidades`);
       
       return availabilities;
     } catch (error) {
@@ -119,16 +114,13 @@ export const availabilityService = {
    */
   getAvailabilitiesForCalendar: async (params = {}) => {
     try {
-      console.log('🔄 availabilityService: Obteniendo disponibilidades para calendario...');
       
       const availabilitiesData = await availabilityService.getAvailabilities(params);
       
       if (!Array.isArray(availabilitiesData) || availabilitiesData.length === 0) {
-        console.log('📭 availabilityService: No hay disponibilidades para mostrar');
         return [];
       }
 
-      console.log('📊 Disponibilidades raw:', availabilitiesData.length);
 
       const availabilities = availabilitiesData.map(avail => {
         // Construir fechas ISO
@@ -188,9 +180,7 @@ export const availabilityService = {
         };
       }).filter(Boolean);
 
-      console.log('✅ Disponibilidades formateadas:', availabilities.length);
       if (availabilities.length > 0) {
-        console.log('📊 Primera disponibilidad formateada:', availabilities[0]);
       }
 
       return availabilities;
@@ -206,8 +196,6 @@ export const availabilityService = {
    */
   updateAvailability: async (availabilityId, availabilityData) => {
     try {
-      console.log('[availabilityService] updateAvailability - ID:', availabilityId);
-      console.log('[availabilityService] updateAvailability - Data:', availabilityData);
 
       const payload = {
         date: availabilityData.date,
@@ -217,11 +205,9 @@ export const availabilityService = {
         notes: availabilityData.notes || ''
       };
 
-      console.log('🔄 [availabilityService] Actualizando disponibilidad:', availabilityId, payload);
       
       const response = await shiftAPI.updateAvailability(availabilityId, payload);
       
-      console.log('✅ [availabilityService] Disponibilidad actualizada:', response);
       return response;
     } catch (error) {
       console.error('❌ [availabilityService] Error updating availability:', error.response?.data);
@@ -240,11 +226,9 @@ export const availabilityService = {
    */
   deleteAvailability: async (availabilityId) => {
     try {
-      console.log('[availabilityService] deleteAvailability - ID:', availabilityId);
       
       const response = await shiftAPI.deleteAvailability(availabilityId);
       
-      console.log('✅ [availabilityService] Disponibilidad eliminada');
       return response;
     } catch (error) {
       console.error('[availabilityService] Error deleting availability:', error);
@@ -259,7 +243,6 @@ export const availabilityService = {
    */
   checkEmployeeAvailability: async (checkData) => {
     try {
-      console.log('[availabilityService] checkEmployeeAvailability - Data:', checkData);
 
       if (!checkData.employee) {
         throw new Error('El ID del empleado es requerido');
@@ -281,11 +264,9 @@ export const availabilityService = {
         end_time: padSeconds(checkData.end_time || checkData.endTime)
       };
 
-      console.log('[availabilityService] checkEmployeeAvailability - Payload:', payload);
 
       const response = await shiftAPI.checkEmployeeAvailability(payload);
       
-      console.log('[availabilityService] checkEmployeeAvailability - Response:', response);
       
       return response;
     } catch (error) {
@@ -315,7 +296,6 @@ export const availabilityService = {
         employeesWithAvailability: new Set(availabilities.map(a => a.employee_id)).size
       };
 
-      console.log('📊 Estadísticas de disponibilidad:', stats);
       return stats;
     } catch (error) {
       console.error('❌ Error getting availability stats:', error);

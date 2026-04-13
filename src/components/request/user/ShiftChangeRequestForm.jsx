@@ -92,12 +92,6 @@ const ShiftChangeRequestForm = ({ initialOriginalShiftId = null }) => {
       const nextMonth = new Date(today);
       nextMonth.setDate(today.getDate() + 30);
 
-      console.log('🕐 Fechas para filtro:', {
-        hoy: today.toISOString(),
-        hoyLocal: today.toString(),
-        en30Dias: nextMonth.toISOString(),
-        en30DiasLocal: nextMonth.toString()
-      });
 
       const getLocalDate = (date) => {
         const year = date.getFullYear();
@@ -111,10 +105,8 @@ const ShiftChangeRequestForm = ({ initialOriginalShiftId = null }) => {
         end_date: getLocalDate(nextMonth)
       });
 
-      console.log('📋 Turnos recibidos del backend:', shifts);
       
       if (shifts.length === 0) {
-        console.log('🔍 Debug: No hay turnos.');
       }
 
       setMyShifts(shifts);
@@ -136,7 +128,6 @@ const ShiftChangeRequestForm = ({ initialOriginalShiftId = null }) => {
   const loadEmployees = async () => {
     try {
       const empList = await shiftService.getEmployees();
-      console.log('✅ Empleados cargados:', empList);
       setEmployees(empList);
     } catch (error) {
       console.error('Error cargando empleados:', error);
@@ -152,10 +143,8 @@ const ShiftChangeRequestForm = ({ initialOriginalShiftId = null }) => {
     setLoadingEmployeeShifts(true);
     
     try {
-      console.log('🔄 Cargando turnos del empleado:', employeeId);
       const shifts = await shiftService.getEmployeeShifts(employeeId);
       
-      console.log('✅ Turnos del empleado obtenidos:', shifts);
       setEmployeeShifts(shifts);
       
       if (shifts.length === 0) {
@@ -233,7 +222,6 @@ const ShiftChangeRequestForm = ({ initialOriginalShiftId = null }) => {
         reason: formData.reason.trim()
       };
 
-      console.log('📤 Enviando solicitud CON compañero:', payload);
 
       await shiftChangeService.createChangeRequest(payload);
 

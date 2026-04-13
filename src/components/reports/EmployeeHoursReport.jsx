@@ -338,7 +338,6 @@ const EmployeeHoursReport = () => {
       
       // Obtener turnos del servicio
       const shiftsRaw = await shiftService.getEmployeeShifts(employeeDbId);
-      console.log('Datos crudos de turnos:', shiftsRaw);
       let scheduledShifts = [];
       if (!Array.isArray(shiftsRaw) || shiftsRaw.length === 0) {
         try {
@@ -346,7 +345,6 @@ const EmployeeHoursReport = () => {
           const params = { employee: employeeDbId, start_date: filters.startDate, end_date: filters.endDate };
           const resp = await shiftService.getShifts(params);
           scheduledShifts = Array.isArray(resp) ? resp : (resp?.results || resp?.data || []);
-          console.log('Programados obtenidos vía getShifts:', scheduledShifts.length);
         } catch (err) {
           console.warn('No se pudieron obtener turnos programados por getShifts:', err);
         }
@@ -369,7 +367,6 @@ const EmployeeHoursReport = () => {
         return d >= start && d <= end;
       });
 
-      console.log('Turnos filtrados:', filtered);
 
       // Primero: intentar obtener registros de tiempo (check_in/check_out) del empleado
       const timeFilters = {
@@ -382,7 +379,6 @@ const EmployeeHoursReport = () => {
       let finalShifts = [];
       try {
         const entries = await timeEntryService.getMyTimeEntries(timeFilters);
-        console.log('Registros de tiempo del empleado:', entries.length);
 
         // Agrupar por fecha usando la fecha del registro o el timestamp
         const grouped = {};
@@ -594,7 +590,6 @@ const EmployeeHoursReport = () => {
         totalHours: Math.round(totalHours * 100) / 100
       };
 
-      console.log('Reporte final:', final);
       setReportData(final.shifts.length > 0 ? final : null);
       
     } catch (error) {

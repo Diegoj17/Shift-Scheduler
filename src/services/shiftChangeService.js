@@ -6,7 +6,6 @@ export const shiftChangeService = {
    */
   createChangeRequest: async (requestData) => {
     try {
-      console.log('🔄 [shiftChangeService] Creando solicitud:', requestData);
       
       const payload = {
         original_shift: requestData.originalShiftId,
@@ -16,7 +15,6 @@ export const shiftChangeService = {
       };
 
       const response = await shiftsApi.post('/change-requests/new/', payload);
-      console.log('✅ [shiftChangeService] Solicitud creada:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ [shiftChangeService] Error creando solicitud:', error);
@@ -30,7 +28,6 @@ export const shiftChangeService = {
           console.warn('⏱️ [shiftChangeService] Timeout al crear solicitud — verificando existencia en backend...');
           const results = await module.exports.getChangeRequests({ original_shift: requestData.originalShiftId });
           if (results && results.length > 0) {
-            console.log('✅ [shiftChangeService] Verificación: solicitud encontrada tras timeout:', results[0]);
             return results[0];
           }
         } catch (verifyErr) {
@@ -50,7 +47,6 @@ export const shiftChangeService = {
    */
   getChangeRequests: async (filters = {}) => {
     try {
-      console.log('🔄 [shiftChangeService] Obteniendo solicitudes con filtros:', filters);
 
       const params = new URLSearchParams();
 
@@ -64,7 +60,6 @@ export const shiftChangeService = {
 
       const query = params.toString() ? `?${params.toString()}` : '';
       const response = await shiftsApi.get(`/change-requests/${query}`);
-      console.log('✅ [shiftChangeService] Solicitudes obtenidas:', response.data);
       return response.data.results || [];
     } catch (error) {
       console.error('❌ [shiftChangeService] Error obteniendo solicitudes:', error);
@@ -77,7 +72,6 @@ export const shiftChangeService = {
    */
   reviewChangeRequest: async (requestId, action, comment = '') => {
     try {
-      console.log('🔄 [shiftChangeService] Revisando solicitud:', { requestId, action, comment });
       
       const payload = {
         action, // 'approve' o 'reject'
@@ -89,7 +83,6 @@ export const shiftChangeService = {
       // Intentar la petición una vez, y reintentar si hay timeout / sin respuesta
       try {
         const response = await doPut();
-        console.log('✅ [shiftChangeService] Solicitud revisada:', response.data);
         return response.data;
       } catch (err) {
         console.warn('⚠️ [shiftChangeService] Error en primer intento de review:', err?.code || err?.message || err);
@@ -101,7 +94,6 @@ export const shiftChangeService = {
           try {
             await new Promise(res => setTimeout(res, 500));
             const retryResp = await doPut();
-            console.log('✅ [shiftChangeService] Solicitud revisada en retry:', retryResp.data);
             return retryResp.data;
           } catch (retryErr) {
             console.error('❌ [shiftChangeService] Retry falló:', retryErr);

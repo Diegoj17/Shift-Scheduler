@@ -40,10 +40,8 @@ const TimeAvailabilityPage = () => {
   const loadAvailabilities = async () => {
     setIsLoading(true);
     try {
-      console.log('🔄 Cargando disponibilidades...');
       const data = await availabilityService.getAvailabilities();
 
-      console.log('✅ Disponibilidades cargadas (raw):', data);
 
       // Normalizar la forma de cada disponibilidad para evitar inconsistencias
       const ensureSeconds = (t) => {
@@ -89,7 +87,6 @@ const TimeAvailabilityPage = () => {
         };
       }) : [];
 
-      console.log('✅ Disponibilidades normalizadas:', normalized);
       setAvailabilities(normalized);
     } catch (error) {
       console.error('❌ Error al cargar disponibilidades:', error);

@@ -99,7 +99,6 @@ const TimeAvailabilityForm = ({ onSubmit, initialData = null, onUpdate, onCancel
         notes: formData.notes
       };
 
-      console.log('📝 [TimeAvailabilityForm] Datos a enviar:', availabilityData);
 
       if (isEditing) {
         // ✅ Actualizar disponibilidad existente
@@ -108,7 +107,6 @@ const TimeAvailabilityForm = ({ onSubmit, initialData = null, onUpdate, onCancel
           availabilityData
         );
         
-        console.log('✅ Disponibilidad actualizada:', response);
         
         if (onUpdate) {
           onUpdate({
@@ -120,7 +118,6 @@ const TimeAvailabilityForm = ({ onSubmit, initialData = null, onUpdate, onCancel
         // ✅ Crear nueva disponibilidad
         const response = await availabilityService.createAvailability(availabilityData);
         
-        console.log('✅ Disponibilidad creada:', response);
         
         if (onSubmit) {
           onSubmit(response);
@@ -158,7 +155,6 @@ const TimeAvailabilityForm = ({ onSubmit, initialData = null, onUpdate, onCancel
     setIsSubmitting(true);
     try {
       await availabilityService.deleteAvailability(initialData.id);
-      console.log('✅ Disponibilidad eliminada:', initialData.id);
       if (onDelete) onDelete(initialData.id);
       if (onCancel) onCancel();
     } catch (error) {

@@ -45,13 +45,17 @@ export const AuthProvider = ({ children }) => {
       console.error('Error en login:', error);
       
       let errorMessage = 'Error al iniciar sesión';
+      const backendMessage = error?.response?.data?.detail || error?.response?.data?.message || error?.message || '';
+      const normalizedMessage = String(backendMessage).toLowerCase();
       
       if (error.response?.status === 401) {
         errorMessage = 'Credenciales inválidas';
       } else if (error.response?.status === 403) {
         errorMessage = 'Usuario bloqueado o inactivo';
-      } else if (error.response?.data?.message) {
-        errorMessage = error.response.data.message;
+      } else if (/active account|inactivo|inactive|bloquead/i.test(normalizedMessage)) {
+        errorMessage = 'Usuario inactivo o bloqueado';
+      } else if (backendMessage) {
+        errorMessage = backendMessage;
       }
       
       return { success: false, message: errorMessage };

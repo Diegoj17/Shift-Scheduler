@@ -16,9 +16,7 @@ export const timeEntryService = {
    */
   getLastEntry: async () => {
     try {
-      console.log('🔄 [timeEntryService] Obteniendo último registro...');
       const response = await shiftsApi.get('/time-entry/last/');
-      console.log('✅ [timeEntryService] Último registro:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ [timeEntryService] Error obteniendo último registro:', error);
@@ -31,7 +29,6 @@ export const timeEntryService = {
    */
   createTimeEntry: async (entryType, notes = '', location = '', shiftId = null) => {
     try {
-      console.log('🔄 [timeEntryService] Creando registro:', { entryType, notes, location, shiftId });
       
       const payload = {
         entry_type: entryType,
@@ -44,7 +41,6 @@ export const timeEntryService = {
       }
 
       const response = await shiftsApi.post('/time-entry/new/', payload);
-      console.log('✅ [timeEntryService] Registro creado:', response.data);
       return response.data;
     } catch (error) {
       console.error('❌ [timeEntryService] Error creando registro:', error);
@@ -63,7 +59,6 @@ export const timeEntryService = {
    */
   getMyTimeEntries: async (filters = {}) => {
     try {
-      console.log('🔄 [timeEntryService] Obteniendo historial con filtros:', filters);
       
       const params = new URLSearchParams();
       
@@ -82,7 +77,6 @@ export const timeEntryService = {
       }
 
       const response = await shiftsApi.get(`/time-entry/?${params.toString()}`);
-      console.log('✅ [timeEntryService] Historial obtenido:', response.data);
       return response.data.results || [];
     } catch (error) {
       console.error('❌ [timeEntryService] Error obteniendo historial:', error);

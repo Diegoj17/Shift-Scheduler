@@ -1,10 +1,21 @@
 import React from 'react';
-import { FaExclamationTriangle, FaTrash, FaLock, FaUnlock, FaTimes } from 'react-icons/fa';
+import { FaExclamationTriangle, FaTrash, FaLock, FaUnlock } from 'react-icons/fa';
 import '../../styles/components/management/ConfirmationModal.css';
 import Modal from '../common/Modal';
 
 const ConfirmationModal = ({ user, action, onConfirm, onClose }) => {
   const [resultModal, setResultModal] = React.useState({ isOpen: false, type: 'success', title: '', message: '' });
+
+  React.useEffect(() => {
+    const handleEscKey = (event) => {
+      if (event.key === 'Escape') {
+        onClose?.();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscKey);
+    return () => document.removeEventListener('keydown', handleEscKey);
+  }, [onClose]);
 
   const handleConfirm = async () => {
     try {
@@ -59,12 +70,12 @@ const ConfirmationModal = ({ user, action, onConfirm, onClose }) => {
   const config = getModalConfig();
 
   return (
-    <div className="modal-overlay">
-      <div className="confirmation-modal">
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="confirmation-modal" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{config.title}</h2>
           <button className="close-btn" onClick={onClose}>
-            <FaTimes />
+            <span aria-hidden="true">X</span>
           </button>
         </div>
 

@@ -1,8 +1,21 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FaExclamationTriangle } from 'react-icons/fa';
 import '../../styles/components/common/Modal.css';
 
 const ConfirmModal = ({ isOpen, title = 'Confirmar', message, onCancel, onConfirm, confirmLabel = 'Eliminar', cancelLabel = 'Cancelar' }) => {
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleEscKey = (event) => {
+      if (event.key === 'Escape') {
+        onCancel?.();
+      }
+    };
+
+    document.addEventListener('keydown', handleEscKey);
+    return () => document.removeEventListener('keydown', handleEscKey);
+  }, [isOpen, onCancel]);
+
   if (!isOpen) return null;
 
   return (
