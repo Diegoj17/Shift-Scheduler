@@ -3,7 +3,7 @@ import '../../../styles/components/time/admin/TimeScheduleStats.css';
 import { MdPeople, MdCheckCircle, MdTimer, MdBusiness } from 'react-icons/md';
 
 const TimeScheduleStats = ({ availabilities }) => {
-  const totalEmployees = new Set(availabilities.map(a => a.employeeName)).size;
+  const totalEmployees = new Set(availabilities.map(a => a.employee_name || a.employeeName)).size;
   const availableCount = availabilities.filter(a => a.type === 'available').length;
 
   // Calcular total de horas disponibles
@@ -19,7 +19,8 @@ const TimeScheduleStats = ({ availabilities }) => {
   // Áreas con más disponibilidad
   const areaStats = availabilities.reduce((acc, avail) => {
     if (avail.type === 'available') {
-      acc[avail.area] = (acc[avail.area] || 0) + 1;
+      const areaKey = avail.employee_area || avail.area || 'N/A';
+      acc[areaKey] = (acc[areaKey] || 0) + 1;
     }
     return acc;
   }, {});

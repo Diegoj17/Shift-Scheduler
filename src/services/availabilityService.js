@@ -21,8 +21,8 @@ const isOvernight = (startTime, endTime) => {
 
 // Colores para disponibilidad
 export const AVAILABILITY_COLORS = {
-  AVAILABLE: '#22543d',      // Verde - Disponible
-  UNAVAILABLE: '#742a2a'     // Rojo - No disponible
+  AVAILABLE: '#38a169',      // Verde - Disponible
+  UNAVAILABLE: '#e53e3e'     // Rojo - No disponible
 };
 
 export const availabilityService = {

@@ -260,6 +260,81 @@ html, body {
   overflow-x: hidden;
 }
 
+.app-loader-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(79, 140, 255, 0.08), transparent 40%),
+    radial-gradient(circle at 80% 80%, rgba(59, 130, 246, 0.08), transparent 45%),
+    linear-gradient(135deg, #f8fafc 0%, #eef2f7 100%);
+  padding: 1.5rem;
+}
+
+.app-loader-card {
+  width: min(440px, 100%);
+  background: rgba(255, 255, 255, 0.9);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid #dbe4f0;
+  border-radius: 18px;
+  box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+  padding: 1.5rem 1.25rem;
+}
+
+.app-loader-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.9rem;
+}
+
+.app-loader-icon {
+  color: #4f8cff;
+  font-size: 1.1rem;
+}
+
+.app-loader-progress {
+  width: 100%;
+  height: 9px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #e2e8f0;
+  position: relative;
+}
+
+.app-loader-progress-bar {
+  display: block;
+  height: 100%;
+  width: 45%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #4f8cff, #3b82f6);
+  animation: appLoaderMove 1.2s ease-in-out infinite;
+}
+
+.app-loader-text {
+  margin-top: 0.8rem;
+  color: #475569;
+  font-size: 0.93rem;
+  font-weight: 600;
+}
+
+@keyframes appLoaderMove {
+  0% {
+    transform: translateX(-70%);
+  }
+  50% {
+    transform: translateX(95%);
+  }
+  100% {
+    transform: translateX(-70%);
+  }
+}
+
 /* Asegurar que todos los contenedores no excedan el ancho */
 .auth-layout,
 .auth-main-container,

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { AVAILABILITY_COLORS } from '../../../services/availabilityService';
 import '../../../styles/components/time/admin/TimeScheduleList.css';
 import { MdCalendarToday, MdAccessTime, MdTimer, MdBusiness, MdCheckCircle, MdCancel } from 'react-icons/md';
 
@@ -58,6 +59,23 @@ const TimeScheduleList = ({ availabilities }) => {
       }
     };
     return `${to12(startTime)} - ${to12(endTime)}`;
+  };
+
+  const resolveAvailabilityColor = (avail) => {
+    const fromBackend = avail?.adminResolvedColor || avail?.resolvedColor || avail?.color || avail?.status_color || avail?.availability_color || avail?.type_color;
+    if (typeof fromBackend === 'string' && fromBackend.trim()) return fromBackend.trim();
+    return avail?.type === 'available' ? AVAILABILITY_COLORS.AVAILABLE : AVAILABILITY_COLORS.UNAVAILABLE;
+  };
+
+  const toRgba = (hex, alpha = 0.16) => {
+    if (!hex || typeof hex !== 'string' || !hex.startsWith('#')) return `rgba(15, 23, 42, ${alpha})`;
+    const clean = hex.replace('#', '');
+    const expanded = clean.length === 3 ? clean.split('').map((c) => c + c).join('') : clean;
+    if (expanded.length !== 6) return `rgba(15, 23, 42, ${alpha})`;
+    const r = parseInt(expanded.substring(0, 2), 16);
+    const g = parseInt(expanded.substring(2, 4), 16);
+    const b = parseInt(expanded.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   };
 
   const calculateDuration = (startTime, endTime) => {
@@ -147,9 +165,14 @@ const TimeScheduleList = ({ availabilities }) => {
           const startTime = avail.start_time || '00:00';
           const endTime = avail.end_time || '00:00';
           const availType = avail.type || 'available';
+          const availabilityColor = resolveAvailabilityColor(avail);
 
           return (
-            <div key={avail.id} className={`time-schedule-list-item ${availType}`}>
+            <div
+              key={avail.id}
+              className={`time-schedule-list-item ${availType}`}
+              style={{ '--availability-color': availabilityColor }}
+            >
               <div className="time-schedule-list-item-header">
                 <div className="time-schedule-list-item-employee">
                   <div className="time-schedule-list-item-avatar">
@@ -160,7 +183,14 @@ const TimeScheduleList = ({ availabilities }) => {
                     <div className="time-schedule-list-item-role">{employeePosition}</div>
                   </div>
                 </div>
-                <span className={`time-schedule-list-item-badge ${availType}`}>
+                <span
+                  className={`time-schedule-list-item-badge ${availType}`}
+                  style={{
+                    backgroundColor: toRgba(availabilityColor, 0.16),
+                    color: availabilityColor,
+                    border: `1px solid ${toRgba(availabilityColor, 0.35)}`
+                  }}
+                >
                   {availType === 'available' ? (
                     <>
                       <MdCheckCircle style={{ marginRight: 8 }} />

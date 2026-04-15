@@ -162,9 +162,6 @@ export const shiftService = {
 
       const shiftsData = Array.isArray(response) ? response : (response.results || response.data || []);
 
-      if (shiftsData.length > 0) {
-      }
-
       const shifts = shiftsData.map(shift => {
         // Construir fechas ISO
         const start = shift.start || (shift.date && shift.start_time ? `${shift.date}T${shift.start_time}` : null);
@@ -183,6 +180,18 @@ export const shiftService = {
         const employeeName = shift.employee || shift.employee_name || '';
         const role = shift.role || '';
         const notes = shift.notes || '';
+        const department = shift.department || shift.employee_department || shift.employee_area || shift.area || shift.departamento || '';
+        
+        // Debug para verificar el departamento
+        if (shift.id) {
+          console.log(`[DEBUG] Shift ${shift.id}: department="${department}", raw fields:`, {
+            department: shift.department,
+            employee_department: shift.employee_department,
+            employee_area: shift.employee_area,
+            area: shift.area,
+            departamento: shift.departamento
+          });
+        }
         
         const title = employeeName && role ? `${employeeName} - ${role}` : employeeName || 'Sin empleado';
         const color = shift.shift_type_color || shift.color || '#3788d8';
@@ -217,6 +226,8 @@ export const shiftService = {
           shiftTypeName: shift.shift_type_name || shift.shiftTypeName,
           role,
           notes,
+          department,
+          area: department,
           
           // ✅ CRÍTICO: extendedProps con TODOS los datos
           extendedProps: {
@@ -227,6 +238,8 @@ export const shiftService = {
             shiftTypeName: shift.shift_type_name || shift.shiftTypeName,
             role,
             notes,
+            department,
+            area: department,
             date: shift.date,
             start_time: shift.start_time || shift.startTime,
             end_time: shift.end_time || shift.endTime,
@@ -240,9 +253,6 @@ export const shiftService = {
           }
         };
       }).filter(Boolean);
-
-      if (shifts.length > 0) {
-      }
 
       return shifts;
     } catch (error) {
@@ -265,6 +275,29 @@ export const shiftService = {
     } catch (error) {
       console.error('❌ [shiftService] Error deleting shift:', error);
       throw new Error(error.response?.data?.detail || 'Error al eliminar turno');
+    }
+  },
+
+  deleteShifts: async (shiftIds) => {
+    try {
+      if (!Array.isArray(shiftIds) || shiftIds.length === 0) {
+        throw new Error('Se requiere al menos un turno para eliminar');
+      }
+
+      const ids = shiftIds
+        .map((id) => parseInt(id, 10))
+        .filter((id) => Number.isInteger(id));
+
+      if (ids.length === 0) {
+        throw new Error('Los IDs de turno no son válidos');
+      }
+
+      const response = await shiftAPI.deleteShifts(ids);
+
+      return response;
+    } catch (error) {
+      console.error('❌ [shiftService] Error deleting shifts:', error);
+      throw new Error(error.response?.data?.detail || error.message || 'Error al eliminar turnos');
     }
   },
 
@@ -591,6 +624,8 @@ export const shiftService = {
         const employeeName = shift.employee_name || '';
         const shiftTypeName = shift.shift_type_name || 'Turno';
         const role = shift.employee_position || shift.role || '';
+        const department = shift.department || shift.employee_department || shift.employee_area || shift.area || '';
+        const location = shift.location || shift.work_location || shift.site || department || '';
         const notes = shift.notes || '';
         const color = shift.shift_type_color;
         
@@ -609,6 +644,9 @@ export const shiftService = {
             shiftTypeId: shift.shift_type,
             shiftTypeName,
             role,
+            department,
+            area: department,
+            location,
             notes,
             color
           }
@@ -637,9 +675,6 @@ export const shiftService = {
       const shiftsData = response.data?.results || response.data || [];
       
       // Debug: ver estructura completa
-      if (shiftsData.length > 0) {
-      }
-
       // Si algunos turnos vienen con shift_type_id (o shift_type) pero sin nombre,
       // intentar obtener la lista de tipos de turno y mapearlos para adjuntar el nombre.
       try {

@@ -6,6 +6,13 @@
   height: 100%;
 }
 
+.title-accent {
+  width: 4px;
+  height: 24px;
+  border-radius: 3px;
+  background: #4f8cff;
+}
+
 .distribucion-content {
   margin-top: 1.5rem;
 }
@@ -171,6 +178,13 @@
   gap: 1rem;
 }
 
+.legend-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+  letter-spacing: -0.01em;
+}
+
 .legend-color {
   width: 20px;
   height: 20px;
@@ -235,17 +249,14 @@
 
 .legend-row:nth-child(1) {
   animation-delay: 0.1s;
-  --legend-color: #3b82f6;
 }
 
 .legend-row:nth-child(2) {
   animation-delay: 0.2s;
-  --legend-color: #8b5cf6;
 }
 
 .legend-row:nth-child(3) {
   animation-delay: 0.3s;
-  --legend-color: #f59e0b;
 }
 
 /* Estado de carga */

@@ -1,26 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import Header from '../../components/common/Header';
 import SidebarEmployee from '../../components/common/SidebarEmployee.jsx';
-import { FaSyncAlt, FaClock, FaCalendarAlt, FaExclamationTriangle, FaClipboardList, FaMoneyBillWave, FaBullhorn } from 'react-icons/fa';
+import { FaSyncAlt, FaClock, FaCalendarAlt } from 'react-icons/fa';
 import WelcomeCard from '../../components/dashboard/user/WelcomeCard.jsx';
 import TodayScheduleCard from '../../components/dashboard/user/TodayScheduleCard.jsx';
 import { shiftService } from '../../services/shiftService';
 import QuickActionsCard from '../../components/dashboard/user/QuickActionsCard.jsx';
 import UpcomingShiftsCard from '../../components/dashboard/user/UpcomingShiftsCard.jsx';
 import MonthlyStatsCard from '../../components/dashboard/user/MonthlyStatsCard.jsx';
-import RemindersCard from '../../components/dashboard/user/RemindersCard.jsx';
 import menuItems from '../../components/common/sidebarMenu.jsx';
-import { useToast } from '../../contexts/NotificationToastContext.jsx';
 import '@/styles/components/dashboard/user/WelcomeCard.css';
+import '../../styles/pages/user/MainPage.css';
 
 // Nota: moved activeItem state into component
 
 const MainPage = () => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   const [currentTime, setCurrentTime] = useState(new Date());
   const [activeItem, setActiveItem] = useState('dashboard');
-  const { showToast } = useToast();
   // Estado local para controlar el sidebar (abierto / colapsado)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [employee] = useState({
@@ -41,10 +41,10 @@ const MainPage = () => {
   const [upcomingError, setUpcomingError] = useState(null);
 
   const [quickActions] = useState([
-    { id: 1, title: 'Solicitar Cambio', icon: <FaSyncAlt />, color: '#4CAF50' },
-    { id: 2, title: 'Registrar Horas', icon: <FaClock />, color: '#2196F3' },
     { id: 3, title: 'Ver Calendario', icon: <FaCalendarAlt />, color: '#FF9800' },
-    { id: 4, title: 'Reportar Incidencia', icon: <FaExclamationTriangle />, color: '#F44336' }
+    { id: 2, title: 'Registrar Horas', icon: <FaClock />, color: '#2196F3' },
+    { id: 4, title: 'Registrar Disponibilidad', icon: <FaClock />, color: '#14b8a6' },
+    { id: 1, title: 'Solicitar Cambio', icon: <FaSyncAlt />, color: '#4CAF50' }
   ]);
 
   const [monthlyStats] = useState({
@@ -53,11 +53,12 @@ const MainPage = () => {
     punctuality: '98%'
   });
 
-  const [reminders] = useState([
-    { icon: <FaClipboardList />, text: 'Revisión trimestral programada para el 25 de Enero' },
-    { icon: <FaMoneyBillWave />, text: 'Nómina disponible para consulta' },
-    { icon: <FaBullhorn />, text: 'Objetivos del mes: 85% completado' }
-  ]);
+  const currentUserDepartment =
+    currentUser?.departamento ||
+    currentUser?.department ||
+    currentUser?.employee_area ||
+    currentUser?.area ||
+    '';
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -145,8 +146,16 @@ const MainPage = () => {
           const hours = (start || end) ? `${fmt(start)} - ${fmt(end)}` : '-';
           const shiftName = s.shift_type_name || s.shift_type || (s.shift_type && s.shift_type.name) || 'Turno';
           const isFree = (s.status && String(s.status).toLowerCase() === 'free') || (shiftName && shiftName.toLowerCase().includes('libre')) || (s.type === 'free');
+          const department = s.department || s.employee_department || s.employee_area || s.area || s.departamento || currentUserDepartment;
 
-          return { date: date || dateStr, shift: isFree ? 'Libre' : shiftName, hours: isFree ? '-' : hours };
+          return {
+            date: date || dateStr,
+            shift: isFree ? 'Libre' : shiftName,
+            hours: isFree ? '-' : hours,
+            department,
+            area: department,
+            userDepartment: currentUserDepartment
+          };
         });
 
         if (!mounted) return;
@@ -185,13 +194,6 @@ const MainPage = () => {
     const action = quickActions.find(a => a.id === actionId);
     if (!action) return;
 
-    // Mostrar toast de confirmación
-    showToast({
-      type: 'info',
-      title: 'Acción Iniciada',
-      message: `Procesando: ${action.title}`
-    });
-
     // Navegación existente
     if (action.id === 1) {
       navigate('/employee/shift-change-request');
@@ -205,13 +207,10 @@ const MainPage = () => {
       navigate('/employee/time');
       return;
     }
-    
-    // Por defecto, mantener comportamiento de alerta pero con toast
-    showToast({
-      type: 'success',
-      title: action.title,
-      message: 'Acción completada exitosamente'
-    });
+    if (action.id === 4) {
+      navigate('/employee/availability');
+      return;
+    }
   };
 
   const handleToggleSidebar = () => {
@@ -219,11 +218,6 @@ const MainPage = () => {
   };
 
   const handleClockAction = () => {
-    showToast({
-      type: 'info', 
-      title: 'Registro de Tiempo',
-      message: 'Redirigiendo al registro de horas...'
-    });
     navigate('/employee/time');
   };
 
@@ -232,7 +226,7 @@ const MainPage = () => {
   };
 
   return (
-    <div className="dashboard-container">
+    <div className="dashboard-container employee-dashboard">
       <SidebarEmployee 
       isOpen={isSidebarOpen} 
       onToggle={handleToggleSidebar} 
@@ -241,7 +235,7 @@ const MainPage = () => {
       menuItems={menuItems}
       />
 
-      <div className={`main-content ${!isSidebarOpen ? 'sidebar-collapsed' : ''}`}>
+      <div className={`main-content employee-main-content ${!isSidebarOpen ? 'sidebar-collapsed' : ''}`}>
         <Header employee={employee} onToggleSidebar={handleToggleSidebar} pageTitle={`Inicio`} />
 
         <div className="content-area">
@@ -297,10 +291,6 @@ const MainPage = () => {
 
               <div className="lower-grid-item">
                 <MonthlyStatsCard stats={monthlyStats} />
-              </div>
-
-              <div className="lower-grid-item">
-                <RemindersCard reminders={reminders} />
               </div>
             </div>
           </div>

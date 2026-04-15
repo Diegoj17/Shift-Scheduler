@@ -1,12 +1,10 @@
 import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { FaSun, FaClock, FaCalendarDay, FaBuilding, FaCheckCircle, FaDownload, FaExchangeAlt } from 'react-icons/fa';
+import { FaSun, FaClock, FaCalendarDay, FaBuilding, FaCheckCircle } from 'react-icons/fa';
 import { FiSun, FiClock, FiMoon} from 'react-icons/fi';
 import '../../../styles/components/calendar/user/ShiftDetails.css';
 
-const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange, hideActions = false }) => {
-  // shift ya contiene userDepartment pasado desde ShiftCalendarPage
-  
+const ShiftDetailsView = ({ shift, isOpen, onClose, onEdit }) => {
   useEffect(() => {
     if (!isOpen) return;
 
@@ -84,30 +82,19 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange, hideA
     return 0;
   };
 
-  // Función para determinar el tipo de turno basado en el nombre o color
   const getShiftTypeFromData = (shift) => {
-    // Si tenemos el color de la BD, usarlo para determinar el tipo
-    const color = shift.extendedProps?.color || shift.backgroundColor;
+    const color = shift.backgroundColor || shift.color;
     
+    if (color === '#4caf50') return 'morning';
+    if (color === '#ffc107') return 'afternoon';
+    if (color === '#2196F3') return 'night';
     
-    // Mapear colores de la BD a tipos
-    if (color === '#4caf50') return 'morning';     // Verde - Mañana
-    if (color === '#ffc107') return 'afternoon';   // Amarillo - Tarde
-    if (color === '#2196F3') return 'night';       // Azul - Noche
-    
-    // ✅ LÓGICA MEJORADA: determinar por hora de inicio
     if (shift.start) {
       const startHour = new Date(shift.start).getHours();
-      
       if (startHour >= 6 && startHour < 12) return 'morning';
       if (startHour >= 12 && startHour < 18) return 'afternoon';
       return 'night';
     }
-    
-    // Fallback: determinar por nombre
-    const shiftTypeName = shift.extendedProps?.shiftTypeName || '';
-    if (shiftTypeName.toLowerCase().includes('tarde')) return 'afternoon';
-    if (shiftTypeName.toLowerCase().includes('noche')) return 'night';
     
     return 'morning';
   };
@@ -138,15 +125,6 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange, hideA
     });
   };
 
-  const getShiftTypeColor = (type) => {
-    const colors = {
-      morning: '#4CAF50',    // Verde
-      afternoon: '#FFC107',  // Amarillo/naranja
-      night: '#2196F3'       // Azul
-    };
-    return colors[type] || '#757575';
-  };
-
   const getThemeForType = (type) => {
     const themes = {
       morning: { primary: '#4CAF50', dark: '#388E3C', icon: <FiSun />, label: 'Mañana' },
@@ -156,16 +134,14 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange, hideA
     return themes[type] || themes['night'];
   };
 
-  // Obtener el tipo basado en los datos reales de la BD
   const correctShiftType = getShiftTypeFromData(shift);
   const theme = getThemeForType(correctShiftType);
+  const actualColor = shift.backgroundColor || shift.color || theme.primary;
   
-  // ✅ CORREGIDO: Declarar actualColor una sola vez
-  const actualColor = shift.extendedProps?.color || shift.backgroundColor || getShiftTypeColor(correctShiftType);
-
   const duration = getDurationHours(shift);
 
-  // Debug para verificar
+  // Obtener el departamento con múltiples fallbacks
+  const department = shift.department || shift.area || shift.employee_area || shift.employee_department || shift.departamento || '—';
 
   const modal = (
     <div className="shift-modal-overlay" onClick={onClose}>
@@ -184,7 +160,7 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange, hideA
         <div className="shift-details-header">
           <div
             className="shift-type-indicator"
-            style={{ backgroundColor: actualColor }}  // ✅ Color real de la BD
+            style={{ backgroundColor: actualColor }}
           >
             {theme.icon}
           </div>
@@ -234,7 +210,7 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange, hideA
               <div className="shift-detail-row">
                 <span className="shift-label">Departamento:</span>
                 <span className="shift-value">
-                  {shift.userDepartment || shift.department || shift.area || '—'}
+                  {department}
                 </span>
               </div>
             </div>
@@ -259,7 +235,7 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange, hideA
                 <span 
                   className="shift-type-badge"
                   style={{ 
-                    backgroundColor: actualColor  // ✅ Color real de la BD
+                    backgroundColor: actualColor
                   }}
                 >
                   {theme.icon}
@@ -270,25 +246,22 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange, hideA
           </div>
         </div>
         
-        {!hideActions && (
-          <div className="shift-details-actions">
-            <button onClick={onExport} className="shift-btn shift-btn-primary">
-              <FaDownload className="shift-btn-icon" aria-hidden="true" />
-              Exportar
-            </button>
-            <button
-              className="shift-btn shift-btn-secondary"
-              onClick={() => {
-                if (typeof onRequestChange === 'function') {
-                  onRequestChange(shift);
-                }
-              }}
-            >
-              <FaExchangeAlt className="shift-btn-icon" aria-hidden="true" />
-              Solicitar Cambio
-            </button>
-          </div>
-        )}
+        <div className="shift-details-actions">
+          <button 
+            onClick={() => {
+              onClose();
+              if (onEdit && typeof onEdit === 'function') {
+                onEdit(shift);
+              }
+            }} 
+            className="shift-btn shift-btn-primary"
+          >
+            Editar
+          </button>
+          <button onClick={onClose} className="shift-btn shift-btn-secondary">
+            Cerrar
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -296,4 +269,4 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange, hideA
   return createPortal(modal, document.body);
 };
 
-export default ShiftDetails;
+export default ShiftDetailsView;

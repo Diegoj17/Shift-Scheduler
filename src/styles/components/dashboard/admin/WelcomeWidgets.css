@@ -24,6 +24,27 @@
   border-bottom: 2px solid transparent; /* keep layout consistent */
 }
 
+.widgets-section .section-title::before {
+  content: none;
+}
+
+.section-title-accent {
+  width: 4px;
+  height: 24px;
+  border-radius: 3px;
+  background: #4f8cff;
+  margin-right: 0.25rem;
+}
+
+.section-icon-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+}
+
 .section-icon {
   color: var(--primary-color);
   font-size: 1.25rem;

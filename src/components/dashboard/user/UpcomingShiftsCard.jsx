@@ -1,11 +1,15 @@
 import React from 'react';
-import { FaCalendarAlt, FaSun } from 'react-icons/fa';
+import { FaCalendarAlt, FaSun, FaClock } from 'react-icons/fa';
 import '../../../styles/components/dashboard/user/UpcomingShiftsCard.css';
 
 const UpcomingShiftsCard = ({ shifts = [] }) => {
   return (
     <div className="upcoming-shifts-container">
-      <h3 className="upcoming-shifts-header">Próximos Turnos</h3>
+      <h3 className="upcoming-shifts-header">
+        <span className="upcoming-shifts-title-accent" aria-hidden="true"></span>
+        <span className="upcoming-shifts-title-icon" aria-hidden="true"><FaClock /></span>
+        <span>Próximos Turnos</span>
+      </h3>
       
       <div className="upcoming-shifts-timeline">
         {shifts.map((shift, index) => (

@@ -130,11 +130,11 @@
 }
 
 .time-schedule-list-item.available::before {
-  background: linear-gradient(180deg, var(--success-color), #2f855a);
+  background: var(--availability-color, var(--success-color));
 }
 
 .time-schedule-list-item.unavailable::before {
-  background: linear-gradient(180deg, var(--error-color), #c53030);
+  background: var(--availability-color, var(--error-color));
 }
 
 .time-schedule-list-item:hover {
@@ -166,14 +166,14 @@
   width: 48px;
   height: 48px;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+  background: linear-gradient(135deg, var(--availability-color, var(--primary-color)), var(--availability-color, var(--primary-dark)));
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 20px;
   font-weight: 700;
-  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.2);
 }
 
 .time-schedule-list-item-name {

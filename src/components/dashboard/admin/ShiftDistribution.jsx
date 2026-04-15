@@ -68,6 +68,7 @@ const DistribucionTurnos = () => {
     <div className="distribucion-turnos">
       <div className="widget-header">
         <h3 className="widget-title">
+          <span className="title-accent" aria-hidden="true"></span>
           <FaChartPie className="title-icon" />
           Distribución de Turnos
         </h3>
@@ -89,7 +90,7 @@ const DistribucionTurnos = () => {
                 <div 
                   key={index}
                   className={`chart-segment ${item.isDominant ? 'dominant' : ''}`}
-                  data-tooltip={`${item.porcentaje}%`}
+                  data-tooltip={`${item.nombre}: ${item.porcentaje}%`}
                   style={{
                     width: `${(item.count / (totalCount || 1)) * 100}%`,
                     backgroundColor: item.color
@@ -102,12 +103,17 @@ const DistribucionTurnos = () => {
 
             <div className="distribucion-legend">
               {distribucion.map((item, index) => (
-                <div key={index} className="legend-row">
+                <div
+                  key={index}
+                  className="legend-row"
+                  style={{ '--legend-color': item.color }}
+                >
                   <div className="legend-info">
                     <div 
                       className="legend-color" 
                       style={{ backgroundColor: item.color }}
                     ></div>
+                    <span className="legend-name">{item.nombre}</span>
                   </div>
                   <span className="legend-value">{item.porcentaje}%</span>
                 </div>

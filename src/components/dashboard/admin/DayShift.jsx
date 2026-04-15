@@ -10,6 +10,34 @@ const DayShift = ({ filtroArea, searchTerm = '' }) => {
   const [estadoFiltro, setEstadoFiltro] = useState('todas');
   const navigate = useNavigate();
 
+  const getShiftCategoryByHour = (startDate) => {
+    if (!startDate) return 'Noche';
+    const hour = new Date(startDate).getHours();
+    if (hour >= 6 && hour < 12) return 'Mañana';
+    if (hour >= 12 && hour < 18) return 'Tarde';
+    return 'Noche';
+  };
+
+  const fallbackColorByCategory = (category) => {
+    if (category === 'Mañana') return '#22c55e';
+    if (category === 'Tarde') return '#3b82f6';
+    return '#ef4444';
+  };
+
+  const normalizeColor = (value, fallback) => {
+    const color = String(value || '').trim();
+    if (!color) return fallback;
+    if (/^(#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8}))$/.test(color)) return color;
+    if (/^(rgb|rgba|hsl|hsla)\(/.test(color)) return color;
+    return fallback;
+  };
+
+  const resolveShiftTypeColor = (shift) => {
+    const category = getShiftCategoryByHour(shift.start);
+    const fallback = fallbackColorByCategory(category);
+    return normalizeColor(shift.backgroundColor || shift.extendedProps?.color, fallback);
+  };
+
   const getEstadoDesdeBackend = (raw) => {
     const v = String(raw || '').toLowerCase();
     if (['active', 'activo', 'activa', 'en_curso', 'in_progress'].includes(v)) {
@@ -75,7 +103,8 @@ const DayShift = ({ filtroArea, searchTerm = '' }) => {
             shiftTypeId: s.extendedProps?.shiftTypeId || '',
             shiftTypeName: s.extendedProps?.shiftTypeName || '',
             notes: s.extendedProps?.notes || '',
-            backgroundColor: s.backgroundColor || s.extendedProps?.color || '#667eea'
+            backgroundColor: s.backgroundColor || s.extendedProps?.color || '#667eea',
+            shiftColor: resolveShiftTypeColor(s)
           };
         });
 
@@ -105,6 +134,8 @@ const DayShift = ({ filtroArea, searchTerm = '' }) => {
     const matchEstado = estadoFiltro === 'todas' || turno.estado === estadoFiltro;
     return matchArea && matchSearch && matchEstado;
   });
+
+  const totalTurnosLabel = loading ? '...' : String(turnosFiltrados.length);
 
   const handleEditTurno = (turno) => {
     navigate('/admin/calendar', {
@@ -149,8 +180,9 @@ const DayShift = ({ filtroArea, searchTerm = '' }) => {
     <div className="turnos-del-dia">
       <div className="card-header">
         <h2 className="card-title">
+          <span className="title-accent" aria-hidden="true"></span>
           <FaClock className="title-icon" />
-          Turnos del Día ({loading ? '...' : turnosFiltrados.length})
+          {`Turnos del Día (${totalTurnosLabel})`}
         </h2>
         <div className="status-legend">
           <button className={`legend-item activo ${estadoFiltro === 'activo' ? 'active' : ''}`} onClick={() => setEstadoFiltro('activo')}>Activo</button>
@@ -164,10 +196,14 @@ const DayShift = ({ filtroArea, searchTerm = '' }) => {
         {loading && <div style={{padding:16}}>Cargando turnos...</div>}
         {!loading && turnosFiltrados.length === 0 && <div style={{padding:16, color:'#777'}}>No hay turnos programados para hoy</div>}
         {turnosFiltrados.map(turno => (
-          <div key={turno.id} className="turno-card">
+          <div
+            key={turno.id}
+            className="turno-card"
+            style={{ '--shift-color': turno.shiftColor }}
+          >
             <div className="turno-content">
               <div className="empleado-info">
-                <div className="avatar-large">
+                <div className="avatar-large" style={{ '--shift-color': turno.shiftColor }}>
                   {getInitials(turno.empleado)}
                 </div>
                 <div className="empleado-details">

@@ -4,7 +4,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import esLocale from '@fullcalendar/core/locales/es';
-import { MdCalendarToday, MdInbox, MdAccessTime, MdBusiness } from 'react-icons/md';
+import { MdCalendarToday, MdInbox, MdAccessTime, MdBusiness, MdTune } from 'react-icons/md';
 import TimeScheduleFilter from '../../components/time/admin/TimeScheduleFilter';
 import TimeScheduleList from '../../components/time/admin/TimeScheduleList';
 import TimeScheduleStats from '../../components/time/admin/TimeScheduleStats';
@@ -15,6 +15,11 @@ import Header from '../../components/common/Header';
 import availabilityService, { AVAILABILITY_COLORS } from '../../services/availabilityService';
 import shiftService from '../../services/shiftService';
 import '../../styles/pages/admin/TimeSchedulePage.css';
+
+const ADMIN_AVAILABILITY_COLORS = {
+  available: '#38a169',
+  unavailable: '#e53e3e'
+};
 
 const TimeSchedulePage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -38,6 +43,7 @@ const TimeSchedulePage = () => {
   const [employees, setEmployees] = useState([]);
   const [shiftTypes, setShiftTypes] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
 
   const menuItems = [
     { id: "dashboard", label: "Inicio", icon: "dashboard" },
@@ -58,6 +64,22 @@ const TimeSchedulePage = () => {
     loadAvailabilities();
   }, [filters]);
 
+  const resolveAvailabilityColor = (avail) => {
+    return avail?.type === 'available'
+      ? ADMIN_AVAILABILITY_COLORS.available
+      : ADMIN_AVAILABILITY_COLORS.unavailable;
+  };
+
+  const normalizeAvailability = (avail) => ({
+    ...avail,
+    resolvedColor: resolveAvailabilityColor(avail),
+    adminResolvedColor: resolveAvailabilityColor(avail),
+    employeeName: avail.employee_name || avail.employeeName || 'Sin nombre',
+    startTime: avail.start_time || avail.startTime || '00:00',
+    endTime: avail.end_time || avail.endTime || '00:00',
+    area: avail.employee_area || avail.area || 'Sin área'
+  });
+
   useEffect(() => {
     if (calendarRef.current) {
       setTimeout(() => {
@@ -76,7 +98,7 @@ const TimeSchedulePage = () => {
         shiftService.getShiftTypes()
       ]);
 
-      setAvailabilities(availData);
+      setAvailabilities((availData || []).map(normalizeAvailability));
       setEmployees(empData);
       setShiftTypes(typesData);
     } catch (error) {
@@ -98,7 +120,7 @@ const TimeSchedulePage = () => {
 
       const data = await availabilityService.getAvailabilities(params);
       
-      setAvailabilities(data);
+      setAvailabilities((data || []).map(normalizeAvailability));
     } catch (error) {
       console.error('❌ Error al cargar disponibilidades:', error);
     }
@@ -125,8 +147,8 @@ const TimeSchedulePage = () => {
     title: `${avail.employee_name} - ${avail.employee_position}`,
     start: `${avail.date}T${avail.start_time}`,
     end: `${avail.date}T${avail.end_time}`,
-    backgroundColor: avail.type === 'available' ? AVAILABILITY_COLORS.AVAILABLE : AVAILABILITY_COLORS.UNAVAILABLE,
-    borderColor: avail.type === 'available' ? AVAILABILITY_COLORS.AVAILABLE : AVAILABILITY_COLORS.UNAVAILABLE,
+    backgroundColor: avail.adminResolvedColor,
+    borderColor: avail.adminResolvedColor,
     textColor: 'white',
     extendedProps: {
       ...avail
@@ -221,11 +243,24 @@ const handleAssignFromDetails = async (availability) => {
           <TimeScheduleStats availabilities={filteredData} />
 
           {/* Filter Section */}
-          <TimeScheduleFilter 
-            onFilterChange={handleFilterChange} 
-            filters={filters}
-            onReset={handleResetFilters}
-          />
+          <div className="time-schedule-filter-toggle-wrap">
+            <button
+              type="button"
+              className="time-schedule-filter-toggle"
+              onClick={() => setShowFilters((prev) => !prev)}
+            >
+              <MdTune size={20} />
+              {showFilters ? 'Ocultar filtros' : 'Mostrar filtros'}
+            </button>
+          </div>
+
+          {showFilters && (
+            <TimeScheduleFilter 
+              onFilterChange={handleFilterChange} 
+              filters={filters}
+              onReset={handleResetFilters}
+            />
+          )}
 
           {/* Main Content */}
           {filteredData.length === 0 ? (
@@ -271,7 +306,7 @@ const handleAssignFromDetails = async (availability) => {
                     eventClick={handleEventClick}
                     eventDidMount={(info) => {
                       const type = info.event.extendedProps.type;
-                      const bg = type === 'available' ? AVAILABILITY_COLORS.AVAILABLE : AVAILABILITY_COLORS.UNAVAILABLE;
+                      const bg = info.event.extendedProps.adminResolvedColor || (type === 'available' ? ADMIN_AVAILABILITY_COLORS.available : ADMIN_AVAILABILITY_COLORS.unavailable);
                       try {
                         info.el.style.backgroundColor = bg;
                         info.el.style.borderColor = bg;
