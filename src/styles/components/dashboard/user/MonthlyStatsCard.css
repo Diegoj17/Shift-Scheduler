@@ -7,7 +7,9 @@
   height: 100%;
   width: 100%;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e5e7eb;
+  border: 2px solid #dbe4f0;
+  position: relative;
+  overflow: hidden;
   transition: all 0.3s ease;
 }
 
@@ -15,7 +17,24 @@
 
 .monthly-stats-widget:hover {
   transform: translateY(-3px);
+  border-color: #cbd5e1;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.monthly-stats-widget::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, #4f8cff, #3b82f6);
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.monthly-stats-widget:hover::after {
+  opacity: 1;
 }
 
 .monthly-stats-heading {
@@ -29,13 +48,25 @@
 }
 
 .monthly-stats-heading::before {
-  content: '';
-  display: inline-block;
-  width: 1.5rem;
-  height: 1.5rem;
+  content: none;
+}
+
+.monthly-stats-title-accent {
+  width: 4px;
+  height: 26px;
+  border-radius: 3px;
+  background: #4f8cff;
   margin-right: 0.35rem;
-  background: var(--icon-blue, #2563eb);
-  border-radius: 0.25rem;
+}
+
+.monthly-stats-title-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  color: #4f8cff;
+  font-size: 1rem;
 }
 
 .monthly-stats-metrics-grid {
@@ -50,7 +81,7 @@
   background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
   border-radius: 14px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 2px solid transparent;
+  border: 1px solid #e2e8f0;
   position: relative;
   overflow: hidden;
 }
@@ -66,9 +97,9 @@
 }
 
 .stats-metric-box:hover {
-  transform: translateY(-4px) scale(1.03);
+  transform: translateY(-3px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-  border-color: var(--stat-color);
+  border-color: #4f8cff;
   background: #ffffff;
 }
 
@@ -86,7 +117,7 @@
 }
 
 .stats-metric-box:hover .metric-icon-circle {
-  transform: scale(1.1) rotate(5deg);
+  transform: scale(1.06) rotate(4deg);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
@@ -108,7 +139,7 @@
 }
 
 .stats-metric-box:hover .metric-value-display {
-  transform: scale(1.1);
+  transform: scale(1.04);
 }
 
 .metric-label-text {

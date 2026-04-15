@@ -327,6 +327,7 @@ const SolicitudesPendientes = () => {
     <div className="solicitudes-widget">
       <div className="widget-header">
         <h3 className="widget-title">
+          <span className="title-accent" aria-hidden="true"></span>
           <FaExclamationCircle className="title-icon" />
           Solicitudes Pendientes
         </h3>

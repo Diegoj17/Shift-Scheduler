@@ -57,6 +57,7 @@
   cursor: pointer;
   transition: all 0.3s ease;
   font-size: 1rem;
+  line-height: 1;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -76,6 +77,7 @@
   color: currentColor;
   fill: currentColor;
   display: block;
+  flex-shrink: 0;
 }
 
 .calendar-btn-today {
@@ -138,6 +140,7 @@
   background: rgba(255, 255, 255, 0.1);
   padding: 5px;
   border-radius: 12px;
+  -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
 }
 
@@ -194,6 +197,13 @@
 .fc {
   font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
   height: 100%;
+}
+
+.calendar-content .fc a,
+.calendar-content .fc a:hover,
+.calendar-content .fc a:focus {
+  color: inherit !important;
+  text-decoration: none !important;
 }
 
 .fc-theme-standard td,

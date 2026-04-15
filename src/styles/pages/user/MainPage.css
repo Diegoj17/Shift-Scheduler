@@ -38,7 +38,7 @@
 /* Layout principal: dejar espacio a la izquierda para el sidebar fijo */
 
 /* Compatibilidad con el layout usado en DashboardPage */
-.dashboard-container {
+.employee-dashboard.dashboard-container {
   display: flex;
   width: 100vw;
   min-height: 100vh;
@@ -47,7 +47,7 @@
   overflow-x: hidden;
 }
 
-.main-content {
+.employee-dashboard .main-content {
   margin-left: var(--sidebar-width);
   transition: all 0.28s cubic-bezier(0.4, 0, 0.2, 1);
   min-height: 100vh;
@@ -57,15 +57,15 @@
   position: relative;
 }
 
-.main-content.sidebar-collapsed {
+.employee-dashboard .main-content.sidebar-collapsed {
   margin-left: var(--sidebar-collapsed-width);
   width: calc(100% - var(--sidebar-collapsed-width));
 }
 
-.content-area {
+.employee-dashboard .content-area {
   flex: 1;
   width: 100%;
-  padding: 0rem 1rem;
+  padding: 1rem;
   animation: fadeIn 0.4s ease-out;
 }
 
@@ -75,13 +75,13 @@
 }
 
 /* Main Content Area */
-.dashboard-content-grid {
+.employee-dashboard .dashboard-content-grid {
   /* Mantener el grid dentro de content-area */
   margin: 0;
 }
 
 /* Ajustes del contenedor principal interior (si alguien usa la clase antigua) */
-.dashboard-main-content {
+.employee-dashboard .dashboard-main-content {
   flex: 1;
   padding: 2.5rem;
   max-width: 1400px;
@@ -89,32 +89,32 @@
   width: 100%;
 }
 
-.dashboard-content-grid {
+.employee-dashboard .dashboard-content-grid {
   display: grid;
   margin: 0;
 }
 
 /* Nueva rejilla principal: columna principal y columna secundaria (derecha) */
-.dashboard-main-grid {
+.employee-dashboard .dashboard-main-grid {
   display: grid;
   grid-template-columns: 1fr 360px;
-  gap: 1.5rem;
+  gap: 1rem;
   align-items: start;
 }
 
-.dashboard-primary-column {
+.employee-dashboard .dashboard-primary-column {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
-.dashboard-secondary-column {
+.employee-dashboard .dashboard-secondary-column {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1rem;
 }
 
-.primary-item, .secondary-item {
+.employee-dashboard .primary-item, .employee-dashboard .secondary-item {
   background: var(--card-white);
   border-radius: 12px;
   padding: 0; /* Los componentes internos controlan su propio padding */
@@ -123,17 +123,17 @@
   overflow: hidden;
 }
 
-.lower-grid {
+.employee-dashboard .lower-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
   width: 100%;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   /* ocupar todo el ancho de la grid principal */
   grid-column: 1 / -1;
 }
 
-.lower-grid-item {
+.employee-dashboard .lower-grid-item {
   background: var(--card-white);
   border-radius: 16px;
   padding: 0;
@@ -144,7 +144,7 @@
   height: fit-content;
 }
 
-.lower-grid-item:hover {
+.employee-dashboard .lower-grid-item:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
 }
@@ -152,21 +152,21 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .dashboard-main-grid {
+  .employee-dashboard .dashboard-main-grid {
     grid-template-columns: 1fr;
   }
 
-  .lower-grid {
+  .employee-dashboard .lower-grid {
     grid-template-columns: 1fr;
   }
 }
 
 @media (max-width: 768px) {
-  .dashboard-main-content {
+  .employee-dashboard .dashboard-main-content {
     padding: 1.5rem;
   }
   
-  .dashboard-content-grid {
+  .employee-dashboard .dashboard-content-grid {
     grid-template-columns: 1fr;
     gap: 1.25rem;
   }
@@ -185,11 +185,11 @@
 }
 
 @media (max-width: 480px) {
-  .dashboard-main-content {
+  .employee-dashboard .dashboard-main-content {
     padding: 1rem;
   }
   
-  .dashboard-content-grid {
+  .employee-dashboard .dashboard-content-grid {
     gap: 1rem;
   }
   
@@ -210,13 +210,13 @@
   }
 }
 
-.dashboard-content-grid > * {
+.employee-dashboard .dashboard-content-grid > * {
   animation: fadeInUp 0.6s ease-out backwards;
 }
 
-.dashboard-content-grid > *:nth-child(1) { animation-delay: 0.1s; }
-.dashboard-content-grid > *:nth-child(2) { animation-delay: 0.2s; }
-.dashboard-content-grid > *:nth-child(3) { animation-delay: 0.3s; }
-.dashboard-content-grid > *:nth-child(4) { animation-delay: 0.4s; }
-.dashboard-content-grid > *:nth-child(5) { animation-delay: 0.5s; }
-.dashboard-content-grid > *:nth-child(6) { animation-delay: 0.6s; }
+.employee-dashboard .dashboard-content-grid > *:nth-child(1) { animation-delay: 0.1s; }
+.employee-dashboard .dashboard-content-grid > *:nth-child(2) { animation-delay: 0.2s; }
+.employee-dashboard .dashboard-content-grid > *:nth-child(3) { animation-delay: 0.3s; }
+.employee-dashboard .dashboard-content-grid > *:nth-child(4) { animation-delay: 0.4s; }
+.employee-dashboard .dashboard-content-grid > *:nth-child(5) { animation-delay: 0.5s; }
+.employee-dashboard .dashboard-content-grid > *:nth-child(6) { animation-delay: 0.6s; }

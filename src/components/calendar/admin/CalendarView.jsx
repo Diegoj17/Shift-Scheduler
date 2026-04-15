@@ -210,13 +210,13 @@ const CalendarView = ({
                   el.style.borderLeftWidth = '5px';
                   el.style.boxShadow = el.style.boxShadow || 'none';
 
-                  // Texto en color (para que el título destaque) y el resto más tenue
+                  // Texto en el mismo color del tipo de turno para consistencia visual.
                   const title = el.querySelector('.calendar-event-title-text');
                   if (title) title.style.color = color;
                   const timeText = el.querySelector('.calendar-event-time-text');
-                  if (timeText) timeText.style.color = '#475569';
+                  if (timeText) timeText.style.color = color;
                   const roleText = el.querySelector('.calendar-event-role-text');
-                  if (roleText) roleText.style.color = '#718096';
+                  if (roleText) roleText.style.color = color;
                 } else {
                   // Vistas semana/día: rellenar con el color real del turno
                   el.style.backgroundColor = color;

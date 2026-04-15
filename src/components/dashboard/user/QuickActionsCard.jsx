@@ -6,6 +6,7 @@ const QuickActionsCard = ({ actions, onActionClick }) => {
   return (
     <div className="quick-actions-panel">
       <h3 className="quick-actions-title">
+        <span className="quick-actions-title-accent" aria-hidden="true"></span>
         <span className="quick-actions-title-icon-wrapper">
           <FaBolt className="quick-actions-title-icon" />
         </span>

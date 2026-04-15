@@ -6,6 +6,7 @@ import Sidebar from '../../components/common/Sidebar';
 import CalendarView from '../../components/calendar/admin/CalendarView';
 import ShiftTypeManager from '../../components/calendar/admin/ShiftTypeManager';
 import ShiftModal from '../../components/calendar/admin/ShiftModal';
+import ShiftDetailsView from '../../components/calendar/admin/ShiftDetailsView';
 import ShiftDuplicateModal from '../../components/calendar/admin/ShiftDuplicateModal';
 import DeleteMultipleShiftsModal from '../../components/calendar/admin/DeleteMultipleShiftsModal';
 // timeStringToMinutes removed (not needed here)
@@ -23,8 +24,11 @@ const CalendarPage = () => {
   const [employees, setEmployees] = useState([]);
   const [unavailabilities, _setUnavailabilities] = useState([]);
   const [isShiftModalOpen, setIsShiftModalOpen] = useState(false);
+  const [isShiftDetailsViewOpen, setIsShiftDetailsViewOpen] = useState(false);
   const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
   const [isTypeManagerOpen, setIsTypeManagerOpen] = useState(false);
+  const [openDeleteConfirmOnOpen, setOpenDeleteConfirmOnOpen] = useState(false);
+  const [viewingShift, setViewingShift] = useState(null);
   const [editingShift, setEditingShift] = useState(null);
   const [selectedShiftIds, setSelectedShiftIds] = useState([]);
   const [isDeleteSelectedModalOpen, setIsDeleteSelectedModalOpen] = useState(false);
@@ -58,6 +62,7 @@ const CalendarPage = () => {
           backgroundColor: s.backgroundColor || '#667eea'
         };
 
+        setOpenDeleteConfirmOnOpen(Boolean(state.openShiftDeleteConfirm));
         setEditingShift(editing);
         setIsShiftModalOpen(true);
 
@@ -165,6 +170,9 @@ const initializeData = async () => {
         const notes = shift.notes || shift.note || '';
         const role = shift.role || '';
         
+        // ✅ NUEVO: Extraer departamento/área
+        const department = shift.department || shift.employee_department || shift.employee_area || shift.area || '';
+        
         const color = shift.backgroundColor || shift.color || shift.color_hex || '#667eea';
         
         // Fechas/horas
@@ -198,6 +206,8 @@ const initializeData = async () => {
             shiftTypeName: shiftTypeName,
             role: role,
             notes: notes,
+            department: department,
+            area: department,
             is_locked: isLocked,
             isLocked: isLocked,
             lock_reason: lockReason,
@@ -373,13 +383,13 @@ const initializeData = async () => {
     const handleEscapeClearSelection = (event) => {
       if (event.key !== 'Escape') return;
       if (selectedShiftIds.length === 0) return;
-      if (isShiftModalOpen || isDuplicateModalOpen || isDeleteSelectedModalOpen || isDeletingSelected) return;
+      if (isShiftModalOpen || isShiftDetailsViewOpen || isDuplicateModalOpen || isDeleteSelectedModalOpen || isDeletingSelected) return;
       setSelectedShiftIds([]);
     };
 
     window.addEventListener('keydown', handleEscapeClearSelection);
     return () => window.removeEventListener('keydown', handleEscapeClearSelection);
-  }, [selectedShiftIds, isShiftModalOpen, isDuplicateModalOpen, isDeleteSelectedModalOpen, isDeletingSelected]);
+  }, [selectedShiftIds, isShiftModalOpen, isShiftDetailsViewOpen, isDuplicateModalOpen, isDeleteSelectedModalOpen, isDeletingSelected]);
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -578,6 +588,7 @@ const initializeData = async () => {
     }
     
     setIsShiftModalOpen(false);
+    setOpenDeleteConfirmOnOpen(false);
     setEditingShift(null);
     
   } catch (error) {
@@ -673,9 +684,20 @@ const initializeData = async () => {
     }
   }
 
+  // ✅ NUEVO: Buscar el departamento del empleado en la lista de empleados
+  let employeeDepartment = '';
+  const employeeRecord = employees.find(emp => 
+    emp.id === finalEmployeeId || 
+    emp.user_id === finalEmployeeId ||
+    emp.employee_id === finalEmployeeId
+  );
+  if (employeeRecord) {
+    employeeDepartment = employeeRecord.departamento || employeeRecord.department || employeeRecord.employee_area || employeeRecord.area || '';
+  }
+
   // ✅ CRÍTICO: Asegurar que el ID del turno se pase correctamente
   const shiftForModal = {
-    id: shift.id, // ✅ Esto es lo más importante
+    id: shift.id,
     employeeId: finalEmployeeId,
     employeeName: shift.extendedProps?.employeeName || shift.title?.split(' - ')[0] || '',
     shiftTypeId: finalShiftTypeId,
@@ -687,7 +709,10 @@ const initializeData = async () => {
     backgroundColor: shift.backgroundColor || shift.color || event.backgroundColor,
     is_locked: shift.is_locked || shift.isLocked || false,
     lock_reason: shift.lock_reason || shift.lockReason || '',
-    locked_at: shift.locked_at || shift.lockedAt || null
+    locked_at: shift.locked_at || shift.lockedAt || null,
+    // Departamento obtenido del empleado
+    department: employeeDepartment,
+    area: employeeDepartment
   };
 
   // ✅ CRÍTICO: Verificar que tenemos el ID antes de abrir el modal
@@ -697,8 +722,9 @@ const initializeData = async () => {
     return;
   }
 
-  setEditingShift(shiftForModal);
-  setIsShiftModalOpen(true);
+  // Abrir el modal de visualización primero
+  setViewingShift(shiftForModal);
+  setIsShiftDetailsViewOpen(true);
 };
 
   const handleDeleteSelectedShifts = async () => {
@@ -718,31 +744,14 @@ const initializeData = async () => {
 
     try {
       setIsDeletingSelected(true);
-      const deletedIds = [];
-      let failedCount = 0;
+      const result = await shiftService.deleteShifts(selectedShiftIds);
+      const deletedCount = Number(result?.deleted || selectedShiftIds.length);
 
-      for (const id of selectedShiftIds) {
-        try {
-          await shiftService.deleteShift(id);
-          deletedIds.push(id);
-        } catch {
-          failedCount += 1;
-        }
-      }
-
-      if (deletedIds.length > 0) {
-        setShifts((prev) => prev.filter((shift) => !deletedIds.includes(String(shift.id))));
-      }
+      setShifts((prev) => prev.filter((shift) => !selectedShiftIds.includes(String(shift.id))));
 
       setSelectedShiftIds([]);
 
-      if (failedCount === 0) {
-        showNotification('success', `${deletedIds.length} turno(s) eliminado(s)`);
-      } else if (deletedIds.length > 0) {
-        showNotification('warning', `${deletedIds.length} eliminado(s), ${failedCount} no se pudo/pudieron eliminar`);
-      } else {
-        showNotification('error', 'No se pudo eliminar ninguno de los turnos seleccionados');
-      }
+      showNotification('success', `${deletedCount} turno(s) eliminado(s)`);
     } catch (error) {
       console.error('Error deleting selected shifts:', error);
       showNotification('error', 'Error al eliminar turnos seleccionados');
@@ -940,11 +949,23 @@ const initializeData = async () => {
                 />
               </div>
 
+              <ShiftDetailsView
+                isOpen={isShiftDetailsViewOpen}
+                onClose={() => setIsShiftDetailsViewOpen(false)}
+                onEdit={(shift) => {
+                  setViewingShift(null);
+                  setEditingShift(shift);
+                  setIsShiftModalOpen(true);
+                }}
+                shift={viewingShift}
+              />
+
               <ShiftModal
                 isOpen={isShiftModalOpen}
-                onClose={() => { setIsShiftModalOpen(false); setEditingShift(null); }}
+                onClose={() => { setIsShiftModalOpen(false); setOpenDeleteConfirmOnOpen(false); setEditingShift(null); }}
                 onSave={handleSaveShift}
                 onDelete={handleDeleteShift}
+                openDeleteConfirmOnOpen={openDeleteConfirmOnOpen}
                 shift={editingShift}
                 employees={employees}
                 shiftTypes={shiftTypes}

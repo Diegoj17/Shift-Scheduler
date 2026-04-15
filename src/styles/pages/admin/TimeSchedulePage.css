@@ -24,6 +24,33 @@
   min-height: calc(100vh - 80px);
 }
 
+.time-schedule-filter-toggle-wrap {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 0.75rem;
+}
+
+.time-schedule-filter-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.time-schedule-filter-toggle:hover {
+  border-color: #4f8cff;
+  color: #2563eb;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.14);
+}
+
 
 /* ============================================
    CONTENT GRID
@@ -86,6 +113,13 @@
 
 .time-schedule-fullcalendar-wrapper .fc {
   font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
+.time-schedule-fullcalendar-wrapper .fc a,
+.time-schedule-fullcalendar-wrapper .fc a:hover,
+.time-schedule-fullcalendar-wrapper .fc a:focus {
+  color: inherit !important;
+  text-decoration: none !important;
 }
 
 .time-schedule-fullcalendar-wrapper .fc-theme-standard td,

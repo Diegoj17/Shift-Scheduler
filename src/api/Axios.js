@@ -44,13 +44,20 @@ const createApiInstance = (baseURL) => {
   instance.interceptors.response.use(
     (response) => response,
     (error) => {
+      const requestPath = String(error.config?.url || '');
+      const isPublicAuthEndpoint =
+        requestPath.includes('/login/') ||
+        requestPath.includes('/register/') ||
+        requestPath.includes('/password/reset/') ||
+        requestPath.includes('/password/reset/confirm/');
+
       console.error('API Error:', {
         status: error.response?.status,
         data: error.response?.data,
         url: error.config?.url
       });
 
-      if (error.response?.status === 401) {
+      if (error.response?.status === 401 && !isPublicAuthEndpoint) {
         localStorage.removeItem('token');
         window.location.href = '/login';
       }
@@ -69,13 +76,20 @@ const notificationsApi = createApiInstance(API_BASE_URL + '/notifications'); // 
 
 // Interceptor de respuestas para manejar errores
 const handleResponseError = (error) => {
+  const requestPath = String(error.config?.url || '');
+  const isPublicAuthEndpoint =
+    requestPath.includes('/login/') ||
+    requestPath.includes('/register/') ||
+    requestPath.includes('/password/reset/') ||
+    requestPath.includes('/password/reset/confirm/');
+
   console.error('API Error:', {
     status: error.response?.status,
     data: error.response?.data,
     url: error.config?.url
   });
 
-  if (error.response?.status === 401) {
+  if (error.response?.status === 401 && !isPublicAuthEndpoint) {
     localStorage.removeItem('token');
     window.location.href = '/login';
   }
@@ -245,6 +259,18 @@ export const shiftAPI = {
       return response.data;
     } catch (error) {
       const message = error.response?.data?.detail || error.response?.data?.message || 'Error al eliminar turno';
+      throw new Error(message);
+    }
+  },
+
+  deleteShifts: async (shiftIds) => {
+    try {
+      const response = await shiftsApi.delete('/shifts/delete/', {
+        data: { ids: shiftIds },
+      });
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.detail || error.response?.data?.message || 'Error al eliminar turnos';
       throw new Error(message);
     }
   },

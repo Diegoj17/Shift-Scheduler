@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../../../styles/components/time/admin/TimeScheduleDetails.css';
 import { MdClose, MdCalendarToday, MdPerson, MdInsertChart, MdCheckCircle, MdCancel } from 'react-icons/md';
+import { AVAILABILITY_COLORS } from '../../../services/availabilityService';
 
 const TimeScheduleDetails = ({ availability, onClose }) => {
   useEffect(() => {
@@ -23,6 +24,14 @@ const TimeScheduleDetails = ({ availability, onClose }) => {
   const rawDate = availability.date || availability.day || availability.fecha || '';
   const rawStartTime = availability.start_time || availability.startTime || availability.start || availability.hora_inicio || '';
   const rawEndTime = availability.end_time || availability.endTime || availability.end || availability.hora_fin || '';
+  const availabilityColor =
+    availability.adminResolvedColor ||
+    availability.resolvedColor ||
+    availability.color ||
+    availability.status_color ||
+    availability.availability_color ||
+    availability.type_color ||
+    (availability.type === 'available' ? AVAILABILITY_COLORS.AVAILABLE : AVAILABILITY_COLORS.UNAVAILABLE);
 
   const formatDate = (dateStr) => {
     if (!dateStr) return '';
@@ -100,7 +109,7 @@ const TimeScheduleDetails = ({ availability, onClose }) => {
       <div className="time-schedule-details-modal">
         <div className="time-schedule-details-header">
           <div className="time-schedule-details-header-content">
-            <div className={`time-schedule-details-status ${availability.type}`}>
+            <div className={`time-schedule-details-status ${availability.type}`} style={{ background: availabilityColor }}>
               {availability.type === 'available' ? '✓ Disponible' : '✕ No disponible'}
             </div>
             <h2 className="time-schedule-details-title">{employeeName}</h2>
@@ -159,7 +168,7 @@ const TimeScheduleDetails = ({ availability, onClose }) => {
             <h3 className="time-schedule-details-section-title">
               <MdInsertChart style={{ marginRight: 8 }} /> Estado de Disponibilidad
             </h3>
-            <div className={`time-schedule-details-availability-card ${availability.type}`}>
+            <div className={`time-schedule-details-availability-card ${availability.type}`} style={{ '--availability-color': availabilityColor }}>
               <div className="time-schedule-details-availability-icon">
                 {availability.type === 'available' ? <MdCheckCircle /> : <MdCancel />}
               </div>

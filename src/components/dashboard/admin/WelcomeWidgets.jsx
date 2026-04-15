@@ -1,5 +1,6 @@
 import React from 'react';
-import { HiOutlineCalendar, HiOutlineClipboardList, HiOutlineChartBar, HiOutlineUsers } from 'react-icons/hi';
+import { HiOutlineCalendar, HiOutlineClipboardList, HiOutlineChartBar, HiOutlineUsers, HiOutlineClock } from 'react-icons/hi';
+import { FaBolt } from 'react-icons/fa';
 import { FaArrowRight } from 'react-icons/fa';
 import { useNavigate } from 'react-router-dom';
 import '../../../styles/components/dashboard/admin/WelcomeWidgets.css';
@@ -13,6 +14,12 @@ const WelcomeWidgets = () => {
       path: '/admin/calendar'
     },
     {
+      icon: <HiOutlineClock />,
+      title: "Disponibilidad",
+      description: "Administra la disponibilidad y horarios del equipo.",
+      path: '/admin/availability'
+    },
+    {
       icon: <HiOutlineClipboardList />,
       title: "Solicitudes",
       description: "Revisa y aprueba las solicitudes de cambios de turno."
@@ -20,16 +27,16 @@ const WelcomeWidgets = () => {
       path: '/admin/shift-change-review'
     },
     {
-      icon: <HiOutlineChartBar />,
-      title: "Reportes",
-      description: "Genera reportes detallados de asistencia y horarios.",
-      path: '/admin/reports'
-    },
-    {
       icon: <HiOutlineUsers />,
       title: "Equipo",
       description: "Gestiona los miembros de tu equipo y sus horarios.",
       path: '/admin/management'
+    },
+    {
+      icon: <HiOutlineChartBar />,
+      title: "Reportes",
+      description: "Genera reportes detallados de asistencia y horarios.",
+      path: '/admin/reports'
     }
   ];
   const navigate = useNavigate();
@@ -37,7 +44,10 @@ const WelcomeWidgets = () => {
   return (
     <div className="widgets-section">
       <h3 className="section-title">
-        <HiOutlineCalendar className="section-icon" />
+        <span className="section-title-accent" aria-hidden="true"></span>
+        <span className="section-icon-wrapper">
+          <FaBolt className="section-icon" />
+        </span>
         Acciones Rápidas
       </h3>
       <div className="welcome-widgets">

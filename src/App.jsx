@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
+import { FaCalendarAlt } from 'react-icons/fa';
 import './App.css'
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import { NotificationToastProvider } from './contexts/NotificationToastContext.jsx';
@@ -23,14 +24,20 @@ const ProfileView = lazy(() => import('./components/profile/ProfileView.jsx'));
 const EditProfile = lazy(() => import('./components/profile/EditProfile.jsx'));
 const ChangePassword = lazy(() => import('./components/profile/ChangePassword.jsx'));
 
-const appLoadingStyle = {
-  minHeight: '40vh',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  fontSize: '1rem',
-  color: '#334155',
-};
+const AppLoadingFallback = () => (
+  <div className="app-loader-shell" role="status" aria-live="polite" aria-label="Cargando aplicación">
+    <div className="app-loader-card">
+      <div className="app-loader-brand">
+        <FaCalendarAlt className="app-loader-icon" />
+        <span>Shift Scheduler</span>
+      </div>
+      <div className="app-loader-progress" aria-hidden="true">
+        <span className="app-loader-progress-bar"></span>
+      </div>
+      <p className="app-loader-text">Cargando aplicación...</p>
+    </div>
+  </div>
+);
 
 
 function App() {
@@ -39,7 +46,7 @@ function App() {
     <AuthProvider>
       <BrowserRouter>
         <NotificationToastProvider>
-        <Suspense fallback={<div style={appLoadingStyle}>Cargando aplicación...</div>}>
+        <Suspense fallback={<AppLoadingFallback />}>
         <Routes>
           <Route path="/" element={<LoginPage />} />
           <Route path="/login" element={<LoginPage />} />

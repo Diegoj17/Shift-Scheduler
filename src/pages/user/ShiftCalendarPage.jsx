@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 import Header from '../../components/common/Header';
 import SidebarEmployee from '../../components/common/SidebarEmployee';
 // FullCalendar will be loaded dynamically to reduce initial bundle size
@@ -43,6 +44,7 @@ const getShiftTypeFromData = (shift) => {
 
 const ShiftCalendarPage = () => {
   const navigate = useNavigate();
+  const { currentUser } = useAuth();
   
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [activeItem, setActiveItem] = useState("mi-calendario");
@@ -54,7 +56,7 @@ const ShiftCalendarPage = () => {
     end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
   });
   const [loading, setLoading] = useState(false);
-  const [showFilters, setShowFilters] = useState(true);
+  const [showFilters, setShowFilters] = useState(false);
   const [shifts, setShifts] = useState([]);
   const [calendarKey, setCalendarKey] = useState(0);
   const [FC, setFC] = useState(null); // { FullCalendar, dayGridPlugin, timeGridPlugin, interactionPlugin, esLocale }
@@ -75,6 +77,8 @@ const ShiftCalendarPage = () => {
       // Procesar los turnos
       const processedShifts = myShifts.map(shift => {
         const shiftType = getShiftTypeFromData(shift);
+        const department = shift.extendedProps?.department || shift.extendedProps?.area || shift.department || shift.area || '';
+        const location = shift.extendedProps?.location || shift.location || department || '';
         
         return {
           ...shift,
@@ -82,8 +86,9 @@ const ShiftCalendarPage = () => {
             ...shift.extendedProps,
             type: shiftType,
             role: shift.extendedProps?.role || shift.title?.split(' - ')[1] || 'Supervisor',
-            department: shift.extendedProps?.department || 'Turnos',
-            location: shift.extendedProps?.location || 'Principal'
+            department,
+            area: department,
+            location
           }
         };
       });
@@ -249,26 +254,28 @@ const ShiftCalendarPage = () => {
 };
 
   const handleEventClick = (clickInfo) => {
-  const event = clickInfo.event;
-  const eventData = event.extendedProps;
-  
-  
-  setSelectedEvent({
-    ...eventData,
-    id: event.id,
-    title: event.title,
-    start: event.start,
-    end: event.end,
-    backgroundColor: event.backgroundColor, // ✅ Pasar el color del evento
-    type: eventData.type || getShiftTypeFromData(event),
-    // ✅ Asegurar que todos los datos estén presentes
-    role: eventData.role || 'Supervisor',
-    department: eventData.department || 'Turnos', 
-    location: eventData.location || 'Principal',
-    shiftTypeName: eventData.shiftTypeName || 'Turno'
-  });
-  setShowDetails(true);
-};
+    const event = clickInfo.event;
+    const eventData = event.extendedProps;
+    const department = eventData.department || eventData.area || eventData.employeeDepartment || eventData.employee_area || currentUser?.departamento || currentUser?.department || currentUser?.employee_area || currentUser?.area || '';
+    const location = eventData.location || department || '';
+    
+    setSelectedEvent({
+      ...eventData,
+      id: event.id,
+      title: event.title,
+      start: event.start,
+      end: event.end,
+      backgroundColor: event.backgroundColor,
+      type: eventData.type || getShiftTypeFromData(event),
+      role: eventData.role || 'Supervisor',
+      department,
+      area: department,
+      location,
+      shiftTypeName: eventData.shiftTypeName || 'Turno',
+      userDepartment: currentUser?.departamento || currentUser?.department || currentUser?.employee_area || currentUser?.area || ''
+    });
+    setShowDetails(true);
+  };
 
   const handleResetFilters = async () => {
     const start = new Date();

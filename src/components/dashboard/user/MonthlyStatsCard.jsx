@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaClock, FaCheckCircle, FaChartLine } from 'react-icons/fa';
+import { FaClock, FaCheckCircle, FaChartLine, FaChartBar } from 'react-icons/fa';
 import '../../../styles/components/dashboard/user/MonthlyStatsCard.css';
 
 const MonthlyStatsCard = ({ stats = {} }) => {
@@ -26,7 +26,11 @@ const MonthlyStatsCard = ({ stats = {} }) => {
 
   return (
     <div className="monthly-stats-widget">
-      <h3 className="monthly-stats-heading">Estadísticas del Mes</h3>
+      <h3 className="monthly-stats-heading">
+        <span className="monthly-stats-title-accent" aria-hidden="true"></span>
+        <span className="monthly-stats-title-icon" aria-hidden="true"><FaChartBar /></span>
+        <span>Estadísticas del Mes</span>
+      </h3>
       
       <div className="monthly-stats-metrics-grid">
         {statItems.map((stat, index) => (

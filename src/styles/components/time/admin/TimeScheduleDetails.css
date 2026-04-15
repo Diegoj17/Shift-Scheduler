@@ -204,13 +204,13 @@
 }
 
 .time-schedule-details-availability-card.available {
-  background: var(--success-light);
-  border-color: var(--success-color);
+  background: color-mix(in srgb, var(--availability-color, var(--success-color)) 14%, white);
+  border-color: var(--availability-color, var(--success-color));
 }
 
 .time-schedule-details-availability-card.unavailable {
-  background: rgba(229, 62, 62, 0.1);
-  border-color: var(--error-color);
+  background: color-mix(in srgb, var(--availability-color, var(--error-color)) 14%, white);
+  border-color: var(--availability-color, var(--error-color));
 }
 
 .time-schedule-details-availability-icon {
@@ -226,12 +226,12 @@
 }
 
 .time-schedule-details-availability-card.available .time-schedule-details-availability-icon {
-  background: var(--success-color);
+  background: var(--availability-color, var(--success-color));
   color: white;
 }
 
 .time-schedule-details-availability-card.unavailable .time-schedule-details-availability-icon {
-  background: var(--error-color);
+  background: var(--availability-color, var(--error-color));
   color: white;
 }
 
