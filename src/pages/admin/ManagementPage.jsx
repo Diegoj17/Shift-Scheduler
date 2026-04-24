@@ -105,8 +105,20 @@ const ManagementPage = () => {
   };
 
   const handleToggleStatus = (user) => {
+    if (user.status === 'inactive') {
+      return;
+    }
     setSelectedUser(user);
-    setModalAction(user.status === 'active' ? 'block' : 'unblock');
+    setModalAction(user.status === 'blocked' ? 'unblock' : 'block');
+    setIsConfirmationModalOpen(true);
+  };
+
+  const handleToggleActiveStatus = (user) => {
+    if (user.status === 'blocked') {
+      return;
+    }
+    setSelectedUser(user);
+    setModalAction(user.status === 'inactive' ? 'activate' : 'deactivate');
     setIsConfirmationModalOpen(true);
   };
 
@@ -117,6 +129,10 @@ const ManagementPage = () => {
         setUsers(users.filter(u => u.id !== selectedUser.id));
       } else if (modalAction === 'block' || modalAction === 'unblock') {
         const targetStatus = modalAction === 'block' ? 'blocked' : 'active';
+        await userService.toggleUserStatus(selectedUser.id, targetStatus);
+        await loadUsers();
+      } else if (modalAction === 'deactivate' || modalAction === 'activate') {
+        const targetStatus = modalAction === 'deactivate' ? 'inactive' : 'active';
         await userService.toggleUserStatus(selectedUser.id, targetStatus);
         await loadUsers();
       }
@@ -238,6 +254,7 @@ const ManagementPage = () => {
               onEditUser={handleEditUser}
               onDeleteUser={handleDeleteUser}
               onToggleStatus={handleToggleStatus}
+              onToggleActiveStatus={handleToggleActiveStatus}
             />
 
           </div>

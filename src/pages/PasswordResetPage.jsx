@@ -2,7 +2,6 @@ import AuthLayout from '../modules/admin/auth/layout/AuthLayout';
 import ResetWelcomePanel from '../modules/admin/auth/components/reset/ResetWelcomePanel';
 import ResetForm from '../modules/admin/auth/components/reset/ResetForm';
 import '/src/styles/pages/PasswordResetPage.css';
-import '/src/styles/pages/RegisterPage.css';
 
 const PasswordResetPage = () => {
   return (

@@ -1,5 +1,6 @@
 import React from 'react';
 import Footer from '../../../../components/common/Footer';
+import '../../../../styles/components/auth/authVariables.css';
 import '../../../../styles/components/auth/layout/AuthLayout.css';
 
 const AuthLayout = ({ children }) => {

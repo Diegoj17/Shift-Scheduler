@@ -59,7 +59,8 @@ const DeleteMultipleShiftsModal = ({
     }
   };
 
-  const previewShifts = selectedShifts.slice(0, 4);
+  const previewLimit = 8;
+  const previewShifts = selectedShifts.slice(0, previewLimit);
 
   return (
     <div className="calendar-delete-modal-overlay" onMouseDown={handleBackdropMouseDown} onClick={handleBackdropClick} role="dialog" aria-modal="true">
@@ -83,32 +84,35 @@ const DeleteMultipleShiftsModal = ({
           </div>
 
           {employeeEntries.length > 0 && (
-            <div className="calendar-delete-modal-employee-list">
-              {employeeEntries.map(([name, count]) => (
-                <div key={name} className="calendar-delete-modal-employee-item">
-                  <span className="calendar-delete-modal-employee-name">{name}</span>
-                  <span className="calendar-delete-modal-employee-count">{count} turno(s)</span>
-                </div>
-              ))}
+            <div className="calendar-delete-modal-block">
+              <p className="calendar-delete-modal-block-title">Empleados incluidos</p>
+              <div className="calendar-delete-modal-employee-list">
+                {employeeEntries.map(([name, count]) => (
+                  <div key={name} className="calendar-delete-modal-employee-item">
+                    <span className="calendar-delete-modal-employee-name" title={name}>{name}</span>
+                    <span className="calendar-delete-modal-employee-count">{count} turno(s)</span>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
           {previewShifts.length > 0 && (
-            <div className="calendar-delete-modal-preview">
-              {previewShifts.map((shift) => (
-                <p key={String(shift.id)}>
-                  <strong>{shift?.extendedProps?.employeeName || String(shift?.title || '').split(' - ')[0] || 'Sin nombre'}:</strong>{' '}
-                  {formatDate(shift?.start)}
-                </p>
-              ))}
-              {selectedShifts.length > 4 && (
-                <p className="calendar-delete-modal-more">+{selectedShifts.length - 4} turno(s) más</p>
-              )}
+            <div className="calendar-delete-modal-block">
+              <p className="calendar-delete-modal-block-title">Vista previa de turnos</p>
+              <div className="calendar-delete-modal-preview">
+                {previewShifts.map((shift) => (
+                  <p key={String(shift.id)}>
+                    <strong>{shift?.extendedProps?.employeeName || String(shift?.title || '').split(' - ')[0] || 'Sin nombre'}:</strong>{' '}
+                    {formatDate(shift?.start)}
+                  </p>
+                ))}
+                {selectedShifts.length > previewLimit && (
+                  <p className="calendar-delete-modal-more">+{selectedShifts.length - previewLimit} turno(s) más</p>
+                )}
+              </div>
             </div>
           )}
-
-          <p className="calendar-delete-modal-warning">Esta acción no se puede deshacer.</p>
-
         </div>
 
         <div className="calendar-delete-modal-actions">

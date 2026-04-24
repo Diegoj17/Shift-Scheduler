@@ -239,7 +239,9 @@ export const shiftAPI = {
       return response.data;
     } catch (error) {
       const message = error.response?.data?.detail || error.response?.data?.message || 'Error al crear turno';
-      throw new Error(message);
+      const wrappedError = new Error(message);
+      wrappedError.response = error.response;
+      throw wrappedError;
     }
   },
 
@@ -249,7 +251,9 @@ export const shiftAPI = {
       return response.data;
     } catch (error) {
       const message = error.response?.data?.detail || error.response?.data?.message || 'Error al actualizar turno';
-      throw new Error(message);
+      const wrappedError = new Error(message);
+      wrappedError.response = error.response;
+      throw wrappedError;
     }
   },
 

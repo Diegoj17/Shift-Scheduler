@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom';
 import '/src/styles/components/auth/reset/ResetWelcomePanel.css';
-import '/src/styles/components/auth/register/RegisterWelcomePanel.css';
 
 const ResetWelcomePanel = () => {
   return (

@@ -1,16 +1,16 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import '../../../../../styles/components/auth/reset/ResetConfirmForm.css';
+import '/src/styles/components/auth/reset/ResetWelcomePanel.css';
 
 const ResetConfirmWelcomePanel = () => {
   return (
-    <div className="register-welcome-panel reset-welcome-panel">
-      <div className="register-welcome-content reset-welcome-content">
-        <div className="register-logo-container reset-logo-container">
+    <div className="reset-welcome-panel">
+      <div className="reset-welcome-content">
+        <div className="reset-logo-container">
           <img
             src="/img/calendario.png"
             alt="Programador de turnos"
-            className="register-logo reset-logo"
+            className="reset-logo"
           />
           <h1 className="reset-welcome-app-name">Shift Scheduler</h1>
         </div>

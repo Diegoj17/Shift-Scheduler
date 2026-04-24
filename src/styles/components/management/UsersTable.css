@@ -135,6 +135,13 @@
   white-space: nowrap;
 }
 
+.management-action-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .management-action-btn.edit {
   background-color: #e3f2fd;
   color: #1976d2;
@@ -160,6 +167,15 @@
 
 .management-action-btn.toggle:hover {
   background-color: #ffe0b2;
+}
+
+.management-action-btn.inactive {
+  background-color: #fff8e1;
+  color: #8a6d1b;
+}
+
+.management-action-btn.inactive:hover {
+  background-color: #ffecb3;
 }
 
 /* Estados del usuario */

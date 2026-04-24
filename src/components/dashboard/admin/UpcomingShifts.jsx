@@ -115,7 +115,7 @@ const UpcomingShifts = () => {
             end: s.end,
             shiftTypeId: s.extendedProps?.shiftTypeId || '',
             shiftTypeName: s.extendedProps?.shiftTypeName || '',
-            notes: s.extendedProps?.notes || '',
+            notes: s.extendedProps?.notes || s.notes || s.note || s.comment || s.extendedProps?.comment || '',
             backgroundColor: s.backgroundColor || s.extendedProps?.color || '#667eea',
             shiftColor: resolveShiftTypeColor(s),
             employeeDepartment: department
@@ -165,6 +165,7 @@ const UpcomingShifts = () => {
       start: shift.start,
       end: shift.end,
       backgroundColor: shift.backgroundColor,
+      notes: shift.notes || '',
       role: shift.role || 'Supervisor de Turnos',
       department: shift.employeeDepartment || shift.department || 'Turnos',
       area: shift.employeeDepartment || shift.department || 'Turnos',
@@ -174,7 +175,8 @@ const UpcomingShifts = () => {
         color: shift.backgroundColor,
         shiftTypeName: shift.shiftTypeName || '',
         department: shift.employeeDepartment || shift.department || 'Turnos',
-        area: shift.employeeDepartment || shift.department || 'Turnos'
+        area: shift.employeeDepartment || shift.department || 'Turnos',
+        notes: shift.notes || ''
       }
     });
     setShowDetails(true);
@@ -187,6 +189,9 @@ const UpcomingShifts = () => {
           <span className="title-accent" aria-hidden="true"></span>
           <FaClock className="title-icon" />
           Próximos Turnos
+          <span className="upcoming-shifts-count" aria-label={`Total de próximos turnos: ${upcomingShifts.length}`}>
+            {upcomingShifts.length}
+          </span>
         </h3>
       </div>
       
