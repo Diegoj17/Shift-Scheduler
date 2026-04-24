@@ -294,6 +294,9 @@ const TimeAvailabilityForm = ({ onSubmit, initialData = null, onUpdate, onCancel
             rows="3"
             disabled={isSubmitting}
           />
+          <div className="time-availability-form-char-count">
+            {formData.notes.length} caracteres
+          </div>
         </div>
 
         {/* Submit Button */}

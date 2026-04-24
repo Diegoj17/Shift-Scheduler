@@ -1149,6 +1149,9 @@ const ShiftModal = ({
               placeholder="Notas adicionales sobre este turno..."
               rows="3"
             />
+            <div className="calendar-char-count">
+              {formData.notes.length} caracteres
+            </div>
           </div>
 
           {/* CONFLICTOS */}

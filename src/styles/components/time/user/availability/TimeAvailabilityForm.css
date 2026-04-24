@@ -99,6 +99,13 @@
   box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.1);
 }
 
+.time-availability-form-char-count {
+  align-self: flex-end;
+  font-size: 0.78rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
 .time-availability-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
