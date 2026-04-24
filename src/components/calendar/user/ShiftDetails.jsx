@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { FaSun, FaClock, FaCalendarDay, FaBuilding, FaCheckCircle, FaDownload, FaExchangeAlt } from 'react-icons/fa';
 import { FiSun, FiClock, FiMoon} from 'react-icons/fi';
@@ -6,6 +6,7 @@ import '../../../styles/components/calendar/user/ShiftDetails.css';
 
 const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange, hideActions = false }) => {
   // shift ya contiene userDepartment pasado desde ShiftCalendarPage
+  const [notesExpanded, setNotesExpanded] = useState(false);
   
   useEffect(() => {
     if (!isOpen) return;
@@ -31,6 +32,12 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange, hideA
       body.style.overflow = previousOverflow;
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setNotesExpanded(false);
+    }
+  }, [isOpen, shift?.id]);
 
   if (!isOpen || !shift) return null;
 
@@ -109,6 +116,21 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange, hideA
     if (shiftTypeName.toLowerCase().includes('tarde')) return 'afternoon';
     if (shiftTypeName.toLowerCase().includes('noche')) return 'night';
     
+          {notes && (
+            <div className="shift-detail-section">
+              <h4 className="shift-section-title">
+                <FaClock className="shift-section-icon" aria-hidden="true" />
+                Notas
+              </h4>
+              <div className="shift-detail-grid">
+                <div className="shift-detail-row" style={{ gridColumn: '1 / -1' }}>
+                  <span className="shift-value" style={{ whiteSpace: 'pre-wrap' }}>
+                    {notes}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
     return 'morning';
   };
 
@@ -164,6 +186,8 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange, hideA
   const actualColor = shift.extendedProps?.color || shift.backgroundColor || getShiftTypeColor(correctShiftType);
 
   const duration = getDurationHours(shift);
+  const notes = shift.extendedProps?.notes || shift.notes || shift.note || shift.comment || '';
+  const hasLongNotes = notes.length > 140 || notes.includes('\n');
 
   // Debug para verificar
 
@@ -239,6 +263,31 @@ const ShiftDetails = ({ shift, isOpen, onClose, onExport, onRequestChange, hideA
               </div>
             </div>
           </div>
+
+          {notes && (
+            <div className="shift-detail-section">
+              <h4 className="shift-section-title">
+                <FaCalendarDay className="shift-section-icon" aria-hidden="true" />
+                Notas
+              </h4>
+              <div className="shift-detail-grid">
+                <div className="shift-detail-row shift-notes-row" style={{ gridColumn: '1 / -1' }}>
+                  <div className={`shift-notes-content ${hasLongNotes && !notesExpanded ? 'is-collapsed' : ''}`}>
+                    {notes}
+                  </div>
+                  {hasLongNotes && (
+                    <button
+                      type="button"
+                      className="shift-notes-toggle"
+                      onClick={() => setNotesExpanded((value) => !value)}
+                    >
+                      {notesExpanded ? 'Ver menos' : 'Ver más'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="shift-detail-section">
             <h4 className="shift-section-title">

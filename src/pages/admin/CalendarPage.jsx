@@ -659,7 +659,7 @@ const initializeData = async () => {
   const employeeId = shift.extendedProps?.employeeId || event.extendedProps?.employeeId;
   const shiftTypeId = shift.extendedProps?.shiftTypeId || event.extendedProps?.shiftTypeId;
   const notes = shift.extendedProps?.notes || event.extendedProps?.notes || '';
-  const role = shift.extendedProps?.role || event.extendedProps?.role || '';
+  const roleFromShift = shift.extendedProps?.role || event.extendedProps?.role || '';
   
   // ✅ Si no encontramos el employeeId, intentar buscarlo por nombre
   let finalEmployeeId = employeeId;
@@ -686,20 +686,48 @@ const initializeData = async () => {
 
   // ✅ NUEVO: Buscar el departamento del empleado en la lista de empleados
   let employeeDepartment = '';
-  const employeeRecord = employees.find(emp => 
-    emp.id === finalEmployeeId || 
-    emp.user_id === finalEmployeeId ||
-    emp.employee_id === finalEmployeeId
-  );
+  let employeeRole = '';
+  const normalizedEmployeeId = String(finalEmployeeId ?? '').trim();
+  const employeeRecord = employees.find((emp) => {
+    const candidateIds = [emp?.id, emp?.user_id, emp?.employee_id]
+      .map((value) => String(value ?? '').trim())
+      .filter(Boolean);
+    return normalizedEmployeeId && candidateIds.includes(normalizedEmployeeId);
+  });
+
+  const departmentFromShift =
+    shift.department ||
+    shift.area ||
+    shift.extendedProps?.department ||
+    shift.extendedProps?.area ||
+    event.extendedProps?.department ||
+    event.extendedProps?.area ||
+    '';
+
+  const roleFromData =
+    shift.role ||
+    shift.extendedProps?.role ||
+    event.extendedProps?.role ||
+    '';
+
+  const employeeNameFromData =
+    shift.extendedProps?.employeeName ||
+    event.extendedProps?.employeeName ||
+    shift.title?.split(' - ')[0] ||
+    '';
   if (employeeRecord) {
     employeeDepartment = employeeRecord.departamento || employeeRecord.department || employeeRecord.employee_area || employeeRecord.area || '';
+    employeeRole = employeeRecord.position || employeeRecord.puesto || employeeRecord.jobTitle || employeeRecord.role || '';
   }
+
+  const role = roleFromShift || roleFromData || employeeRole;
+  const resolvedDepartment = employeeDepartment || departmentFromShift;
 
   // ✅ CRÍTICO: Asegurar que el ID del turno se pase correctamente
   const shiftForModal = {
     id: shift.id,
     employeeId: finalEmployeeId,
-    employeeName: shift.extendedProps?.employeeName || shift.title?.split(' - ')[0] || '',
+    employeeName: employeeNameFromData,
     shiftTypeId: finalShiftTypeId,
     shiftTypeName: shift.extendedProps?.shiftTypeName || '',
     start: shift.start || event.start,
@@ -710,9 +738,9 @@ const initializeData = async () => {
     is_locked: shift.is_locked || shift.isLocked || false,
     lock_reason: shift.lock_reason || shift.lockReason || '',
     locked_at: shift.locked_at || shift.lockedAt || null,
-    // Departamento obtenido del empleado
-    department: employeeDepartment,
-    area: employeeDepartment
+    // Departamento con fallback: empleado -> datos del turno/evento
+    department: resolvedDepartment,
+    area: resolvedDepartment
   };
 
   // ✅ CRÍTICO: Verificar que tenemos el ID antes de abrir el modal

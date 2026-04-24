@@ -7,13 +7,13 @@ import '/src/styles/pages/PasswordResetPage.css';
 const PasswordResetConfirmPage = () => {
   return (
     <AuthLayout>
-      <div className="reset-page register-page">
-        <div className="reset-card-container register-card-container">
-          <div className="reset-card register-card">
-            <div className="reset-card-left register-card-left">
+      <div className="reset-page">
+        <div className="reset-card-container">
+          <div className="reset-card">
+            <div className="reset-card-left">
               <ResetConfirmWelcomePanel />
             </div>
-            <div className="reset-card-right register-card-right">
+            <div className="reset-card-right">
               <ResetConfirmForm />
             </div>
           </div>

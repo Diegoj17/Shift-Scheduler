@@ -16,16 +16,16 @@ const TimeScheduleList = ({ availabilities }) => {
     switch (sortBy) {
       case 'date':
         return new Date(a.date) - new Date(b.date);
-      case 'employee':
-        // ✅ Usar employee_name del backend
+      case 'employee': {
         const nameA = a.employee_name || '';
         const nameB = b.employee_name || '';
         return nameA.localeCompare(nameB);
-      case 'area':
-        // ✅ Usar employee_area del backend
+      }
+      case 'area': {
         const areaA = a.employee_area || '';
         const areaB = b.employee_area || '';
         return areaA.localeCompare(areaB);
+      }
       default:
         return 0;
     }
@@ -34,13 +34,18 @@ const TimeScheduleList = ({ availabilities }) => {
   const formatDate = (dateStr) => {
     if (!dateStr) return 'Sin fecha';
     try {
-      const date = new Date(dateStr);
+      // Parse local de YYYY-MM-DD para evitar desfase por zona horaria
+      const value = String(dateStr).trim();
+      const match = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      const date = match
+        ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+        : new Date(value);
       return date.toLocaleDateString('es-ES', { 
         weekday: 'short', 
         day: 'numeric', 
         month: 'short',
         year: 'numeric'
-      });
+      }).toUpperCase();
     } catch {
       return dateStr;
     }
@@ -51,7 +56,7 @@ const TimeScheduleList = ({ availabilities }) => {
       if (!t) return '';
       try {
         const [hh, mm] = t.split(':').map(Number);
-        const period = hh >= 12 ? 'pm' : 'am';
+        const period = hh >= 12 ? 'p. m.' : 'a. m.';
         const h12 = hh % 12 === 0 ? 12 : hh % 12;
         return `${h12}:${String(mm).padStart(2, '0')} ${period}`;
       } catch {
@@ -62,7 +67,7 @@ const TimeScheduleList = ({ availabilities }) => {
   };
 
   const resolveAvailabilityColor = (avail) => {
-    const fromBackend = avail?.adminResolvedColor || avail?.resolvedColor || avail?.color || avail?.status_color || avail?.availability_color || avail?.type_color;
+    const fromBackend = avail?.adminResolvedColor || avail?.resolvedColor || avail?.color;
     if (typeof fromBackend === 'string' && fromBackend.trim()) return fromBackend.trim();
     return avail?.type === 'available' ? AVAILABILITY_COLORS.AVAILABLE : AVAILABILITY_COLORS.UNAVAILABLE;
   };
@@ -79,20 +84,15 @@ const TimeScheduleList = ({ availabilities }) => {
   };
 
   const calculateDuration = (startTime, endTime) => {
-    if (!startTime || !endTime) return '0h';
+    if (!startTime || !endTime) return '0.0h';
     try {
       const start = new Date(`2000-01-01T${startTime}`);
       const end = new Date(`2000-01-01T${endTime}`);
       let hours = (end - start) / (1000 * 60 * 60);
-      
-      // Si es turno nocturno (cruza medianoche)
-      if (hours < 0) {
-        hours += 24;
-      }
-      
+      if (hours < 0) hours += 24;
       return `${hours.toFixed(1)}h`;
     } catch {
-      return '0h';
+      return '0.0h';
     }
   };
 
@@ -132,13 +132,13 @@ const TimeScheduleList = ({ availabilities }) => {
             className={`time-schedule-list-filter-btn ${filterType === 'available' ? 'active' : ''}`}
             onClick={() => setFilterType('available')}
           >
-            Disponible
+            <MdCheckCircle size={14} /> Disponible
           </button>
           <button 
             className={`time-schedule-list-filter-btn ${filterType === 'unavailable' ? 'active' : ''}`}
             onClick={() => setFilterType('unavailable')}
           >
-            No disponible
+            <MdCancel size={14} /> No disponible
           </button>
         </div>
 
@@ -157,8 +157,7 @@ const TimeScheduleList = ({ availabilities }) => {
       </div>
 
       <div className="time-schedule-list-items">
-        {sortedAvailabilities.map(avail => {
-          // ✅ Extraer datos con valores por defecto
+        {sortedAvailabilities.map((avail, index) => {
           const employeeName = avail.employee_name || 'Sin nombre';
           const employeePosition = avail.employee_position || 'Sin puesto';
           const employeeArea = avail.employee_area || 'Sin área';
@@ -166,6 +165,9 @@ const TimeScheduleList = ({ availabilities }) => {
           const endTime = avail.end_time || '00:00';
           const availType = avail.type || 'available';
           const availabilityColor = resolveAvailabilityColor(avail);
+          const displayNumber = Number.isFinite(Number(avail.availabilityNumber))
+            ? Number(avail.availabilityNumber)
+            : (Number.isFinite(Number(avail.id)) ? Number(avail.id) : index + 1);
 
           return (
             <div
@@ -175,10 +177,13 @@ const TimeScheduleList = ({ availabilities }) => {
             >
               <div className="time-schedule-list-item-header">
                 <div className="time-schedule-list-item-employee">
+                  <div className="time-schedule-list-item-number" aria-label={`Disponibilidad ${displayNumber}`}>
+                    #{displayNumber}
+                  </div>
                   <div className="time-schedule-list-item-avatar">
                     {employeeName.charAt(0).toUpperCase()}
                   </div>
-                  <div>
+                  <div className="time-schedule-list-item-info">
                     <div className="time-schedule-list-item-name">{employeeName}</div>
                     <div className="time-schedule-list-item-role">{employeePosition}</div>
                   </div>
@@ -186,54 +191,60 @@ const TimeScheduleList = ({ availabilities }) => {
                 <span
                   className={`time-schedule-list-item-badge ${availType}`}
                   style={{
-                    backgroundColor: toRgba(availabilityColor, 0.16),
+                    backgroundColor: toRgba(availabilityColor, 0.12),
                     color: availabilityColor,
-                    border: `1px solid ${toRgba(availabilityColor, 0.35)}`
+                    border: `1px solid ${toRgba(availabilityColor, 0.25)}`
                   }}
                 >
                   {availType === 'available' ? (
                     <>
-                      <MdCheckCircle style={{ marginRight: 8 }} />
-                      Disponible
+                      <MdCheckCircle size={14} />
+                      DISPONIBLE
                     </>
                   ) : (
                     <>
-                      <MdCancel style={{ marginRight: 8 }} />
-                      No disponible
+                      <MdCancel size={14} />
+                      NO DISPONIBLE
                     </>
                   )}
                 </span>
               </div>
 
+              {/* DOS COLUMNAS: Fecha | Horario */}
+              {/*            Duración | Área       */}
               <div className="time-schedule-list-item-details">
+                {/* Columna 1: Fecha */}
                 <div className="time-schedule-list-item-detail">
-                  <span className="time-schedule-list-item-detail-icon"><MdCalendarToday /></span>
-                  <div>
-                    <div className="time-schedule-list-item-detail-label">Fecha</div>
+                  <MdCalendarToday className="time-schedule-list-item-detail-icon" />
+                  <div className="time-schedule-list-item-detail-content">
+                    <div className="time-schedule-list-item-detail-label">FECHA</div>
                     <div className="time-schedule-list-item-detail-value">{formatDate(avail.date)}</div>
                   </div>
                 </div>
 
+                {/* Columna 2: Horario */}
                 <div className="time-schedule-list-item-detail">
-                  <span className="time-schedule-list-item-detail-icon"><MdAccessTime /></span>
-                  <div>
-                    <div className="time-schedule-list-item-detail-label">Horario</div>
+                  <MdAccessTime className="time-schedule-list-item-detail-icon" />
+                  <div className="time-schedule-list-item-detail-content">
+                    <div className="time-schedule-list-item-detail-label">HORARIO</div>
                     <div className="time-schedule-list-item-detail-value">{formatTime(startTime, endTime)}</div>
                   </div>
                 </div>
 
+                {/* Columna 3: Duración (primera de la segunda fila) */}
                 <div className="time-schedule-list-item-detail">
-                  <span className="time-schedule-list-item-detail-icon"><MdTimer /></span>
-                  <div>
-                    <div className="time-schedule-list-item-detail-label">Duración</div>
+                  <MdTimer className="time-schedule-list-item-detail-icon" />
+                  <div className="time-schedule-list-item-detail-content">
+                    <div className="time-schedule-list-item-detail-label">DURACIÓN</div>
                     <div className="time-schedule-list-item-detail-value">{calculateDuration(startTime, endTime)}</div>
                   </div>
                 </div>
 
+                {/* Columna 4: Área (segunda de la segunda fila) */}
                 <div className="time-schedule-list-item-detail">
-                  <span className="time-schedule-list-item-detail-icon"><MdBusiness /></span>
-                  <div>
-                    <div className="time-schedule-list-item-detail-label">Área</div>
+                  <MdBusiness className="time-schedule-list-item-detail-icon" />
+                  <div className="time-schedule-list-item-detail-content">
+                    <div className="time-schedule-list-item-detail-label">ÁREA</div>
                     <div className="time-schedule-list-item-detail-value">{employeeArea}</div>
                   </div>
                 </div>

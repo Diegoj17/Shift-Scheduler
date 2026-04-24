@@ -1,10 +1,12 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { FaSun, FaClock, FaCalendarDay, FaBuilding, FaCheckCircle } from 'react-icons/fa';
 import { FiSun, FiClock, FiMoon} from 'react-icons/fi';
 import '../../../styles/components/calendar/user/ShiftDetails.css';
 
 const ShiftDetailsView = ({ shift, isOpen, onClose, onEdit }) => {
+  const [notesExpanded, setNotesExpanded] = useState(false);
+
   useEffect(() => {
     if (!isOpen) return;
 
@@ -29,6 +31,12 @@ const ShiftDetailsView = ({ shift, isOpen, onClose, onEdit }) => {
       body.style.overflow = previousOverflow;
     };
   }, [isOpen]);
+
+  useEffect(() => {
+    if (isOpen) {
+      setNotesExpanded(false);
+    }
+  }, [isOpen, shift?.id]);
 
   if (!isOpen || !shift) return null;
 
@@ -137,11 +145,21 @@ const ShiftDetailsView = ({ shift, isOpen, onClose, onEdit }) => {
   const correctShiftType = getShiftTypeFromData(shift);
   const theme = getThemeForType(correctShiftType);
   const actualColor = shift.backgroundColor || shift.color || theme.primary;
-  
+
+    const notes = shift.extendedProps?.notes || shift.notes || shift.note || shift.comment || '';
+    const hasLongNotes = notes.length > 140 || notes.includes('\n');
   const duration = getDurationHours(shift);
 
   // Obtener el departamento con múltiples fallbacks
-  const department = shift.department || shift.area || shift.employee_area || shift.employee_department || shift.departamento || '—';
+  const department =
+    shift.department ||
+    shift.area ||
+    shift.employee_area ||
+    shift.employee_department ||
+    shift.departamento ||
+    shift.extendedProps?.department ||
+    shift.extendedProps?.area ||
+    '—';
 
   const modal = (
     <div className="shift-modal-overlay" onClick={onClose}>
@@ -215,6 +233,31 @@ const ShiftDetailsView = ({ shift, isOpen, onClose, onEdit }) => {
               </div>
             </div>
           </div>
+
+          {notes && (
+            <div className="shift-detail-section">
+              <h4 className="shift-section-title">
+                <FaCalendarDay className="shift-section-icon" aria-hidden="true" />
+                Notas
+              </h4>
+              <div className="shift-detail-grid">
+                <div className="shift-detail-row shift-notes-row" style={{ gridColumn: '1 / -1' }}>
+                  <div className={`shift-notes-content ${hasLongNotes && !notesExpanded ? 'is-collapsed' : ''}`}>
+                    {notes}
+                  </div>
+                  {hasLongNotes && (
+                    <button
+                      type="button"
+                      className="shift-notes-toggle"
+                      onClick={() => setNotesExpanded((value) => !value)}
+                    >
+                      {notesExpanded ? 'Ver menos' : 'Ver más'}
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="shift-detail-section">
             <h4 className="shift-section-title">

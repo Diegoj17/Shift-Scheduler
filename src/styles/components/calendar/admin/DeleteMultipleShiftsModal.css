@@ -19,6 +19,9 @@
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(15, 23, 42, 0.28);
   overflow: hidden;
+  max-height: min(90vh, 850px);
+  display: flex;
+  flex-direction: column;
 }
 
 .calendar-delete-modal-header {
@@ -79,6 +82,7 @@
 .calendar-delete-modal-content {
   padding: 30px 32px;
   text-align: center;
+  overflow-y: auto;
 }
 
 .calendar-delete-warning {
@@ -140,8 +144,20 @@
   margin-top: 14px;
   border: 1px solid #e5e7eb;
   border-radius: 12px;
-  max-height: 170px;
+  max-height: 185px;
   overflow-y: auto;
+}
+
+.calendar-delete-modal-block {
+  margin-top: 12px;
+  text-align: left;
+}
+
+.calendar-delete-modal-block-title {
+  margin: 0 0 8px;
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: #334155;
 }
 
 .calendar-delete-modal-employee-item {
@@ -160,6 +176,10 @@
 .calendar-delete-modal-employee-name {
   font-weight: 700;
   color: #111827;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 70%;
 }
 
 .calendar-delete-modal-employee-count {
@@ -174,6 +194,8 @@
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   background: #ffffff;
+  max-height: 150px;
+  overflow-y: auto;
 }
 
 .calendar-delete-modal-preview p {
@@ -242,6 +264,10 @@
 }
 
 @media (max-width: 520px) {
+  .calendar-delete-modal {
+    max-height: 92vh;
+  }
+
   .calendar-delete-modal-header-title {
     font-size: 1.5rem;
   }

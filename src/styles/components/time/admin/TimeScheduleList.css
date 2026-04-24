@@ -7,12 +7,17 @@
   border-radius: 20px;
   padding: 1.5rem;
   box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  max-height: 104vh;
+  overflow: hidden;
 }
 
 .time-schedule-list-header {
   margin-bottom: 24px;
   padding-bottom: 20px;
   border-bottom: 2px solid var(--border-color);
+  flex-shrink: 0;
 }
 
 .time-schedule-list-title {
@@ -39,6 +44,7 @@
   gap: 20px;
   margin-bottom: 24px;
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 .time-schedule-list-filters {
@@ -100,19 +106,43 @@
 }
 
 /* ============================================
-   LIST ITEMS
+   LIST ITEMS - SCROLLABLE
    ============================================ */
 
 .time-schedule-list-items {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 0.75rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  min-height: 0;
+  padding-right: 8px;
 }
+
+/* Estilo del scrollbar */
+.time-schedule-list-items::-webkit-scrollbar {
+  width: 6px;
+}
+
+.time-schedule-list-items::-webkit-scrollbar-track {
+  background: var(--border-color);
+  border-radius: 10px;
+}
+
+.time-schedule-list-items::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 10px;
+}
+
+/* ============================================
+   ITEM STYLES
+   ============================================ */
 
 .time-schedule-list-item {
   border: 2px solid var(--border-color);
   border-radius: 14px;
-  padding: 24px;
+  padding: 20px;
   background: #f8fafc;
   transition: var(--transition);
   position: relative;
@@ -130,11 +160,11 @@
 }
 
 .time-schedule-list-item.available::before {
-  background: var(--availability-color, var(--success-color));
+  background: var(--availability-color, #38a169);
 }
 
 .time-schedule-list-item.unavailable::before {
-  background: var(--availability-color, var(--error-color));
+  background: var(--availability-color, #e53e3e);
 }
 
 .time-schedule-list-item:hover {
@@ -160,13 +190,29 @@
   display: flex;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+}
+
+.time-schedule-list-item-number {
+  min-width: 44px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(37, 99, 235, 0.12);
+  color: #1d4ed8;
+  font-size: 0.78rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 0.2px;
+  flex-shrink: 0;
 }
 
 .time-schedule-list-item-avatar {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: 12px;
-  background: linear-gradient(135deg, var(--availability-color, var(--primary-color)), var(--availability-color, var(--primary-dark)));
+  background: linear-gradient(135deg, var(--availability-color, #4f8cff), var(--availability-color, #3a6fd1));
   color: white;
   display: flex;
   align-items: center;
@@ -174,13 +220,18 @@
   font-size: 20px;
   font-weight: 700;
   box-shadow: 0 4px 12px rgba(79, 140, 255, 0.2);
+  flex-shrink: 0;
+}
+
+.time-schedule-list-item-info {
+  min-width: 0;
 }
 
 .time-schedule-list-item-name {
   font-size: 16px;
   font-weight: 700;
   color: var(--text-dark);
-  margin-bottom: 2px;
+  margin-bottom: 4px;
 }
 
 .time-schedule-list-item-role {
@@ -190,57 +241,67 @@
 }
 
 .time-schedule-list-item-badge {
-  padding: 8px 16px;
+  padding: 6px 14px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}
-
-.time-schedule-list-item-badge.available {
-  background: #d4f4dd;
-  color: #22543d;
-}
-
-.time-schedule-list-item-badge.unavailable {
-  background: #fed7d7;
-  color: #742a2a;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
 }
 
 /* ============================================
-   ITEM DETAILS
+   ITEM DETAILS - DOS COLUMNAS (2x2)
    ============================================ */
 
 .time-schedule-list-item-details {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 20px;
+  grid-template-columns: repeat(2, 1fr);  
+  gap: 16px 24px;  
+  margin-top: 8px;
 }
 
 .time-schedule-list-item-detail {
   display: flex;
-  align-items: flex-start;
-  gap: 10px;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 8px 12px;
+
+  border-radius: 12px;
+  transition: var(--transition);
 }
 
+
 .time-schedule-list-item-detail-icon {
-  font-size: 20px;
+  font-size: 22px;
   flex-shrink: 0;
   color: #4f8cff;
 }
 
+.time-schedule-list-item-detail-content {
+  flex: 1;
+  min-width: 0;
+}
+
 .time-schedule-list-item-detail-label {
-  font-size: 12px;
-  color: #000000;
-  font-weight: 700;
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 600;
   margin-bottom: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .time-schedule-list-item-detail-value {
   font-size: 14px;
-  color: #000000;
-  font-weight: 450;
+  color: #1e293b;
+  font-weight: 600;
+  word-break: break-word;
+  line-height: 1.4;
 }
 
 /* ============================================
@@ -249,7 +310,8 @@
 
 @media (max-width: 768px) {
   .time-schedule-list-section {
-    padding: 24px;
+    padding: 20px;
+    max-height: calc(100vh - 150px);
   }
 
   .time-schedule-list-controls {
@@ -258,11 +320,35 @@
   }
 
   .time-schedule-list-item {
-    padding: 20px;
+    padding: 16px;
   }
 
+  /* En móvil, una sola columna */
   .time-schedule-list-item-details {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: 12px;
+  }
+  
+  .time-schedule-list-item-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .time-schedule-list-item-badge {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .time-schedule-list-item-detail {
+    padding: 6px 10px;
+  }
+  
+  .time-schedule-list-item-detail-icon {
+    font-size: 18px;
+  }
+  
+  .time-schedule-list-item-detail-value {
+    font-size: 13px;
   }
 }

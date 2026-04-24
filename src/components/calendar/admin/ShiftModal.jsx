@@ -724,10 +724,11 @@ const ShiftModal = ({
     const selectedEmp = selectedEmployee || (Array.isArray(employees) ? 
       employees.find(emp => String(emp.id) === String(formData.employeeId)) : undefined);
     const selectedType = shiftTypes.find(type => type.id === formData.shiftTypeId);
+    const resolvedRole = selectedEmp?.position || selectedEmp?.puesto || selectedEmp?.jobTitle || selectedEmp?.role || '';
 
     // Construir payload robusto para el backend:
-    // - El campo `employee` que espera el backend es el USER_ID (no el employee_db_id)
-    // - `formData.employeeId` contiene el USER_ID seleccionado en el formulario
+    // - El backend espera `employee` como employee_id (PK del modelo Employee)
+    // - El selector del formulario maneja user_id, por eso resolvemos ambos IDs
     const resolvedUserId = Number.isFinite(Number(formData.employeeId)) ? parseInt(formData.employeeId) : (selectedEmp?.id ? parseInt(selectedEmp.id) : undefined);
     const resolvedDbEmployeeId = selectedEmp?.employee_id ? parseInt(selectedEmp.employee_id) : undefined;
 
@@ -735,9 +736,10 @@ const ShiftModal = ({
       date: formData.date,
       start_time: formData.startTime,
       end_time: formData.endTime,
-      // Preferir USER_ID (formData.employeeId) para el backend; si no existe usar selectedEmp.id; último recurso usar employee_db_id
-      employee: resolvedUserId || resolvedDbEmployeeId,
+      // Preferir employee_id para backend; fallback a user_id si no existe mapeo
+      employee: resolvedDbEmployeeId || resolvedUserId,
       shift_type: parseInt(formData.shiftTypeId),
+      role: resolvedRole,
       notes: formData.notes.trim(),
 
       ...(shift?.id && { 
@@ -943,7 +945,7 @@ const ShiftModal = ({
               {Array.isArray(employees) && employees.map(emp => {
                 const employeeId = String(emp.id || '');
                 const employeeName = emp.name || `${emp.first_name || ''} ${emp.last_name || ''}`.trim() || 'Sin nombre';
-                const employeePosition = emp.position || emp.puesto || emp.jobTitle || 'Sin puesto';
+                const employeePosition = emp.position || emp.puesto || emp.jobTitle || emp.role || 'Sin puesto';
                 
                 return (
                   <option key={employeeId} value={employeeId}>
@@ -1193,7 +1195,7 @@ const ShiftModal = ({
                 </div>
                 <div className="calendar-summary-item">
                   <span className="calendar-summary-label">Puesto:</span>
-                  <span className="calendar-summary-value">{selectedEmployee?.position || selectedEmployee?.puesto || 'Sin especificar'}</span>
+                  <span className="calendar-summary-value">{selectedEmployee?.position || selectedEmployee?.puesto || selectedEmployee?.jobTitle || selectedEmployee?.role || 'Sin especificar'}</span>
                 </div>
               </div>
             </div>

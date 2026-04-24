@@ -27,12 +27,14 @@ export const shiftService = {
   createShift: async (shiftData) => {
     try {
       
-      // ✅ Payload - employee es USER_ID
+      // `employee` debe ser employee_id (PK del modelo Employee).
+      // Si llega también user_id, se usa solo como fallback.
+      const employeeValue = shiftData.employee_id ?? shiftData.employeeId ?? shiftData.employee;
       const payload = {
         date: shiftData.date,
         start_time: padSeconds(shiftData.start_time),
         end_time: padSeconds(shiftData.end_time),
-        employee: parseInt(shiftData.employee),  // ✅ USER_ID
+        employee: parseInt(employeeValue),
         shift_type: parseInt(shiftData.shift_type),
         notes: shiftData.notes || ''
       };
@@ -178,20 +180,9 @@ export const shiftService = {
         
 
         const employeeName = shift.employee || shift.employee_name || '';
-        const role = shift.role || '';
+        const role = shift.role || shift.employee_position || shift.position || shift.puesto || '';
         const notes = shift.notes || '';
         const department = shift.department || shift.employee_department || shift.employee_area || shift.area || shift.departamento || '';
-        
-        // Debug para verificar el departamento
-        if (shift.id) {
-          console.log(`[DEBUG] Shift ${shift.id}: department="${department}", raw fields:`, {
-            department: shift.department,
-            employee_department: shift.employee_department,
-            employee_area: shift.employee_area,
-            area: shift.area,
-            departamento: shift.departamento
-          });
-        }
         
         const title = employeeName && role ? `${employeeName} - ${role}` : employeeName || 'Sin empleado';
         const color = shift.shift_type_color || shift.color || '#3788d8';

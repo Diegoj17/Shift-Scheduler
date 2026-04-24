@@ -6,6 +6,7 @@ import '../../../../styles/components/time/user/availability/TimeAvailabilityLis
 const TimeAvailabilityList = ({ availabilities, onDelete }) => {
   const [sortBy, _setSortBy] = useState('date');
   const [filterType, setFilterType] = useState('all');
+  const [expandedNotes, setExpandedNotes] = useState({});
 
   const isAvailable = (avail) => {
     if (!avail) return false;
@@ -85,6 +86,13 @@ const TimeAvailabilityList = ({ availabilities, onDelete }) => {
   const handleDelete = (id) => {
     // Open confirm modal instead of native confirm
     setConfirm({ isOpen: true, id, message: '¿Estás seguro de que deseas eliminar esta disponibilidad?' });
+  };
+
+  const toggleNotes = (id) => {
+    setExpandedNotes((prev) => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
   };
 
   // Confirm modal state
@@ -193,7 +201,21 @@ const TimeAvailabilityList = ({ availabilities, onDelete }) => {
               </div>
               {avail.notes && (
                 <div className="time-availability-list-item-notes">
-                  <strong>Notas:</strong> {avail.notes}
+                  <strong>Notas:</strong>
+                  <div
+                    className={`time-availability-notes-content ${expandedNotes[avail.id] ? 'expanded' : 'collapsed'}`}
+                  >
+                    {avail.notes}
+                  </div>
+                  {(avail.notes.length > 120 || avail.notes.includes('\n')) && (
+                    <button
+                      type="button"
+                      className="time-availability-notes-toggle"
+                      onClick={() => toggleNotes(avail.id)}
+                    >
+                      {expandedNotes[avail.id] ? 'Ver menos' : 'Ver más'}
+                    </button>
+                  )}
                 </div>
               )}
             </div>

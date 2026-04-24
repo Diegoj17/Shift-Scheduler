@@ -21,7 +21,8 @@ const UsersTable = ({
   onSort = () => {}, 
   onEditUser = () => {}, 
   onDeleteUser = () => {}, 
-  onToggleStatus = () => {}
+  onToggleStatus = () => {},
+  onToggleActiveStatus = () => {}
 }) => {
   const getSortIcon = (field) => {
     if (!sortConfig || sortConfig.field !== field) return <FaSort />;
@@ -68,7 +69,17 @@ const UsersTable = ({
         </thead>
         <tbody>
           {users && users.length > 0 ? (
-            users.map(user => (
+            users.map(user => {
+              const isBlockActionDisabled = user.status === 'inactive';
+              const isInactiveActionDisabled = user.status === 'blocked';
+              const blockTitle = isBlockActionDisabled
+                ? 'No disponible para usuarios inactivos'
+                : (user.status === 'blocked' ? 'Desbloquear' : 'Bloquear');
+              const inactiveTitle = isInactiveActionDisabled
+                ? 'No disponible para usuarios bloqueados'
+                : (user.status === 'inactive' ? 'Activar' : 'Inactivar');
+
+              return (
               <tr key={user.id} className={`user-row status-${user.status}`}>
                 <td>
                   <div className="management-user-info">
@@ -120,9 +131,20 @@ const UsersTable = ({
                     <button
                       className="management-action-btn toggle"
                       onClick={() => onToggleStatus(user)}
-                      title={user.status === 'active' ? 'Bloquear' : (user.status === 'blocked' ? 'Desbloquear' : 'Activar')}
+                      title={blockTitle}
+                      disabled={isBlockActionDisabled}
+                      aria-disabled={isBlockActionDisabled}
                     >
-                      {user.status === 'active' ? <FaLock /> : (user.status === 'blocked' ? <FaUnlock /> : <FaUnlock />)}
+                      {user.status === 'blocked' ? <FaUnlock /> : <FaLock />}
+                    </button>
+                    <button
+                      className="management-action-btn inactive"
+                      onClick={() => onToggleActiveStatus(user)}
+                      title={inactiveTitle}
+                      disabled={isInactiveActionDisabled}
+                      aria-disabled={isInactiveActionDisabled}
+                    >
+                      <FaUserTimes />
                     </button>
                     <button
                       className="management-action-btn delete"
@@ -134,7 +156,8 @@ const UsersTable = ({
                   </div>
                 </td>
               </tr>
-            ))
+              );
+            })
           ) : (
             <tr>
               <td colSpan="6" className="no-results">No se encontraron usuarios</td>
