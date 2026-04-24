@@ -192,6 +192,13 @@
   color: #a0aec0;
 }
 
+.calendar-char-count {
+  align-self: flex-end;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
 .calendar-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
