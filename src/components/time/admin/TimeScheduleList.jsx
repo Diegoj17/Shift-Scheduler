@@ -6,6 +6,14 @@ import { MdCalendarToday, MdAccessTime, MdTimer, MdBusiness, MdCheckCircle, MdCa
 const TimeScheduleList = ({ availabilities }) => {
   const [sortBy, setSortBy] = useState('date');
   const [filterType, setFilterType] = useState('all');
+  const [expandedNotes, setExpandedNotes] = useState({});
+
+  const toggleNotes = (id) => {
+    setExpandedNotes((prev) => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
 
   const filteredAvailabilities = availabilities.filter(avail => {
     if (filterType === 'all') return true;
@@ -164,6 +172,8 @@ const TimeScheduleList = ({ availabilities }) => {
           const startTime = avail.start_time || '00:00';
           const endTime = avail.end_time || '00:00';
           const availType = avail.type || 'available';
+          const notesText = String(avail.notes || avail.note || avail.comment || '').trim();
+          const shouldCollapseNotes = notesText.length > 120 || notesText.includes('\n');
           const availabilityColor = resolveAvailabilityColor(avail);
           const displayNumber = Number.isFinite(Number(avail.availabilityNumber))
             ? Number(avail.availabilityNumber)
@@ -249,6 +259,26 @@ const TimeScheduleList = ({ availabilities }) => {
                   </div>
                 </div>
               </div>
+
+              {notesText && (
+                <div className="time-schedule-list-item-notes">
+                  <div className="time-schedule-list-item-notes-label">NOTAS</div>
+                  <div
+                    className={`time-schedule-list-item-notes-content ${shouldCollapseNotes && !expandedNotes[avail.id] ? 'collapsed' : ''}`}
+                  >
+                    {notesText}
+                  </div>
+                  {shouldCollapseNotes && (
+                    <button
+                      type="button"
+                      className="time-schedule-list-item-notes-toggle"
+                      onClick={() => toggleNotes(avail.id)}
+                    >
+                      {expandedNotes[avail.id] ? 'Ver menos' : 'Ver más'}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}

@@ -64,15 +64,45 @@
    ============================================ */
 
 .time-history-table-wrapper {
-  overflow-x: auto;
+  overflow-x: hidden;
   width: 100%;
 }
 
 .time-history-table {
   width: 100%;
-  min-width: 600px; /* evita que columnas se aprieten en pantallas muy pequeñas */
+  min-width: 0;
   border-collapse: separate;
   border-spacing: 0 8px;
+  table-layout: fixed;
+}
+
+.time-history-table thead,
+.time-history-table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.time-history-table-wrapper.with-vertical-scroll .time-history-table tbody {
+  display: block;
+  max-height: 264px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+}
+
+.time-history-table-wrapper.with-vertical-scroll .time-history-table tbody::-webkit-scrollbar {
+  width: 6px;
+}
+
+.time-history-table-wrapper.with-vertical-scroll .time-history-table tbody::-webkit-scrollbar-track {
+  background: var(--border-color);
+  border-radius: 10px;
+}
+
+.time-history-table-wrapper.with-vertical-scroll .time-history-table tbody::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 10px;
 }
 
 .time-history-table thead th {

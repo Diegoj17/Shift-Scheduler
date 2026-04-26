@@ -304,6 +304,76 @@
   line-height: 1.4;
 }
 
+.time-schedule-list-item-notes {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+}
+
+.time-schedule-list-item-notes-label {
+  font-size: 11px;
+  color: #64748b;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+
+.time-schedule-list-item-notes-content {
+  font-size: 14px;
+  color: #334155;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.time-schedule-list-item-notes-content.collapsed {
+  max-height: 4.5em;
+  overflow: hidden;
+  position: relative;
+}
+
+.time-schedule-list-item-notes-content.collapsed::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 1.4em;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0), #ffffff);
+  pointer-events: none;
+}
+
+.time-schedule-list-item-notes-toggle {
+  margin-top: 8px;
+  border: none;
+  background: transparent;
+  color: var(--primary-color);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 0;
+  cursor: pointer;
+  outline: none;
+  box-shadow: none;
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.time-schedule-list-item-notes-toggle:hover {
+  text-decoration: underline;
+}
+
+.time-schedule-list-item-notes-toggle:focus,
+.time-schedule-list-item-notes-toggle:focus-visible,
+.time-schedule-list-item-notes-toggle:active {
+  outline: none;
+  box-shadow: none;
+}
+
 /* ============================================
    RESPONSIVE
    ============================================ */

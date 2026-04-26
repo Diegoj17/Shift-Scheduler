@@ -85,11 +85,11 @@ const DistribucionTurnos = () => {
               <span className="distribucion-summary-value">{totalCount}</span>
             </div>
 
-            <div className="chart-container">
+            <div className={`chart-container ${totalCount === 0 ? 'is-empty' : ''}`}>
               {distribucion.map((item, index) => (
                 <div 
                   key={index}
-                  className={`chart-segment ${item.isDominant ? 'dominant' : ''}`}
+                  className={`chart-segment ${item.isDominant ? 'dominant' : ''} ${totalCount === 0 ? 'is-empty' : ''}`}
                   data-tooltip={`${item.nombre}: ${item.porcentaje}%`}
                   style={{
                     width: `${(item.count / (totalCount || 1)) * 100}%`,

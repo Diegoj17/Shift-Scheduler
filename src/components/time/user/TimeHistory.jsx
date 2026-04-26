@@ -168,7 +168,7 @@ const TimeHistory = forwardRef((props, ref) => {
         </div>
       </div>
 
-      <div className="time-history-table-wrapper">
+      <div className={`time-history-table-wrapper ${historyData.length > 4 ? 'with-vertical-scroll' : ''}`}>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '2rem' }}>
             <p>Cargando historial...</p>
