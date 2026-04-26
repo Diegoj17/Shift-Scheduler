@@ -74,6 +74,17 @@
   opacity: 0.6;
 }
 
+.chart-container.is-empty {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.chart-container.is-empty::before,
+.chart-container.is-empty:hover::before {
+  opacity: 0;
+}
+
 .chart-segment {
   display: flex;
   align-items: center;
@@ -100,12 +111,25 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
 }
 
+.chart-segment.is-empty,
+.chart-segment.is-empty:hover {
+  cursor: default;
+  filter: none;
+  transform: none;
+  box-shadow: none;
+}
+
 .chart-segment.dominant {
   box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.32);
 }
 
 .chart-segment:hover::before {
   opacity: 1;
+}
+
+.chart-segment.is-empty::before,
+.chart-segment.is-empty:hover::before {
+  opacity: 0;
 }
 
 .segment-label {
@@ -302,6 +326,11 @@
 
 .chart-segment:hover::after {
   transform: translateX(-50%) scale(1);
+}
+
+.chart-segment.is-empty::after,
+.chart-segment.is-empty:hover::after {
+  display: none;
 }
 
 /* Responsive */

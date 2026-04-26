@@ -9,6 +9,11 @@
   box-shadow: var(--shadow-md);
 }
 
+:root {
+  --availability-available: #38a169;
+  --availability-available-soft: #e6f6ee;
+}
+
 .time-availability-list-header {
   display: flex;
   align-items: flex-start;
@@ -72,7 +77,7 @@
 .time-availability-list-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  gap: 10px;
 }
 
 .time-availability-list-item {
@@ -90,7 +95,7 @@
 }
 
 .time-availability-list-item.available {
-  border-left: 4px solid var(--success-color);
+  border-left: 4px solid var(--availability-available);
 }
 
 .time-availability-list-item.unavailable {
@@ -118,8 +123,8 @@
 }
 
 .time-availability-list-badge.available {
-  background: var(--success-light);
-  color: var(--success-contrast);
+  background: var(--availability-available-soft);
+  color: var(--availability-available);
 }
 
 .time-availability-list-badge.unavailable {
@@ -179,6 +184,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  
 }
 
 .time-availability-notes-content {

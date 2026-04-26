@@ -169,7 +169,9 @@ const TimeAvailabilityList = ({ availabilities, onDelete }) => {
 
             const startTime = avail.start_time || avail.startTime || '00:00';
             const endTime = avail.end_time || avail.endTime || '00:00';
-            const availType = avail.type || 'available';
+            const availType = isAvailable(avail) ? 'available' : 'unavailable';
+            const notesText = String(avail.notes || '');
+            const shouldCollapseNotes = notesText.length > 120 || notesText.includes('\n');
             
             return (
             <div key={avail.id} className={`time-availability-list-item ${availType}`}>
@@ -199,15 +201,15 @@ const TimeAvailabilityList = ({ availabilities, onDelete }) => {
                 <span className="time-availability-list-time-icon" aria-hidden="true"><MdSchedule size={16} /></span>
                 <span>{formatTime(startTime, endTime)}</span>
               </div>
-              {avail.notes && (
+              {notesText && (
                 <div className="time-availability-list-item-notes">
                   <strong>Notas:</strong>
                   <div
-                    className={`time-availability-notes-content ${expandedNotes[avail.id] ? 'expanded' : 'collapsed'}`}
+                    className={`time-availability-notes-content ${shouldCollapseNotes && !expandedNotes[avail.id] ? 'collapsed' : ''}`}
                   >
-                    {avail.notes}
+                    {notesText}
                   </div>
-                  {(avail.notes.length > 120 || avail.notes.includes('\n')) && (
+                  {shouldCollapseNotes && (
                     <button
                       type="button"
                       className="time-availability-notes-toggle"
